@@ -25,11 +25,10 @@ function cveToFeedItem(item: DefCveItem): FeedItemData {
     title += ` [${cvss.version} ${cvss.baseScore} ${cvss.baseSeverity}]`;
   }
 
-  let description = '';
+  let description = enDesc;
   if (cvss) {
-    description += `Score: ${cvss.baseScore} (${cvss.baseSeverity})\nVector: ${cvss.vectorString}\n\n`;
+    description += `\n\nScore: ${cvss.baseScore} (${cvss.baseSeverity})\nVector: ${cvss.vectorString}`;
   }
-  description += enDesc;
 
   return {
     id: cve.id,
@@ -75,9 +74,9 @@ export function generateFeed(newCves: DefCveItem[], existingItems: ExistingFeedI
 
   const feed = new Feed({
     title: 'NVD CVE Feed',
-    description: 'Latest CVE entries from the National Vulnerability Database',
+    description: 'Latest CVE entries from the National Vulnerability Database. This product uses the NVD API but is not endorsed or certified by the NVD.',
     id: CONFIG.FEED_URL,
-    link: 'https://nvd.nist.gov/',
+    link: CONFIG.REPO_URL,
     language: 'en',
     updated: allItems.length > 0 ? allItems[0].date : new Date(),
     copyright: 'National Vulnerability Database - NIST',
