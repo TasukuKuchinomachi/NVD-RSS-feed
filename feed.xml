@@ -4,11 +4,71 @@
         <title>NVD CVE Feed</title>
         <link>https://github.com/TasukuKuchinomachi/NVD-RSS-feed</link>
         <description>Latest CVE entries from the National Vulnerability Database. This product uses the NVD API but is not endorsed or certified by the NVD.</description>
-        <lastBuildDate>Sat, 07 Mar 2026 10:16:08 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 07 Mar 2026 12:15:53 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>National Vulnerability Database - NIST</copyright>
+        <item>
+            <title><![CDATA[CVE-2025-38001 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-38001</link>
+            <guid isPermaLink="false">CVE-2025-38001</guid>
+            <pubDate>Sat, 07 Mar 2026 12:15:53 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+net_sched: hfsc: Address reentrant enqueue adding class to eltree twice
+
+Savino says:
+    "We are writing to report that this recent patch
+    (141d34391abbb315d68556b7c67ad97885407547) [1]
+    can be bypassed, and a UAF can still occur when HFSC is utilized with
+    NETEM.
+
+    The patch only checks the cl->cl_nactive field to determine whether
+    it is the first insertion or not [2], but this field is only
+    incremented by init_vf [3].
+
+    By using HFSC_RSC (which uses init_ed) [4], it is possible to bypass the
+    check and insert the class twice in the eltree.
+    Under normal conditions, this would lead to an infinite loop in
+    hfsc_dequeue for the reasons we already explained in this report [5].
+
+    However, if TBF is added as root qdisc and it is configured with a
+    very low rate,
+    it can be utilized to prevent packets from being dequeued.
+    This behavior can be exploited to perform subsequent insertions in the
+    HFSC eltree and cause a UAF."
+
+To fix both the UAF and the infinite loop, with netem as an hfsc child,
+check explicitly in hfsc_enqueue whether the class is already in the eltree
+whenever the HFSC_RSC flag is set.
+
+[1] https://web.git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=141d34391abbb315d68556b7c67ad97885407547
+[2] https://elixir.bootlin.com/linux/v6.15-rc5/source/net/sched/sch_hfsc.c#L1572
+[3] https://elixir.bootlin.com/linux/v6.15-rc5/source/net/sched/sch_hfsc.c#L677
+[4] https://elixir.bootlin.com/linux/v6.15-rc5/source/net/sched/sch_hfsc.c#L1574
+[5] https://lore.kernel.org/netdev/8DuRWwfqjoRDLDmBMlIfbrsZg9Gx50DHJc1ilxsEBNe2D6NMoigR_eIRIG0LOjMc3r10nUUZtArXx4oZBIdUfZQrwjcQhdinnMis_0G7VEk=@willsroot.io/T/#u
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-21836 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-21836</link>
+            <guid isPermaLink="false">CVE-2025-21836</guid>
+            <pubDate>Sat, 07 Mar 2026 12:15:52 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+io_uring/kbuf: reallocate buf lists on upgrade
+
+IORING_REGISTER_PBUF_RING can reuse an old struct io_buffer_list if it
+was created for legacy selected buffer and has been emptied. It violates
+the requirement that most of the field should stay stable after publish.
+Always reallocate it instead.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
         <item>
             <title><![CDATA[CVE-2026-2219]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-2219</link>
@@ -958,26 +1018,6 @@ Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
 
 Score: 9.8 (CRITICAL)
 Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2019-25491 [CVSS:4.0 8.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2019-25491</link>
-            <guid isPermaLink="false">CVE-2019-25491</guid>
-            <pubDate>Fri, 06 Mar 2026 21:00:23 GMT</pubDate>
-            <description><![CDATA[Homey BNB V4 contains an SQL injection vulnerability that allows unauthenticated attackers to manipulate database queries by injecting SQL code through the catid parameter. Attackers can send GET requests to the admin/cms_getpagetitle.php endpoint with malicious catid values to extract sensitive database information.
-
-Score: 8.8 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:L/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2019-25493 [CVSS:4.0 8.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2019-25493</link>
-            <guid isPermaLink="false">CVE-2019-25493</guid>
-            <pubDate>Fri, 06 Mar 2026 21:00:18 GMT</pubDate>
-            <description><![CDATA[Homey BNB V4 contains an SQL injection vulnerability that allows unauthenticated attackers to manipulate database queries by injecting SQL code through the 'val' parameter. Attackers can send GET requests to the admin/getrecord.php endpoint with malicious 'val' values to extract sensitive database information.
-
-Score: 8.8 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:L/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
         </item>
     </channel>
 </rss>
