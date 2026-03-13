@@ -4,11 +4,300 @@
         <title>NVD CVE Feed</title>
         <link>https://github.com/TasukuKuchinomachi/NVD-RSS-feed</link>
         <description>Latest CVE entries from the National Vulnerability Database. This product uses the NVD API but is not endorsed or certified by the NVD.</description>
-        <lastBuildDate>Fri, 13 Mar 2026 20:45:13 GMT</lastBuildDate>
+        <lastBuildDate>Fri, 13 Mar 2026 21:28:47 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>National Vulnerability Database - NIST</copyright>
+        <item>
+            <title><![CDATA[CVE-2026-23060 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-23060</link>
+            <guid isPermaLink="false">CVE-2026-23060</guid>
+            <pubDate>Fri, 13 Mar 2026 21:28:47 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+crypto: authencesn - reject too-short AAD (assoclen<8) to match ESP/ESN spec
+
+authencesn assumes an ESP/ESN-formatted AAD. When assoclen is shorter than
+the minimum expected length, crypto_authenc_esn_decrypt() can advance past
+the end of the destination scatterlist and trigger a NULL pointer dereference
+in scatterwalk_map_and_copy(), leading to a kernel panic (DoS).
+
+Add a minimum AAD length check to fail fast on invalid inputs.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-23061 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-23061</link>
+            <guid isPermaLink="false">CVE-2026-23061</guid>
+            <pubDate>Fri, 13 Mar 2026 21:28:28 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+can: kvaser_usb: kvaser_usb_read_bulk_callback(): fix URB memory leak
+
+Fix similar memory leak as in commit 7352e1d5932a ("can: gs_usb:
+gs_usb_receive_bulk_callback(): fix URB memory leak").
+
+In kvaser_usb_set_{,data_}bittiming() -> kvaser_usb_setup_rx_urbs(), the
+URBs for USB-in transfers are allocated, added to the dev->rx_submitted
+anchor and submitted. In the complete callback
+kvaser_usb_read_bulk_callback(), the URBs are processed and resubmitted. In
+kvaser_usb_remove_interfaces() the URBs are freed by calling
+usb_kill_anchored_urbs(&dev->rx_submitted).
+
+However, this does not take into account that the USB framework unanchors
+the URB before the complete function is called. This means that once an
+in-URB has been completed, it is no longer anchored and is ultimately not
+released in usb_kill_anchored_urbs().
+
+Fix the memory leak by anchoring the URB in the
+kvaser_usb_read_bulk_callback() to the dev->rx_submitted anchor.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-23062 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-23062</link>
+            <guid isPermaLink="false">CVE-2026-23062</guid>
+            <pubDate>Fri, 13 Mar 2026 21:28:23 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+platform/x86: hp-bioscfg: Fix kernel panic in GET_INSTANCE_ID macro
+
+The GET_INSTANCE_ID macro that caused a kernel panic when accessing sysfs
+attributes:
+
+1. Off-by-one error: The loop condition used '<=' instead of '<',
+   causing access beyond array bounds. Since array indices are 0-based
+   and go from 0 to instances_count-1, the loop should use '<'.
+
+2. Missing NULL check: The code dereferenced attr_name_kobj->name
+   without checking if attr_name_kobj was NULL, causing a null pointer
+   dereference in min_length_show() and other attribute show functions.
+
+The panic occurred when fwupd tried to read BIOS configuration attributes:
+
+  Oops: general protection fault [#1] SMP KASAN NOPTI
+  KASAN: null-ptr-deref in range [0x0000000000000000-0x0000000000000007]
+  RIP: 0010:min_length_show+0xcf/0x1d0 [hp_bioscfg]
+
+Add a NULL check for attr_name_kobj before dereferencing and corrects
+the loop boundary to match the pattern used elsewhere in the driver.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-23063 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-23063</link>
+            <guid isPermaLink="false">CVE-2026-23063</guid>
+            <pubDate>Fri, 13 Mar 2026 21:28:17 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+uacce: ensure safe queue release with state management
+
+Directly calling `put_queue` carries risks since it cannot
+guarantee that resources of `uacce_queue` have been fully released
+beforehand. So adding a `stop_queue` operation for the
+UACCE_CMD_PUT_Q command and leaving the `put_queue` operation to
+the final resource release ensures safety.
+
+Queue states are defined as follows:
+- UACCE_Q_ZOMBIE: Initial state
+- UACCE_Q_INIT: After opening `uacce`
+- UACCE_Q_STARTED: After `start` is issued via `ioctl`
+
+When executing `poweroff -f` in virt while accelerator are still
+working, `uacce_fops_release` and `uacce_remove` may execute
+concurrently. This can cause `uacce_put_queue` within
+`uacce_fops_release` to access a NULL `ops` pointer. Therefore, add
+state checks to prevent accessing freed pointers.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-23064 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-23064</link>
+            <guid isPermaLink="false">CVE-2026-23064</guid>
+            <pubDate>Fri, 13 Mar 2026 21:28:09 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+net/sched: act_ife: avoid possible NULL deref
+
+tcf_ife_encode() must make sure ife_encode() does not return NULL.
+
+syzbot reported:
+
+Oops: general protection fault, probably for non-canonical address 0xdffffc0000000000: 0000 [#1] SMP KASAN NOPTI
+KASAN: null-ptr-deref in range [0x0000000000000000-0x0000000000000007]
+ RIP: 0010:ife_tlv_meta_encode+0x41/0xa0 net/ife/ife.c:166
+CPU: 3 UID: 0 PID: 8990 Comm: syz.0.696 Not tainted syzkaller #0 PREEMPT(full)
+Call Trace:
+ <TASK>
+  ife_encode_meta_u32+0x153/0x180 net/sched/act_ife.c:101
+  tcf_ife_encode net/sched/act_ife.c:841 [inline]
+  tcf_ife_act+0x1022/0x1de0 net/sched/act_ife.c:877
+  tc_act include/net/tc_wrapper.h:130 [inline]
+  tcf_action_exec+0x1c0/0xa20 net/sched/act_api.c:1152
+  tcf_exts_exec include/net/pkt_cls.h:349 [inline]
+  mall_classify+0x1a0/0x2a0 net/sched/cls_matchall.c:42
+  tc_classify include/net/tc_wrapper.h:197 [inline]
+  __tcf_classify net/sched/cls_api.c:1764 [inline]
+  tcf_classify+0x7f2/0x1380 net/sched/cls_api.c:1860
+  multiq_classify net/sched/sch_multiq.c:39 [inline]
+  multiq_enqueue+0xe0/0x510 net/sched/sch_multiq.c:66
+  dev_qdisc_enqueue+0x45/0x250 net/core/dev.c:4147
+  __dev_xmit_skb net/core/dev.c:4262 [inline]
+  __dev_queue_xmit+0x2998/0x46c0 net/core/dev.c:4798
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-23065 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-23065</link>
+            <guid isPermaLink="false">CVE-2026-23065</guid>
+            <pubDate>Fri, 13 Mar 2026 21:27:57 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+platform/x86/amd: Fix memory leak in wbrf_record()
+
+The tmp buffer is allocated using kcalloc() but is not freed if
+acpi_evaluate_dsm() fails. This causes a memory leak in the error path.
+
+Fix this by explicitly freeing the tmp buffer in the error handling
+path of acpi_evaluate_dsm().
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-23066 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-23066</link>
+            <guid isPermaLink="false">CVE-2026-23066</guid>
+            <pubDate>Fri, 13 Mar 2026 21:27:51 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+rxrpc: Fix recvmsg() unconditional requeue
+
+If rxrpc_recvmsg() fails because MSG_DONTWAIT was specified but the call at
+the front of the recvmsg queue already has its mutex locked, it requeues
+the call - whether or not the call is already queued.  The call may be on
+the queue because MSG_PEEK was also passed and so the call was not dequeued
+or because the I/O thread requeued it.
+
+The unconditional requeue may then corrupt the recvmsg queue, leading to
+things like UAFs or refcount underruns.
+
+Fix this by only requeuing the call if it isn't already on the queue - and
+moving it to the front if it is already queued.  If we don't queue it, we
+have to put the ref we obtained by dequeuing it.
+
+Also, MSG_PEEK doesn't dequeue the call so shouldn't call
+rxrpc_notify_socket() for the call if we didn't use up all the data on the
+queue, so fix that also.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-23067 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-23067</link>
+            <guid isPermaLink="false">CVE-2026-23067</guid>
+            <pubDate>Fri, 13 Mar 2026 21:27:45 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+iommu/io-pgtable-arm: fix size_t signedness bug in unmap path
+
+__arm_lpae_unmap() returns size_t but was returning -ENOENT (negative
+error code) when encountering an unmapped PTE. Since size_t is unsigned,
+-ENOENT (typically -2) becomes a huge positive value (0xFFFFFFFFFFFFFFFE
+on 64-bit systems).
+
+This corrupted value propagates through the call chain:
+  __arm_lpae_unmap() returns -ENOENT as size_t
+  -> arm_lpae_unmap_pages() returns it
+  -> __iommu_unmap() adds it to iova address
+  -> iommu_pgsize() triggers BUG_ON due to corrupted iova
+
+This can cause IOVA address overflow in __iommu_unmap() loop and
+trigger BUG_ON in iommu_pgsize() from invalid address alignment.
+
+Fix by returning 0 instead of -ENOENT. The WARN_ON already signals
+the error condition, and returning 0 (meaning "nothing unmapped")
+is the correct semantic for size_t return type. This matches the
+behavior of other io-pgtable implementations (io-pgtable-arm-v7s,
+io-pgtable-dart) which return 0 on error conditions.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-23068 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-23068</link>
+            <guid isPermaLink="false">CVE-2026-23068</guid>
+            <pubDate>Fri, 13 Mar 2026 21:27:37 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+spi: spi-sprd-adi: Fix double free in probe error path
+
+The driver currently uses spi_alloc_host() to allocate the controller
+but registers it using devm_spi_register_controller().
+
+If devm_register_restart_handler() fails, the code jumps to the
+put_ctlr label and calls spi_controller_put(). However, since the
+controller was registered via a devm function, the device core will
+automatically call spi_controller_put() again when the probe fails.
+This results in a double-free of the spi_controller structure.
+
+Fix this by switching to devm_spi_alloc_host() and removing the
+manual spi_controller_put() call.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-23069 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-23069</link>
+            <guid isPermaLink="false">CVE-2026-23069</guid>
+            <pubDate>Fri, 13 Mar 2026 21:27:26 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+vsock/virtio: fix potential underflow in virtio_transport_get_credit()
+
+The credit calculation in virtio_transport_get_credit() uses unsigned
+arithmetic:
+
+  ret = vvs->peer_buf_alloc - (vvs->tx_cnt - vvs->peer_fwd_cnt);
+
+If the peer shrinks its advertised buffer (peer_buf_alloc) while bytes
+are in flight, the subtraction can underflow and produce a large
+positive value, potentially allowing more data to be queued than the
+peer can handle.
+
+Reuse virtio_transport_has_space() which already handles this case and
+add a comment to make it clear why we are doing that.
+
+[Stefano: use virtio_transport_has_space() instead of duplicating the code]
+[Stefano: tweak the commit message]
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-23654 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-23654</link>
+            <guid isPermaLink="false">CVE-2026-23654</guid>
+            <pubDate>Fri, 13 Mar 2026 21:02:19 GMT</pubDate>
+            <description><![CDATA[Dependency on vulnerable third-party component in GitHub Repo: zero-shot-scfoundation allows an unauthorized attacker to execute code over a network.
+
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
+        </item>
         <item>
             <title><![CDATA[CVE-2026-26123 [CVSS:3.1 5.5 MEDIUM]]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-26123</link>
@@ -925,116 +1214,6 @@ Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:N]]></description>
 
 Score: 2.7 (LOW)
 Vector: CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:N/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-32443 [CVSS:3.1 6.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-32443</link>
-            <guid isPermaLink="false">CVE-2026-32443</guid>
-            <pubDate>Fri, 13 Mar 2026 19:55:04 GMT</pubDate>
-            <description><![CDATA[Cross-Site Request Forgery (CSRF) vulnerability in Josh Kohlbach Product Feed PRO for WooCommerce woo-product-feed-pro allows Cross Site Request Forgery.This issue affects Product Feed PRO for WooCommerce: from n/a through <= 13.5.2.
-
-Score: 6.5 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:H/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-32442 [CVSS:3.1 4.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-32442</link>
-            <guid isPermaLink="false">CVE-2026-32442</guid>
-            <pubDate>Fri, 13 Mar 2026 19:55:04 GMT</pubDate>
-            <description><![CDATA[Missing Authorization vulnerability in E2Pdf e2pdf e2pdf allows Exploiting Incorrectly Configured Access Control Security Levels.This issue affects e2pdf: from n/a through <= 1.28.15.
-
-Score: 4.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-32440 [CVSS:3.1 5.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-32440</link>
-            <guid isPermaLink="false">CVE-2026-32440</guid>
-            <pubDate>Fri, 13 Mar 2026 19:55:04 GMT</pubDate>
-            <description><![CDATA[Missing Authorization vulnerability in Ex-Themes WP Food wp-food allows Exploiting Incorrectly Configured Access Control Security Levels.This issue affects WP Food: from n/a through < 2.7.1.
-
-Score: 5.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-32439 [CVSS:3.1 5.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-32439</link>
-            <guid isPermaLink="false">CVE-2026-32439</guid>
-            <pubDate>Fri, 13 Mar 2026 19:55:04 GMT</pubDate>
-            <description><![CDATA[Missing Authorization vulnerability in WebGeniusLab BigHearts bighearts allows Exploiting Incorrectly Configured Access Control Security Levels.This issue affects BigHearts: from n/a through <= 3.1.14.
-
-Score: 5.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-32438 [CVSS:3.1 5.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-32438</link>
-            <guid isPermaLink="false">CVE-2026-32438</guid>
-            <pubDate>Fri, 13 Mar 2026 19:55:04 GMT</pubDate>
-            <description><![CDATA[Missing Authorization vulnerability in vowelweb VW School Education vw-school-education allows Exploiting Incorrectly Configured Access Control Security Levels.This issue affects VW School Education: from n/a through <= 1.4.6.
-
-Score: 5.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-32437 [CVSS:3.1 5.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-32437</link>
-            <guid isPermaLink="false">CVE-2026-32437</guid>
-            <pubDate>Fri, 13 Mar 2026 19:55:03 GMT</pubDate>
-            <description><![CDATA[Missing Authorization vulnerability in vowelweb VW Portfolio vw-portfolio allows Exploiting Incorrectly Configured Access Control Security Levels.This issue affects VW Portfolio: from n/a through <= 1.3.3.
-
-Score: 5.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-32436 [CVSS:3.1 5.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-32436</link>
-            <guid isPermaLink="false">CVE-2026-32436</guid>
-            <pubDate>Fri, 13 Mar 2026 19:55:03 GMT</pubDate>
-            <description><![CDATA[Missing Authorization vulnerability in vowelweb VW Photography vw-photography allows Exploiting Incorrectly Configured Access Control Security Levels.This issue affects VW Photography: from n/a through <= 1.3.8.
-
-Score: 5.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-32435 [CVSS:3.1 5.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-32435</link>
-            <guid isPermaLink="false">CVE-2026-32435</guid>
-            <pubDate>Fri, 13 Mar 2026 19:55:03 GMT</pubDate>
-            <description><![CDATA[Missing Authorization vulnerability in vowelweb VW Pet Shop vw-pet-shop allows Exploiting Incorrectly Configured Access Control Security Levels.This issue affects VW Pet Shop: from n/a through <= 1.4.7.
-
-Score: 5.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-32434 [CVSS:3.1 5.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-32434</link>
-            <guid isPermaLink="false">CVE-2026-32434</guid>
-            <pubDate>Fri, 13 Mar 2026 19:55:03 GMT</pubDate>
-            <description><![CDATA[Missing Authorization vulnerability in vowelweb VW Fitness vw-fitness allows Exploiting Incorrectly Configured Access Control Security Levels.This issue affects VW Fitness: from n/a through <= 4.3.4.
-
-Score: 5.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-32433 [CVSS:3.1 8.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-32433</link>
-            <guid isPermaLink="false">CVE-2026-32433</guid>
-            <pubDate>Fri, 13 Mar 2026 19:55:02 GMT</pubDate>
-            <description><![CDATA[Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection') vulnerability in codepeople CP Contact Form with Paypal cp-contact-form-with-paypal allows Blind SQL Injection.This issue affects CP Contact Form with Paypal: from n/a through <= 1.3.61.
-
-Score: 8.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:N/A:L]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-32432 [CVSS:3.1 5.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-32432</link>
-            <guid isPermaLink="false">CVE-2026-32432</guid>
-            <pubDate>Fri, 13 Mar 2026 19:55:02 GMT</pubDate>
-            <description><![CDATA[Missing Authorization vulnerability in codepeople WP Time Slots Booking Form wp-time-slots-booking-form allows Exploiting Incorrectly Configured Access Control Security Levels.This issue affects WP Time Slots Booking Form: from n/a through <= 1.2.42.
-
-Score: 5.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N]]></description>
         </item>
     </channel>
 </rss>
