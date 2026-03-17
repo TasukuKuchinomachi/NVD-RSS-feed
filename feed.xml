@@ -4,11 +4,779 @@
         <title>NVD CVE Feed</title>
         <link>https://github.com/TasukuKuchinomachi/NVD-RSS-feed</link>
         <description>Latest CVE entries from the National Vulnerability Database. This product uses the NVD API but is not endorsed or certified by the NVD.</description>
-        <lastBuildDate>Tue, 17 Mar 2026 11:47:27 GMT</lastBuildDate>
+        <lastBuildDate>Tue, 17 Mar 2026 13:42:15 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>National Vulnerability Database - NIST</copyright>
+        <item>
+            <title><![CDATA[CVE-2025-38408 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-38408</link>
+            <guid isPermaLink="false">CVE-2025-38408</guid>
+            <pubDate>Tue, 17 Mar 2026 13:42:15 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+genirq/irq_sim: Initialize work context pointers properly
+
+Initialize `ops` member's pointers properly by using kzalloc() instead of
+kmalloc() when allocating the simulation work context. Otherwise the
+pointers contain random content leading to invalid dereferencing.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-38279 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-38279</link>
+            <guid isPermaLink="false">CVE-2025-38279</guid>
+            <pubDate>Tue, 17 Mar 2026 13:38:01 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+bpf: Do not include stack ptr register in precision backtracking bookkeeping
+
+Yi Lai reported an issue ([1]) where the following warning appears
+in kernel dmesg:
+  [   60.643604] verifier backtracking bug
+  [   60.643635] WARNING: CPU: 10 PID: 2315 at kernel/bpf/verifier.c:4302 __mark_chain_precision+0x3a6c/0x3e10
+  [   60.648428] Modules linked in: bpf_testmod(OE)
+  [   60.650471] CPU: 10 UID: 0 PID: 2315 Comm: test_progs Tainted: G           OE       6.15.0-rc4-gef11287f8289-dirty #327 PREEMPT(full)
+  [   60.654385] Tainted: [O]=OOT_MODULE, [E]=UNSIGNED_MODULE
+  [   60.656682] Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS rel-1.14.0-0-g155821a1990b-prebuilt.qemu.org 04/01/2014
+  [   60.660475] RIP: 0010:__mark_chain_precision+0x3a6c/0x3e10
+  [   60.662814] Code: 5a 30 84 89 ea e8 c4 d9 01 00 80 3d 3e 7d d8 04 00 0f 85 60 fa ff ff c6 05 31 7d d8 04
+                       01 48 c7 c7 00 58 30 84 e8 c4 06 a5 ff <0f> 0b e9 46 fa ff ff 48 ...
+  [   60.668720] RSP: 0018:ffff888116cc7298 EFLAGS: 00010246
+  [   60.671075] RAX: 54d70e82dfd31900 RBX: ffff888115b65e20 RCX: 0000000000000000
+  [   60.673659] RDX: 0000000000000001 RSI: 0000000000000004 RDI: 00000000ffffffff
+  [   60.676241] RBP: 0000000000000400 R08: ffff8881f6f23bd3 R09: 1ffff1103ede477a
+  [   60.678787] R10: dffffc0000000000 R11: ffffed103ede477b R12: ffff888115b60ae8
+  [   60.681420] R13: 1ffff11022b6cbc4 R14: 00000000fffffff2 R15: 0000000000000001
+  [   60.684030] FS:  00007fc2aedd80c0(0000) GS:ffff88826fa8a000(0000) knlGS:0000000000000000
+  [   60.686837] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+  [   60.689027] CR2: 000056325369e000 CR3: 000000011088b002 CR4: 0000000000370ef0
+  [   60.691623] Call Trace:
+  [   60.692821]  <TASK>
+  [   60.693960]  ? __pfx_verbose+0x10/0x10
+  [   60.695656]  ? __pfx_disasm_kfunc_name+0x10/0x10
+  [   60.697495]  check_cond_jmp_op+0x16f7/0x39b0
+  [   60.699237]  do_check+0x58fa/0xab10
+  ...
+
+Further analysis shows the warning is at line 4302 as below:
+
+  4294                 /* static subprog call instruction, which
+  4295                  * means that we are exiting current subprog,
+  4296                  * so only r1-r5 could be still requested as
+  4297                  * precise, r0 and r6-r10 or any stack slot in
+  4298                  * the current frame should be zero by now
+  4299                  */
+  4300                 if (bt_reg_mask(bt) & ~BPF_REGMASK_ARGS) {
+  4301                         verbose(env, "BUG regs %x\n", bt_reg_mask(bt));
+  4302                         WARN_ONCE(1, "verifier backtracking bug");
+  4303                         return -EFAULT;
+  4304                 }
+
+With the below test (also in the next patch):
+  __used __naked static void __bpf_jmp_r10(void)
+  {
+	asm volatile (
+	"r2 = 2314885393468386424 ll;"
+	"goto +0;"
+	"if r2 <= r10 goto +3;"
+	"if r1 >= -1835016 goto +0;"
+	"if r2 <= 8 goto +0;"
+	"if r3 <= 0 goto +0;"
+	"exit;"
+	::: __clobber_all);
+  }
+
+  SEC("?raw_tp")
+  __naked void bpf_jmp_r10(void)
+  {
+	asm volatile (
+	"r3 = 0 ll;"
+	"call __bpf_jmp_r10;"
+	"r0 = 0;"
+	"exit;"
+	::: __clobber_all);
+  }
+
+The following is the verifier failure log:
+  0: (18) r3 = 0x0                      ; R3_w=0
+  2: (85) call pc+2
+  caller:
+   R10=fp0
+  callee:
+   frame1: R1=ctx() R3_w=0 R10=fp0
+  5: frame1: R1=ctx() R3_w=0 R10=fp0
+  ; asm volatile ("                                 \ @ verifier_precision.c:184
+  5: (18) r2 = 0x20202000256c6c78       ; frame1: R2_w=0x20202000256c6c78
+  7: (05) goto pc+0
+  8: (bd) if r2 <= r10 goto pc+3        ; frame1: R2_w=0x20202000256c6c78 R10=fp0
+  9: (35) if r1 >= 0xffe3fff8 goto pc+0         ; frame1: R1=ctx()
+  10: (b5) if r2 <= 0x8 goto pc+0
+  mark_precise: frame1: last_idx 10 first_idx 0 subseq_idx -1
+  mark_precise: frame1: regs=r2 stack= before 9: (35) if r1 >= 0xffe3fff8 goto pc+0
+  mark_precise: frame1: regs=r2 stack= before 8: (bd) if r2 <= r10 goto pc+3
+  mark_preci
+---truncated---
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-38288 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-38288</link>
+            <guid isPermaLink="false">CVE-2025-38288</guid>
+            <pubDate>Tue, 17 Mar 2026 13:36:57 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+scsi: smartpqi: Fix smp_processor_id() call trace for preemptible kernels
+
+Correct kernel call trace when calling smp_processor_id() when called in
+preemptible kernels by using raw_smp_processor_id().
+
+smp_processor_id() checks to see if preemption is disabled and if not,
+issue an error message followed by a call to dump_stack().
+
+Brief example of call trace:
+kernel:  check_preemption_disabled: 436 callbacks suppressed
+kernel:  BUG: using smp_processor_id() in preemptible [00000000]
+         code: kworker/u1025:0/2354
+kernel:  caller is pqi_scsi_queue_command+0x183/0x310 [smartpqi]
+kernel:  CPU: 129 PID: 2354 Comm: kworker/u1025:0
+kernel:  ...
+kernel:  Workqueue: writeback wb_workfn (flush-253:0)
+kernel:  Call Trace:
+kernel:   <TASK>
+kernel:   dump_stack_lvl+0x34/0x48
+kernel:   check_preemption_disabled+0xdd/0xe0
+kernel:   pqi_scsi_queue_command+0x183/0x310 [smartpqi]
+kernel:  ...
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-38248 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-38248</link>
+            <guid isPermaLink="false">CVE-2025-38248</guid>
+            <pubDate>Tue, 17 Mar 2026 13:32:54 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+bridge: mcast: Fix use-after-free during router port configuration
+
+The bridge maintains a global list of ports behind which a multicast
+router resides. The list is consulted during forwarding to ensure
+multicast packets are forwarded to these ports even if the ports are not
+member in the matching MDB entry.
+
+When per-VLAN multicast snooping is enabled, the per-port multicast
+context is disabled on each port and the port is removed from the global
+router port list:
+
+ # ip link add name br1 up type bridge vlan_filtering 1 mcast_snooping 1
+ # ip link add name dummy1 up master br1 type dummy
+ # ip link set dev dummy1 type bridge_slave mcast_router 2
+ $ bridge -d mdb show | grep router
+ router ports on br1: dummy1
+ # ip link set dev br1 type bridge mcast_vlan_snooping 1
+ $ bridge -d mdb show | grep router
+
+However, the port can be re-added to the global list even when per-VLAN
+multicast snooping is enabled:
+
+ # ip link set dev dummy1 type bridge_slave mcast_router 0
+ # ip link set dev dummy1 type bridge_slave mcast_router 2
+ $ bridge -d mdb show | grep router
+ router ports on br1: dummy1
+
+Since commit 4b30ae9adb04 ("net: bridge: mcast: re-implement
+br_multicast_{enable, disable}_port functions"), when per-VLAN multicast
+snooping is enabled, multicast disablement on a port will disable the
+per-{port, VLAN} multicast contexts and not the per-port one. As a
+result, a port will remain in the global router port list even after it
+is deleted. This will lead to a use-after-free [1] when the list is
+traversed (when adding a new port to the list, for example):
+
+ # ip link del dev dummy1
+ # ip link add name dummy2 up master br1 type dummy
+ # ip link set dev dummy2 type bridge_slave mcast_router 2
+
+Similarly, stale entries can also be found in the per-VLAN router port
+list. When per-VLAN multicast snooping is disabled, the per-{port, VLAN}
+contexts are disabled on each port and the port is removed from the
+per-VLAN router port list:
+
+ # ip link add name br1 up type bridge vlan_filtering 1 mcast_snooping 1 mcast_vlan_snooping 1
+ # ip link add name dummy1 up master br1 type dummy
+ # bridge vlan add vid 2 dev dummy1
+ # bridge vlan global set vid 2 dev br1 mcast_snooping 1
+ # bridge vlan set vid 2 dev dummy1 mcast_router 2
+ $ bridge vlan global show dev br1 vid 2 | grep router
+       router ports: dummy1
+ # ip link set dev br1 type bridge mcast_vlan_snooping 0
+ $ bridge vlan global show dev br1 vid 2 | grep router
+
+However, the port can be re-added to the per-VLAN list even when
+per-VLAN multicast snooping is disabled:
+
+ # bridge vlan set vid 2 dev dummy1 mcast_router 0
+ # bridge vlan set vid 2 dev dummy1 mcast_router 2
+ $ bridge vlan global show dev br1 vid 2 | grep router
+       router ports: dummy1
+
+When the VLAN is deleted from the port, the per-{port, VLAN} multicast
+context will not be disabled since multicast snooping is not enabled
+on the VLAN. As a result, the port will remain in the per-VLAN router
+port list even after it is no longer member in the VLAN. This will lead
+to a use-after-free [2] when the list is traversed (when adding a new
+port to the list, for example):
+
+ # ip link add name dummy2 up master br1 type dummy
+ # bridge vlan add vid 2 dev dummy2
+ # bridge vlan del vid 2 dev dummy1
+ # bridge vlan set vid 2 dev dummy2 mcast_router 2
+
+Fix these issues by removing the port from the relevant (global or
+per-VLAN) router port list in br_multicast_port_ctx_deinit(). The
+function is invoked during port deletion with the per-port multicast
+context and during VLAN deletion with the per-{port, VLAN} multicast
+context.
+
+Note that deleting the multicast router timer is not enough as it only
+takes care of the temporary multicast router states (1 or 3) and not the
+permanent one (2).
+
+[1]
+BUG: KASAN: slab-out-of-bounds in br_multicast_add_router.part.0+0x3f1/0x560
+Write of size 8 at addr ffff888004a67328 by task ip/384
+[...]
+Call Trace:
+ <TASK>
+ dump_stack
+---truncated---
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-38234 [CVSS:3.1 4.7 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-38234</link>
+            <guid isPermaLink="false">CVE-2025-38234</guid>
+            <pubDate>Tue, 17 Mar 2026 13:30:18 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+sched/rt: Fix race in push_rt_task
+
+Overview
+========
+When a CPU chooses to call push_rt_task and picks a task to push to
+another CPU's runqueue then it will call find_lock_lowest_rq method
+which would take a double lock on both CPUs' runqueues. If one of the
+locks aren't readily available, it may lead to dropping the current
+runqueue lock and reacquiring both the locks at once. During this window
+it is possible that the task is already migrated and is running on some
+other CPU. These cases are already handled. However, if the task is
+migrated and has already been executed and another CPU is now trying to
+wake it up (ttwu) such that it is queued again on the runqeue
+(on_rq is 1) and also if the task was run by the same CPU, then the
+current checks will pass even though the task was migrated out and is no
+longer in the pushable tasks list.
+
+Crashes
+=======
+This bug resulted in quite a few flavors of crashes triggering kernel
+panics with various crash signatures such as assert failures, page
+faults, null pointer dereferences, and queue corruption errors all
+coming from scheduler itself.
+
+Some of the crashes:
+-> kernel BUG at kernel/sched/rt.c:1616! BUG_ON(idx >= MAX_RT_PRIO)
+   Call Trace:
+   ? __die_body+0x1a/0x60
+   ? die+0x2a/0x50
+   ? do_trap+0x85/0x100
+   ? pick_next_task_rt+0x6e/0x1d0
+   ? do_error_trap+0x64/0xa0
+   ? pick_next_task_rt+0x6e/0x1d0
+   ? exc_invalid_op+0x4c/0x60
+   ? pick_next_task_rt+0x6e/0x1d0
+   ? asm_exc_invalid_op+0x12/0x20
+   ? pick_next_task_rt+0x6e/0x1d0
+   __schedule+0x5cb/0x790
+   ? update_ts_time_stats+0x55/0x70
+   schedule_idle+0x1e/0x40
+   do_idle+0x15e/0x200
+   cpu_startup_entry+0x19/0x20
+   start_secondary+0x117/0x160
+   secondary_startup_64_no_verify+0xb0/0xbb
+
+-> BUG: kernel NULL pointer dereference, address: 00000000000000c0
+   Call Trace:
+   ? __die_body+0x1a/0x60
+   ? no_context+0x183/0x350
+   ? __warn+0x8a/0xe0
+   ? exc_page_fault+0x3d6/0x520
+   ? asm_exc_page_fault+0x1e/0x30
+   ? pick_next_task_rt+0xb5/0x1d0
+   ? pick_next_task_rt+0x8c/0x1d0
+   __schedule+0x583/0x7e0
+   ? update_ts_time_stats+0x55/0x70
+   schedule_idle+0x1e/0x40
+   do_idle+0x15e/0x200
+   cpu_startup_entry+0x19/0x20
+   start_secondary+0x117/0x160
+   secondary_startup_64_no_verify+0xb0/0xbb
+
+-> BUG: unable to handle page fault for address: ffff9464daea5900
+   kernel BUG at kernel/sched/rt.c:1861! BUG_ON(rq->cpu != task_cpu(p))
+
+-> kernel BUG at kernel/sched/rt.c:1055! BUG_ON(!rq->nr_running)
+   Call Trace:
+   ? __die_body+0x1a/0x60
+   ? die+0x2a/0x50
+   ? do_trap+0x85/0x100
+   ? dequeue_top_rt_rq+0xa2/0xb0
+   ? do_error_trap+0x64/0xa0
+   ? dequeue_top_rt_rq+0xa2/0xb0
+   ? exc_invalid_op+0x4c/0x60
+   ? dequeue_top_rt_rq+0xa2/0xb0
+   ? asm_exc_invalid_op+0x12/0x20
+   ? dequeue_top_rt_rq+0xa2/0xb0
+   dequeue_rt_entity+0x1f/0x70
+   dequeue_task_rt+0x2d/0x70
+   __schedule+0x1a8/0x7e0
+   ? blk_finish_plug+0x25/0x40
+   schedule+0x3c/0xb0
+   futex_wait_queue_me+0xb6/0x120
+   futex_wait+0xd9/0x240
+   do_futex+0x344/0xa90
+   ? get_mm_exe_file+0x30/0x60
+   ? audit_exe_compare+0x58/0x70
+   ? audit_filter_rules.constprop.26+0x65e/0x1220
+   __x64_sys_futex+0x148/0x1f0
+   do_syscall_64+0x30/0x80
+   entry_SYSCALL_64_after_hwframe+0x62/0xc7
+
+-> BUG: unable to handle page fault for address: ffff8cf3608bc2c0
+   Call Trace:
+   ? __die_body+0x1a/0x60
+   ? no_context+0x183/0x350
+   ? spurious_kernel_fault+0x171/0x1c0
+   ? exc_page_fault+0x3b6/0x520
+   ? plist_check_list+0x15/0x40
+   ? plist_check_list+0x2e/0x40
+   ? asm_exc_page_fault+0x1e/0x30
+   ? _cond_resched+0x15/0x30
+   ? futex_wait_queue_me+0xc8/0x120
+   ? futex_wait+0xd9/0x240
+   ? try_to_wake_up+0x1b8/0x490
+   ? futex_wake+0x78/0x160
+   ? do_futex+0xcd/0xa90
+   ? plist_check_list+0x15/0x40
+   ? plist_check_list+0x2e/0x40
+   ? plist_del+0x6a/0xd0
+   ? plist_check_list+0x15/0x40
+   ? plist_check_list+0x2e/0x40
+   ? dequeue_pushable_task+0x20/0x70
+   ? __schedule+0x382/0x7e0
+   ? asm_sysvec_reschedule_i
+---truncated---
+
+Score: 4.7 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-38232 [CVSS:3.1 4.7 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-38232</link>
+            <guid isPermaLink="false">CVE-2025-38232</guid>
+            <pubDate>Tue, 17 Mar 2026 13:29:39 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+NFSD: fix race between nfsd registration and exports_proc
+
+As of now nfsd calls create_proc_exports_entry() at start of init_nfsd
+and cleanup by remove_proc_entry() at last of exit_nfsd.
+
+Which causes kernel OOPs if there is race between below 2 operations:
+(i) exportfs -r
+(ii) mount -t nfsd none /proc/fs/nfsd
+
+for 5.4 kernel ARM64:
+
+CPU 1:
+el1_irq+0xbc/0x180
+arch_counter_get_cntvct+0x14/0x18
+running_clock+0xc/0x18
+preempt_count_add+0x88/0x110
+prep_new_page+0xb0/0x220
+get_page_from_freelist+0x2d8/0x1778
+__alloc_pages_nodemask+0x15c/0xef0
+__vmalloc_node_range+0x28c/0x478
+__vmalloc_node_flags_caller+0x8c/0xb0
+kvmalloc_node+0x88/0xe0
+nfsd_init_net+0x6c/0x108 [nfsd]
+ops_init+0x44/0x170
+register_pernet_operations+0x114/0x270
+register_pernet_subsys+0x34/0x50
+init_nfsd+0xa8/0x718 [nfsd]
+do_one_initcall+0x54/0x2e0
+
+CPU 2 :
+Unable to handle kernel NULL pointer dereference at virtual address 0000000000000010
+
+PC is at : exports_net_open+0x50/0x68 [nfsd]
+
+Call trace:
+exports_net_open+0x50/0x68 [nfsd]
+exports_proc_open+0x2c/0x38 [nfsd]
+proc_reg_open+0xb8/0x198
+do_dentry_open+0x1c4/0x418
+vfs_open+0x38/0x48
+path_openat+0x28c/0xf18
+do_filp_open+0x70/0xe8
+do_sys_open+0x154/0x248
+
+Sometimes it crashes at exports_net_open() and sometimes cache_seq_next_rcu().
+
+and same is happening on latest 6.14 kernel as well:
+
+[    0.000000] Linux version 6.14.0-rc5-next-20250304-dirty
+...
+[  285.455918] Unable to handle kernel paging request at virtual address 00001f4800001f48
+...
+[  285.464902] pc : cache_seq_next_rcu+0x78/0xa4
+...
+[  285.469695] Call trace:
+[  285.470083]  cache_seq_next_rcu+0x78/0xa4 (P)
+[  285.470488]  seq_read+0xe0/0x11c
+[  285.470675]  proc_reg_read+0x9c/0xf0
+[  285.470874]  vfs_read+0xc4/0x2fc
+[  285.471057]  ksys_read+0x6c/0xf4
+[  285.471231]  __arm64_sys_read+0x1c/0x28
+[  285.471428]  invoke_syscall+0x44/0x100
+[  285.471633]  el0_svc_common.constprop.0+0x40/0xe0
+[  285.471870]  do_el0_svc_compat+0x1c/0x34
+[  285.472073]  el0_svc_compat+0x2c/0x80
+[  285.472265]  el0t_32_sync_handler+0x90/0x140
+[  285.472473]  el0t_32_sync+0x19c/0x1a0
+[  285.472887] Code: f9400885 93407c23 937d7c27 11000421 (f86378a3)
+[  285.473422] ---[ end trace 0000000000000000 ]---
+
+It reproduced simply with below script:
+while [ 1 ]
+do
+/exportfs -r
+done &
+
+while [ 1 ]
+do
+insmod /nfsd.ko
+mount -t nfsd none /proc/fs/nfsd
+umount /proc/fs/nfsd
+rmmod nfsd
+done &
+
+So exporting interfaces to user space shall be done at last and
+cleanup at first place.
+
+With change there is no Kernel OOPs.
+
+Score: 4.7 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-38162 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-38162</link>
+            <guid isPermaLink="false">CVE-2025-38162</guid>
+            <pubDate>Tue, 17 Mar 2026 13:29:00 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+netfilter: nft_set_pipapo: prevent overflow in lookup table allocation
+
+When calculating the lookup table size, ensure the following
+multiplication does not overflow:
+
+- desc->field_len[] maximum value is U8_MAX multiplied by
+  NFT_PIPAPO_GROUPS_PER_BYTE(f) that can be 2, worst case.
+- NFT_PIPAPO_BUCKETS(f->bb) is 2^8, worst case.
+- sizeof(unsigned long), from sizeof(*f->lt), lt in
+  struct nft_pipapo_field.
+
+Then, use check_mul_overflow() to multiply by bucket size and then use
+check_add_overflow() to the alignment for avx2 (if needed). Finally, add
+lt_size_check_overflow() helper and use it to consolidate this.
+
+While at it, replace leftover allocation using the GFP_KERNEL to
+GFP_KERNEL_ACCOUNT for consistency, in pipapo_resize().
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-38201 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-38201</link>
+            <guid isPermaLink="false">CVE-2025-38201</guid>
+            <pubDate>Tue, 17 Mar 2026 13:27:27 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+netfilter: nft_set_pipapo: clamp maximum map bucket size to INT_MAX
+
+Otherwise, it is possible to hit WARN_ON_ONCE in __kvmalloc_node_noprof()
+when resizing hashtable because __GFP_NOWARN is unset.
+
+Similar to:
+
+  b541ba7d1f5a ("netfilter: conntrack: clamp maximum hashtable size to INT_MAX")
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-38057 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-38057</link>
+            <guid isPermaLink="false">CVE-2025-38057</guid>
+            <pubDate>Tue, 17 Mar 2026 13:22:17 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+espintcp: fix skb leaks
+
+A few error paths are missing a kfree_skb.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-62320 [CVSS:3.1 4.7 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-62320</link>
+            <guid isPermaLink="false">CVE-2025-62320</guid>
+            <pubDate>Tue, 17 Mar 2026 13:16:16 GMT</pubDate>
+            <description><![CDATA[HTML Injection can be carried out in Product when a web application does not properly check or clean user input before showing it on a webpage. Because of this, an attacker may insert unwanted HTML code into the page. When the browser loads the page, it may automatically interact with external resources included in that HTML, which can cause unexpected requests from the user’s browser.
+
+Score: 4.7 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-54920 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-54920</link>
+            <guid isPermaLink="false">CVE-2025-54920</guid>
+            <pubDate>Tue, 17 Mar 2026 13:16:16 GMT</pubDate>
+            <description><![CDATA[This issue affects Apache Spark: before 3.5.7 and 4.0.1. Users are recommended to upgrade to version 3.5.7 or 4.0.1 and above, which fixes the issue.
+
+
+
+
+
+Summary
+
+Apache Spark 3.5.4 and earlier versions contain a code execution vulnerability in the Spark History Web UI due to overly permissive Jackson deserialization of event log data. This allows an attacker with access to the Spark event logs directory to inject malicious JSON payloads that trigger deserialization of arbitrary classes, enabling command execution on the host running the Spark History Server.
+
+
+
+
+
+Details
+
+The vulnerability arises because the Spark History Server uses Jackson polymorphic deserialization with @JsonTypeInfo.Id.CLASS on SparkListenerEvent objects, allowing an attacker to specify arbitrary class names in the event JSON. This behavior permits instantiating unintended classes, such as org.apache.hive.jdbc.HiveConnection, which can perform network calls or other malicious actions during deserialization.
+
+
+The attacker can exploit this by injecting crafted JSON content into the Spark event log files, which the History Server then deserializes on startup or when loading event logs. For example, the attacker can force the History Server to open a JDBC connection to a remote attacker-controlled server, demonstrating remote command injection capability.
+
+
+
+
+
+
+Proof of Concept:
+
+1. Run Spark with event logging enabled, writing to a writable directory (spark-logs).
+
+2. Inject the following JSON at the beginning of an event log file:
+
+
+{
+
+  "Event": "org.apache.hive.jdbc.HiveConnection",
+  "uri": "jdbc:hive2://<IP>:<PORT>/",
+  "info": {
+    "hive.metastore.uris": "thrift://<IP>:<PORT>"
+  }
+}
+
+
+
+
+
+
+
+3. Start the Spark History Server with logs pointing to the modified directory.
+
+4. The Spark History Server initiates a JDBC connection to the attacker’s server, confirming the injection.
+
+
+
+
+
+
+
+
+
+
+Impact
+
+An attacker with write access to Spark event logs can execute arbitrary code on the server running the History Server, potentially compromising the entire system.
+
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-38125 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-38125</link>
+            <guid isPermaLink="false">CVE-2025-38125</guid>
+            <pubDate>Tue, 17 Mar 2026 13:16:14 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+net: stmmac: make sure that ptp_rate is not 0 before configuring EST
+
+If the ptp_rate recorded earlier in the driver happens to be 0, this
+bogus value will propagate up to EST configuration, where it will
+trigger a division by 0.
+
+Prevent this division by 0 by adding the corresponding check and error
+code.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-38007 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-38007</link>
+            <guid isPermaLink="false">CVE-2025-38007</guid>
+            <pubDate>Tue, 17 Mar 2026 13:15:18 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+HID: uclogic: Add NULL check in uclogic_input_configured()
+
+devm_kasprintf() returns NULL when memory allocation fails. Currently,
+uclogic_input_configured() does not check for this case, which results
+in a NULL pointer dereference.
+
+Add NULL check after devm_kasprintf() to prevent this issue.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-3928 [CVSS:3.1 4.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-3928</link>
+            <guid isPermaLink="false">CVE-2026-3928</guid>
+            <pubDate>Tue, 17 Mar 2026 13:10:14 GMT</pubDate>
+            <description><![CDATA[Insufficient policy enforcement in Extensions in Google Chrome prior to 146.0.7680.71 allowed an attacker who convinced a user to install a malicious extension to perform UI spoofing via a crafted Chrome Extension. (Chromium security severity: Medium)
+
+Score: 4.3 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:L/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-38011 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-38011</link>
+            <guid isPermaLink="false">CVE-2025-38011</guid>
+            <pubDate>Tue, 17 Mar 2026 13:09:22 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+drm/amdgpu: csa unmap use uninterruptible lock
+
+After process exit to unmap csa and free GPU vm, if signal is accepted
+and then waiting to take vm lock is interrupted and return, it causes
+memory leaking and below warning backtrace.
+
+Change to use uninterruptible wait lock fix the issue.
+
+WARNING: CPU: 69 PID: 167800 at amd/amdgpu/amdgpu_kms.c:1525
+ amdgpu_driver_postclose_kms+0x294/0x2a0 [amdgpu]
+ Call Trace:
+  <TASK>
+  drm_file_free.part.0+0x1da/0x230 [drm]
+  drm_close_helper.isra.0+0x65/0x70 [drm]
+  drm_release+0x6a/0x120 [drm]
+  amdgpu_drm_release+0x51/0x60 [amdgpu]
+  __fput+0x9f/0x280
+  ____fput+0xe/0x20
+  task_work_run+0x67/0xa0
+  do_exit+0x217/0x3c0
+  do_group_exit+0x3b/0xb0
+  get_signal+0x14a/0x8d0
+  arch_do_signal_or_restart+0xde/0x100
+  exit_to_user_mode_loop+0xc1/0x1a0
+  exit_to_user_mode_prepare+0xf4/0x100
+  syscall_exit_to_user_mode+0x17/0x40
+  do_syscall_64+0x69/0xc0
+
+(cherry picked from commit 7dbbfb3c171a6f63b01165958629c9c26abf38ab)
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-31885 [CVSS:3.1 9.4 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-31885</link>
+            <guid isPermaLink="false">CVE-2026-31885</guid>
+            <pubDate>Tue, 17 Mar 2026 12:58:04 GMT</pubDate>
+            <description><![CDATA[FreeRDP is a free implementation of the Remote Desktop Protocol. Prior to 3.24.0, there is an out-of-bounds read in MS-ADPCM and IMA-ADPCM decoders due to unchecked predictor and step_index values from input data. This vulnerability is fixed in 3.24.0.
+
+Score: 9.4 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:L/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-31897 [CVSS:3.1 9.1 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-31897</link>
+            <guid isPermaLink="false">CVE-2026-31897</guid>
+            <pubDate>Tue, 17 Mar 2026 12:57:00 GMT</pubDate>
+            <description><![CDATA[FreeRDP is a free implementation of the Remote Desktop Protocol. Prior to 3.24.0, there is an out-of-bounds read in freerdp_bitmap_decompress_planar when SrcSize is 0. The function dereferences *srcp (which points to pSrcData) without first verifying that SrcSize >= 1. When SrcSize is 0 and pSrcData is non-NULL, this reads one byte past the end of the source buffer. This vulnerability is fixed in 3.24.0.
+
+Score: 9.1 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-31944 [CVSS:3.1 7.6 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-31944</link>
+            <guid isPermaLink="false">CVE-2026-31944</guid>
+            <pubDate>Tue, 17 Mar 2026 12:39:41 GMT</pubDate>
+            <description><![CDATA[LibreChat is a ChatGPT clone with additional features. From 0.8.2 to 0.8.2-rc3, The MCP (Model Context Protocol) OAuth callback endpoint accepts the redirect from the identity provider and stores OAuth tokens for the user who initiated the flow, without verifying that the browser hitting the redirect URL is logged in or that the logged-in user matches the initiator. An attacker can send the authorization URL to a victim; when the victim completes the flow, the victim’s OAuth tokens are stored on the attacker’s LibreChat account, enabling account takeover of the victim’s MCP-linked services (e.g. Atlassian, Outlook). This vulnerability is fixed in 0.8.3-rc1.
+
+Score: 7.6 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:R/S:C/C:H/I:L/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-31949 [CVSS:3.1 6.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-31949</link>
+            <guid isPermaLink="false">CVE-2026-31949</guid>
+            <pubDate>Tue, 17 Mar 2026 12:26:45 GMT</pubDate>
+            <description><![CDATA[LibreChat is a ChatGPT clone with additional features. Prior to 0.8.3-rc1, a Denial of Service (DoS) vulnerability exists in the DELETE /api/convos endpoint that allows an authenticated attacker to crash the Node.js server process by sending malformed requests. The DELETE /api/convos route handler attempts to destructure req.body.arg without validating that it exists. The server crashes due to an unhandled TypeError that bypasses Express error handling middleware and triggers process.exit(1). This vulnerability is fixed in 0.8.3-rc1.
+
+Score: 6.5 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-4271 [CVSS:3.1 5.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-4271</link>
+            <guid isPermaLink="false">CVE-2026-4271</guid>
+            <pubDate>Tue, 17 Mar 2026 12:16:13 GMT</pubDate>
+            <description><![CDATA[A flaw was found in libsoup, a library for handling HTTP requests. This vulnerability, known as a Use-After-Free, occurs in the HTTP/2 server implementation. A remote attacker can exploit this by sending specially crafted HTTP/2 requests that cause authentication failures. This can lead to the application attempting to access memory that has already been freed, potentially causing application instability or crashes, resulting in a Denial of Service (DoS).
+
+Score: 5.3 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-31966 [CVSS:3.1 2.7 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-31966</link>
+            <guid isPermaLink="false">CVE-2025-31966</guid>
+            <pubDate>Tue, 17 Mar 2026 12:16:12 GMT</pubDate>
+            <description><![CDATA[HCL Sametime is vulnerable to broken server-side validation. While the application performs client-side input checks, these are not enforced by the web server. An attacker can bypass these restrictions by sending manipulated HTTP requests directly to the server.
+
+Score: 2.7 (LOW)
+Vector: CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:N/I:L/A:N]]></description>
+        </item>
         <item>
             <title><![CDATA[CVE-2026-22204 [CVSS:4.0 6.3 MEDIUM]]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-22204</link>
@@ -814,221 +1582,6 @@ Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:N/SC:N/SI:N/SA:N/E:X/CR:X
 
 Score: 4.3 (MEDIUM)
 Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2025-9820 [CVSS:3.1 4 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-9820</link>
-            <guid isPermaLink="false">CVE-2025-9820</guid>
-            <pubDate>Mon, 16 Mar 2026 20:16:17 GMT</pubDate>
-            <description><![CDATA[A flaw was found in the GnuTLS library, specifically in the gnutls_pkcs11_token_init() function that handles PKCS#11 token initialization. When a token label longer than expected is processed, the function writes past the end of a fixed-size stack buffer. This programming error can cause the application using GnuTLS to crash or, in certain conditions, be exploited for code execution. As a result, systems or applications relying on GnuTLS may be vulnerable to a denial of service or local privilege escalation attacks.
-
-Score: 4 (MEDIUM)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2025-69809 [CVSS:3.1 9.8 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-69809</link>
-            <guid isPermaLink="false">CVE-2025-69809</guid>
-            <pubDate>Mon, 16 Mar 2026 20:16:15 GMT</pubDate>
-            <description><![CDATA[A write-what-where condition in p2r3 Bareiron commit 8e4d40 allows unauthenticated attackers to write arbitrary values to memory, enabling arbitrary code execution via a crafted packet.
-
-Score: 9.8 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2025-69808 [CVSS:3.1 9.1 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-69808</link>
-            <guid isPermaLink="false">CVE-2025-69808</guid>
-            <pubDate>Mon, 16 Mar 2026 20:16:15 GMT</pubDate>
-            <description><![CDATA[An out-of-bounds memory access (OOB) in p2r3 Bareiron commit 8e4d40 allows unauthenticated attackers to access sensitive information and cause a Denial of Service (DoS) via supplying a crafted packet.
-
-Score: 9.1 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2025-69768 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-69768</link>
-            <guid isPermaLink="false">CVE-2025-69768</guid>
-            <pubDate>Mon, 16 Mar 2026 20:16:15 GMT</pubDate>
-            <description><![CDATA[SQL Injection vulnerability in Chyrp v.2.5.2 and before allows a remote attacker to obtain sensitive information via the Admin.php component
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2025-69727 [CVSS:3.1 5.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-69727</link>
-            <guid isPermaLink="false">CVE-2025-69727</guid>
-            <pubDate>Mon, 16 Mar 2026 20:16:15 GMT</pubDate>
-            <description><![CDATA[An Incorrect Access Control vulnerability exists in INDEX-EDUCATION PRONOTE prior to 2025.2.8. The affected components (index.js and composeUrlImgPhotoIndividu) allow the construction of direct URLs to user profile images based solely on predictable identifiers such as user IDs and names. Due to missing authorization checks and lack of rate-limiting when generating or accessing these URLs, an unauthenticated or unauthorized actor may retrieve profile pictures of users by crafting requests with guessed or known identifiers.
-
-Score: 5.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2025-68971]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-68971</link>
-            <guid isPermaLink="false">CVE-2025-68971</guid>
-            <pubDate>Mon, 16 Mar 2026 20:16:14 GMT</pubDate>
-            <description><![CDATA[In Forgejo through 13.0.3, the attachment component allows a denial of service by uploading a multi-gigabyte file attachment (e.g., to be associated with an issue or a release).]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2025-57543 [CVSS:3.1 6.1 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-57543</link>
-            <guid isPermaLink="false">CVE-2025-57543</guid>
-            <pubDate>Mon, 16 Mar 2026 20:16:14 GMT</pubDate>
-            <description><![CDATA[Cross Site scripting vulnerability (XSS) in NetBox 4.3.5 "comment" field on object forms. An attacker can inject arbitrary HTML, which will be rendered in the web UI when viewed by other users. This could potentially lead to user interface redress attacks or be escalated to XSS in certain contexts.
-
-Score: 6.1 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2025-14831 [CVSS:3.1 5.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-14831</link>
-            <guid isPermaLink="false">CVE-2025-14831</guid>
-            <pubDate>Mon, 16 Mar 2026 20:16:14 GMT</pubDate>
-            <description><![CDATA[A flaw was found in GnuTLS. This vulnerability allows a denial of service (DoS) by excessive CPU (Central Processing Unit) and memory consumption via specially crafted malicious certificates containing a large number of name constraints and subject alternative names (SANs).
-
-Score: 5.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2024-0202 [CVSS:3.1 5.9 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2024-0202</link>
-            <guid isPermaLink="false">CVE-2024-0202</guid>
-            <pubDate>Mon, 16 Mar 2026 20:16:13 GMT</pubDate>
-            <description><![CDATA[A security vulnerability has been identified in the cryptlib cryptographic library when cryptlib is compiled with the support for RSA key exchange ciphersuites in TLS (by setting the USE_RSA_SUITES define), it will be vulnerable to the timing variant of the Bleichenbacher attack. An attacker that is able to perform a large number of connections to the server will be able to decrypt RSA ciphertexts or forge signatures using server's certificate. THIS CVE ID IS CURRENTLY DISPUTED - MAINTAINER NOTE: There are only two situations where it's enabled, one is for fuzz-testing to exercise code paths that wouldn't otherwise be available, the other is for static source code analysis with tools like Coverity and Prefast, again to open up code paths that otherwise wouldn't be available.  It can also be enabled manually in two specific test builds just to make sure the code still compiles OK, to avoid bit rot and verify that the fuzz-testing build will compile without errors.
-
-Score: 5.9 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-32706 [CVSS:3.1 8.1 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-32706</link>
-            <guid isPermaLink="false">CVE-2026-32706</guid>
-            <pubDate>Mon, 16 Mar 2026 20:10:59 GMT</pubDate>
-            <description><![CDATA[PX4 autopilot is a flight control solution for drones. Prior to 1.17.0-rc2, The crsf_rc parser accepts an oversized variable-length known packet and copies it into a fixed 64-byte global buffer without a bounds check. In deployments where crsf_rc is enabled on a CRSF serial port, an adjacent/raw-serial attacker can trigger memory corruption and crash PX4. This vulnerability is fixed in 1.17.0-rc2.
-
-Score: 8.1 (HIGH)
-Vector: CVSS:3.1/AV:A/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-32705 [CVSS:3.1 6.8 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-32705</link>
-            <guid isPermaLink="false">CVE-2026-32705</guid>
-            <pubDate>Mon, 16 Mar 2026 20:09:12 GMT</pubDate>
-            <description><![CDATA[PX4 autopilot is a flight control solution for drones. Prior to 1.17.0-rc2, the BST telemetry probe writes a string terminator using a device-provided length without bounds. A malicious BST device can report an oversized dev_name_len, causing a stack overflow in the driver and crashing the task (or enabling code execution). This vulnerability is fixed in 1.17.0-rc2.
-
-Score: 6.8 (MEDIUM)
-Vector: CVSS:3.1/AV:P/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-32707 [CVSS:3.1 6.1 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-32707</link>
-            <guid isPermaLink="false">CVE-2026-32707</guid>
-            <pubDate>Mon, 16 Mar 2026 20:07:54 GMT</pubDate>
-            <description><![CDATA[PX4 autopilot is a flight control solution for drones. Prior to 1.17.0-rc2, tattu_can contains an unbounded memcpy in its multi-frame assembly loop, allowing stack memory overwrite when crafted CAN frames are processed. In deployments where tattu_can is enabled and running, a CAN-injection-capable attacker can trigger a crash (DoS) and memory corruption. This vulnerability is fixed in 1.17.0-rc2.
-
-Score: 6.1 (MEDIUM)
-Vector: CVSS:3.1/AV:P/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-32708 [CVSS:3.1 8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-32708</link>
-            <guid isPermaLink="false">CVE-2026-32708</guid>
-            <pubDate>Mon, 16 Mar 2026 20:05:08 GMT</pubDate>
-            <description><![CDATA[PX4 autopilot is a flight control solution for drones. Prior to 1.17.0-rc2, the Zenoh uORB subscriber allocates a stack VLA directly from the incoming payload length without bounds. A remote Zenoh publisher can send an oversized fragmented message to force an unbounded stack allocation and copy, causing a stack overflow and crash of the Zenoh bridge task. This vulnerability is fixed in 1.17.0-rc2.
-
-Score: 8 (HIGH)
-Vector: CVSS:3.1/AV:A/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-31900 [CVSS:4.0 8.7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-31900</link>
-            <guid isPermaLink="false">CVE-2026-31900</guid>
-            <pubDate>Mon, 16 Mar 2026 20:02:12 GMT</pubDate>
-            <description><![CDATA[Black is the uncompromising Python code formatter. Black provides a GitHub action for formatting code. This action supports an option, use_pyproject: true, for reading the version of Black to use from the repository pyproject.toml. A malicious pull request could edit pyproject.toml to use a direct URL reference to a malicious repository. This could lead to arbitrary code execution in the context of the GitHub Action. Attackers could then gain access to secrets or permissions available in the context of the action. Version 26.3.0 fixes this vulnerability.
-
-Score: 8.7 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-32715 [CVSS:3.1 3.8 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-32715</link>
-            <guid isPermaLink="false">CVE-2026-32715</guid>
-            <pubDate>Mon, 16 Mar 2026 20:00:30 GMT</pubDate>
-            <description><![CDATA[AnythingLLM is an application that turns pieces of content into context that any LLM can use as references during chatting. In 1.11.1 and earlier, The two generic system-preferences endpoints allow manager role access, while every other surface that touches the same settings is restricted to admin only. Because of this inconsistency, a manager can call the generic endpoints directly to read plaintext SQL database credentials and overwrite admin-only global settings such as the default system prompt and the Community Hub API key.
-
-Score: 3.8 (LOW)
-Vector: CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:L/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-31957 [CVSS:3.1 10 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-31957</link>
-            <guid isPermaLink="false">CVE-2026-31957</guid>
-            <pubDate>Mon, 16 Mar 2026 19:39:37 GMT</pubDate>
-            <description><![CDATA[Himmelblau is an interoperability suite for Microsoft Azure Entra ID and Intune. From 3.0.0 to before 3.1.0, if Himmelblau is deployed without a configured tenant domain in himmelblau.conf, authentication is not tenant-scoped. In this mode, Himmelblau can accept authentication attempts for arbitrary Entra ID domains by dynamically registering providers at runtime. This behavior is intended for initial/local bootstrap scenarios, but it can create risk in remote authentication environments. This vulnerability is fixed in 3.1.0.
-
-Score: 10 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2025-69236 [CVSS:4.0 5.1 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-69236</link>
-            <guid isPermaLink="false">CVE-2025-69236</guid>
-            <pubDate>Mon, 16 Mar 2026 19:32:09 GMT</pubDate>
-            <description><![CDATA[Raytha CMS is vulnerable to Stored XSS via FieldValues[1].Value parameter in post editing functionality. Authenticated attacker with permissions to edit posts can inject arbitrary HTML and JS into website, which will be rendered/executed when visiting edited page.
-
-This issue was fixed in version 1.4.6.
-
-Score: 5.1 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:P/VC:N/VI:N/VA:N/SC:L/SI:L/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-31958 [CVSS:4.0 8.7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-31958</link>
-            <guid isPermaLink="false">CVE-2026-31958</guid>
-            <pubDate>Mon, 16 Mar 2026 19:32:06 GMT</pubDate>
-            <description><![CDATA[Tornado is a Python web framework and asynchronous networking library. In versions of Tornado prior to 6.5.5, the only limit on the number of parts in multipart/form-data is the max_body_size setting (default 100MB). Since parsing occurs synchronously on the main thread, this creates the possibility of denial-of-service due to the cost of parsing very large multipart bodies with many parts. This vulnerability is fixed in 6.5.5.
-
-Score: 8.7 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2025-69237 [CVSS:4.0 5.1 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-69237</link>
-            <guid isPermaLink="false">CVE-2025-69237</guid>
-            <pubDate>Mon, 16 Mar 2026 19:31:55 GMT</pubDate>
-            <description><![CDATA[Raytha CMS is vulnerable to Stored XSS via FieldValues[0].Value parameter in page creation functionality. Authenticated attacker with permissions to create content can inject arbitrary HTML and JS into website, which will be rendered/executed when visiting edited page.
-
-This issue was fixed in version 1.4.6.
-
-Score: 5.1 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:P/VC:N/VI:N/VA:N/SC:L/SI:L/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2025-69238 [CVSS:4.0 6.9 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-69238</link>
-            <guid isPermaLink="false">CVE-2025-69238</guid>
-            <pubDate>Mon, 16 Mar 2026 19:31:41 GMT</pubDate>
-            <description><![CDATA[Raytha CMS is vulnerable to Cross-Site Request Forgery across multiple endpoints. Attacker can craft special website, which when visited by the authenticated victim, will automatically send POST request to the endpoint (e. x. deletion of the data) without enforcing token verification. 
-
-This issue was fixed in version 1.4.6.
-
-Score: 6.9 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:A/VC:N/VI:H/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2025-69239 [CVSS:4.0 5.1 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-69239</link>
-            <guid isPermaLink="false">CVE-2025-69239</guid>
-            <pubDate>Mon, 16 Mar 2026 19:31:17 GMT</pubDate>
-            <description><![CDATA[Raytha CMS is vulnerable to Server-Side Request Forgery in the “Themes - Import from URL” feature. It allows an attacker with high privileges to provide the URL for redirecting server-side HTTP request.
-
-This issue was fixed in version 1.4.6.
-
-Score: 5.1 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:H/UI:N/VC:N/VI:L/VA:N/SC:L/SI:L/SA:L/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
         </item>
     </channel>
 </rss>
