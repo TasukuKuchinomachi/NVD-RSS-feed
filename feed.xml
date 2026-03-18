@@ -4,11 +4,934 @@
         <title>NVD CVE Feed</title>
         <link>https://github.com/TasukuKuchinomachi/NVD-RSS-feed</link>
         <description>Latest CVE entries from the National Vulnerability Database. This product uses the NVD API but is not endorsed or certified by the NVD.</description>
-        <lastBuildDate>Wed, 18 Mar 2026 11:50:06 GMT</lastBuildDate>
+        <lastBuildDate>Wed, 18 Mar 2026 13:44:29 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>National Vulnerability Database - NIST</copyright>
+        <item>
+            <title><![CDATA[CVE-2026-23081 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-23081</link>
+            <guid isPermaLink="false">CVE-2026-23081</guid>
+            <pubDate>Wed, 18 Mar 2026 13:44:29 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+net: phy: intel-xway: fix OF node refcount leakage
+
+Automated review spotted am OF node reference count leakage when
+checking if the 'leds' child node exists.
+
+Call of_put_node() to correctly maintain the refcount.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-23082 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-23082</link>
+            <guid isPermaLink="false">CVE-2026-23082</guid>
+            <pubDate>Wed, 18 Mar 2026 13:44:05 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+can: gs_usb: gs_usb_receive_bulk_callback(): unanchor URL on usb_submit_urb() error
+
+In commit 7352e1d5932a ("can: gs_usb: gs_usb_receive_bulk_callback(): fix
+URB memory leak"), the URB was re-anchored before usb_submit_urb() in
+gs_usb_receive_bulk_callback() to prevent a leak of this URB during
+cleanup.
+
+However, this patch did not take into account that usb_submit_urb() could
+fail. The URB remains anchored and
+usb_kill_anchored_urbs(&parent->rx_submitted) in gs_can_close() loops
+infinitely since the anchor list never becomes empty.
+
+To fix the bug, unanchor the URB when an usb_submit_urb() error occurs,
+also print an info message.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-23111 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-23111</link>
+            <guid isPermaLink="false">CVE-2026-23111</guid>
+            <pubDate>Wed, 18 Mar 2026 13:43:28 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+netfilter: nf_tables: fix inverted genmask check in nft_map_catchall_activate()
+
+nft_map_catchall_activate() has an inverted element activity check
+compared to its non-catchall counterpart nft_mapelem_activate() and
+compared to what is logically required.
+
+nft_map_catchall_activate() is called from the abort path to re-activate
+catchall map elements that were deactivated during a failed transaction.
+It should skip elements that are already active (they don't need
+re-activation) and process elements that are inactive (they need to be
+restored). Instead, the current code does the opposite: it skips inactive
+elements and processes active ones.
+
+Compare the non-catchall activate callback, which is correct:
+
+  nft_mapelem_activate():
+    if (nft_set_elem_active(ext, iter->genmask))
+        return 0;   /* skip active, process inactive */
+
+With the buggy catchall version:
+
+  nft_map_catchall_activate():
+    if (!nft_set_elem_active(ext, genmask))
+        continue;   /* skip inactive, process active */
+
+The consequence is that when a DELSET operation is aborted,
+nft_setelem_data_activate() is never called for the catchall element.
+For NFT_GOTO verdict elements, this means nft_data_hold() is never
+called to restore the chain->use reference count. Each abort cycle
+permanently decrements chain->use. Once chain->use reaches zero,
+DELCHAIN succeeds and frees the chain while catchall verdict elements
+still reference it, resulting in a use-after-free.
+
+This is exploitable for local privilege escalation from an unprivileged
+user via user namespaces + nftables on distributions that enable
+CONFIG_USER_NS and CONFIG_NF_TABLES.
+
+Fix by removing the negation so the check matches nft_mapelem_activate():
+skip active elements, process inactive ones.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-23112 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-23112</link>
+            <guid isPermaLink="false">CVE-2026-23112</guid>
+            <pubDate>Wed, 18 Mar 2026 13:42:41 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+nvmet-tcp: add bounds checks in nvmet_tcp_build_pdu_iovec
+
+nvmet_tcp_build_pdu_iovec() could walk past cmd->req.sg when a PDU
+length or offset exceeds sg_cnt and then use bogus sg->length/offset
+values, leading to _copy_to_iter() GPF/KASAN. Guard sg_idx, remaining
+entries, and sg->length/offset before building the bvec.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-71200 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-71200</link>
+            <guid isPermaLink="false">CVE-2025-71200</guid>
+            <pubDate>Wed, 18 Mar 2026 13:42:10 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+mmc: sdhci-of-dwcmshc: Prevent illegal clock reduction in HS200/HS400 mode
+
+When operating in HS200 or HS400 timing modes, reducing the clock frequency
+below 52MHz will lead to link broken as the Rockchip DWC MSHC controller
+requires maintaining a minimum clock of 52MHz in these modes.
+
+Add a check to prevent illegal clock reduction through debugfs:
+
+root@debian:/# echo 50000000 > /sys/kernel/debug/mmc0/clock
+root@debian:/# [   30.090146] mmc0: running CQE recovery
+mmc0: cqhci: Failed to halt
+mmc0: cqhci: spurious TCN for tag 0
+WARNING: drivers/mmc/host/cqhci-core.c:797 at cqhci_irq+0x254/0x818, CPU#1: kworker/1:0H/24
+Modules linked in:
+CPU: 1 UID: 0 PID: 24 Comm: kworker/1:0H Not tainted 6.19.0-rc1-00001-g09db0998649d-dirty #204 PREEMPT
+Hardware name: Rockchip RK3588 EVB1 V10 Board (DT)
+Workqueue: kblockd blk_mq_run_work_fn
+pstate: 604000c9 (nZCv daIF +PAN -UAO -TCO -DIT -SSBS BTYPE=--)
+pc : cqhci_irq+0x254/0x818
+lr : cqhci_irq+0x254/0x818
+...
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-23113 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-23113</link>
+            <guid isPermaLink="false">CVE-2026-23113</guid>
+            <pubDate>Wed, 18 Mar 2026 13:41:57 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+io_uring/io-wq: check IO_WQ_BIT_EXIT inside work run loop
+
+Currently this is checked before running the pending work. Normally this
+is quite fine, as work items either end up blocking (which will create a
+new worker for other items), or they complete fairly quickly. But syzbot
+reports an issue where io-wq takes seemingly forever to exit, and with a
+bit of debugging, this turns out to be because it queues a bunch of big
+(2GB - 4096b) reads with a /dev/msr* file. Since this file type doesn't
+support ->read_iter(), loop_rw_iter() ends up handling them. Each read
+returns 16MB of data read, which takes 20 (!!) seconds. With a bunch of
+these pending, processing the whole chain can take a long time. Easily
+longer than the syzbot uninterruptible sleep timeout of 140 seconds.
+This then triggers a complaint off the io-wq exit path:
+
+INFO: task syz.4.135:6326 blocked for more than 143 seconds.
+      Not tainted syzkaller #0
+      Blocked by coredump.
+"echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+task:syz.4.135       state:D stack:26824 pid:6326  tgid:6324  ppid:5957   task_flags:0x400548 flags:0x00080000
+Call Trace:
+ <TASK>
+ context_switch kernel/sched/core.c:5256 [inline]
+ __schedule+0x1139/0x6150 kernel/sched/core.c:6863
+ __schedule_loop kernel/sched/core.c:6945 [inline]
+ schedule+0xe7/0x3a0 kernel/sched/core.c:6960
+ schedule_timeout+0x257/0x290 kernel/time/sleep_timeout.c:75
+ do_wait_for_common kernel/sched/completion.c:100 [inline]
+ __wait_for_common+0x2fc/0x4e0 kernel/sched/completion.c:121
+ io_wq_exit_workers io_uring/io-wq.c:1328 [inline]
+ io_wq_put_and_exit+0x271/0x8a0 io_uring/io-wq.c:1356
+ io_uring_clean_tctx+0x10d/0x190 io_uring/tctx.c:203
+ io_uring_cancel_generic+0x69c/0x9a0 io_uring/cancel.c:651
+ io_uring_files_cancel include/linux/io_uring.h:19 [inline]
+ do_exit+0x2ce/0x2bd0 kernel/exit.c:911
+ do_group_exit+0xd3/0x2a0 kernel/exit.c:1112
+ get_signal+0x2671/0x26d0 kernel/signal.c:3034
+ arch_do_signal_or_restart+0x8f/0x7e0 arch/x86/kernel/signal.c:337
+ __exit_to_user_mode_loop kernel/entry/common.c:41 [inline]
+ exit_to_user_mode_loop+0x8c/0x540 kernel/entry/common.c:75
+ __exit_to_user_mode_prepare include/linux/irq-entry-common.h:226 [inline]
+ syscall_exit_to_user_mode_prepare include/linux/irq-entry-common.h:256 [inline]
+ syscall_exit_to_user_mode_work include/linux/entry-common.h:159 [inline]
+ syscall_exit_to_user_mode include/linux/entry-common.h:194 [inline]
+ do_syscall_64+0x4ee/0xf80 arch/x86/entry/syscall_64.c:100
+ entry_SYSCALL_64_after_hwframe+0x77/0x7f
+RIP: 0033:0x7fa02738f749
+RSP: 002b:00007fa0281ae0e8 EFLAGS: 00000246 ORIG_RAX: 00000000000000ca
+RAX: fffffffffffffe00 RBX: 00007fa0275e6098 RCX: 00007fa02738f749
+RDX: 0000000000000000 RSI: 0000000000000080 RDI: 00007fa0275e6098
+RBP: 00007fa0275e6090 R08: 0000000000000000 R09: 0000000000000000
+R10: 0000000000000000 R11: 0000000000000246 R12: 0000000000000000
+R13: 00007fa0275e6128 R14: 00007fff14e4fcb0 R15: 00007fff14e4fd98
+
+There's really nothing wrong here, outside of processing these reads
+will take a LONG time. However, we can speed up the exit by checking the
+IO_WQ_BIT_EXIT inside the io_worker_handle_work() loop, as syzbot will
+exit the ring after queueing up all of these reads. Then once the first
+item is processed, io-wq will simply cancel the rest. That should avoid
+syzbot running into this complaint again.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-23114 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-23114</link>
+            <guid isPermaLink="false">CVE-2026-23114</guid>
+            <pubDate>Wed, 18 Mar 2026 13:41:42 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+arm64/fpsimd: ptrace: Fix SVE writes on !SME systems
+
+When SVE is supported but SME is not supported, a ptrace write to the
+NT_ARM_SVE regset can place the tracee into an invalid state where
+(non-streaming) SVE register data is stored in FP_STATE_SVE format but
+TIF_SVE is clear. This can result in a later warning from
+fpsimd_restore_current_state(), e.g.
+
+  WARNING: CPU: 0 PID: 7214 at arch/arm64/kernel/fpsimd.c:383 fpsimd_restore_current_state+0x50c/0x748
+
+When this happens, fpsimd_restore_current_state() will set TIF_SVE,
+placing the task into the correct state. This occurs before any other
+check of TIF_SVE can possibly occur, as other checks of TIF_SVE only
+happen while the FPSIMD/SVE/SME state is live. Thus, aside from the
+warning, there is no functional issue.
+
+This bug was introduced during rework to error handling in commit:
+
+  9f8bf718f2923 ("arm64/fpsimd: ptrace: Gracefully handle errors")
+
+... where the setting of TIF_SVE was moved into a block which is only
+executed when system_supports_sme() is true.
+
+Fix this by removing the system_supports_sme() check. This ensures that
+TIF_SVE is set for (SVE-formatted) writes to NT_ARM_SVE, at the cost of
+unconditionally manipulating the tracee's saved svcr value. The
+manipulation of svcr is benign and inexpensive, and we already do
+similar elsewhere (e.g. during signal handling), so I don't think it's
+worth guarding this with system_supports_sme() checks.
+
+Aside from the above, there is no functional change. The 'type' argument
+to sve_set_common() is only set to ARM64_VEC_SME (in ssve_set())) when
+system_supports_sme(), so the ARM64_VEC_SME case in the switch statement
+is still unreachable when !system_supports_sme(). When
+CONFIG_ARM64_SME=n, the only caller of sve_set_common() is sve_set(),
+and the compiler can constant-fold for the case where type is
+ARM64_VEC_SVE, removing the logic for other cases.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-23115 [CVSS:3.1 4.7 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-23115</link>
+            <guid isPermaLink="false">CVE-2026-23115</guid>
+            <pubDate>Wed, 18 Mar 2026 13:41:27 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+serial: Fix not set tty->port race condition
+
+Revert commit bfc467db60b7 ("serial: remove redundant
+tty_port_link_device()") because the tty_port_link_device() is not
+redundant: the tty->port has to be confured before we call
+uart_configure_port(), otherwise user-space can open console without TTY
+linked to the driver.
+
+This tty_port_link_device() was added explicitly to avoid this exact
+issue in commit fb2b90014d78 ("tty: link tty and port before configuring
+it as console"), so offending commit basically reverted the fix saying
+it is redundant without addressing the actual race condition presented
+there.
+
+Reproducible always as tty->port warning on Qualcomm SoC with most of
+devices disabled, so with very fast boot, and one serial device being
+the console:
+
+  printk: legacy console [ttyMSM0] enabled
+  printk: legacy console [ttyMSM0] enabled
+  printk: legacy bootconsole [qcom_geni0] disabled
+  printk: legacy bootconsole [qcom_geni0] disabled
+  ------------[ cut here ]------------
+  tty_init_dev: ttyMSM driver does not set tty->port. This would crash the kernel. Fix the driver!
+  WARNING: drivers/tty/tty_io.c:1414 at tty_init_dev.part.0+0x228/0x25c, CPU#2: systemd/1
+  Modules linked in: socinfo tcsrcc_eliza gcc_eliza sm3_ce fuse ipv6
+  CPU: 2 UID: 0 PID: 1 Comm: systemd Tainted: G S                  6.19.0-rc4-next-20260108-00024-g2202f4d30aa8 #73 PREEMPT
+  Tainted: [S]=CPU_OUT_OF_SPEC
+  Hardware name: Qualcomm Technologies, Inc. Eliza (DT)
+  ...
+  tty_init_dev.part.0 (drivers/tty/tty_io.c:1414 (discriminator 11)) (P)
+  tty_open (arch/arm64/include/asm/atomic_ll_sc.h:95 (discriminator 3) drivers/tty/tty_io.c:2073 (discriminator 3) drivers/tty/tty_io.c:2120 (discriminator 3))
+  chrdev_open (fs/char_dev.c:411)
+  do_dentry_open (fs/open.c:962)
+  vfs_open (fs/open.c:1094)
+  do_open (fs/namei.c:4634)
+  path_openat (fs/namei.c:4793)
+  do_filp_open (fs/namei.c:4820)
+  do_sys_openat2 (fs/open.c:1391 (discriminator 3))
+  ...
+  Starting Network Name Resolution...
+
+Apparently the flow with this small Yocto-based ramdisk user-space is:
+
+driver (qcom_geni_serial.c):                  user-space:
+============================                  ===========
+qcom_geni_serial_probe()
+ uart_add_one_port()
+  serial_core_register_port()
+   serial_core_add_one_port()
+    uart_configure_port()
+     register_console()
+    |
+    |                                         open console
+    |                                          ...
+    |                                          tty_init_dev()
+    |                                           driver->ports[idx] is NULL
+    |
+    tty_port_register_device_attr_serdev()
+     tty_port_link_device() <- set driver->ports[idx]
+
+Score: 4.7 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-23116 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-23116</link>
+            <guid isPermaLink="false">CVE-2026-23116</guid>
+            <pubDate>Wed, 18 Mar 2026 13:40:31 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+pmdomain: imx8m-blk-ctrl: Remove separate rst and clk mask for 8mq vpu
+
+For i.MX8MQ platform, the ADB in the VPUMIX domain has no separate reset
+and clock enable bits, but is ungated and reset together with the VPUs.
+So we can't reset G1 or G2 separately, it may led to the system hang.
+Remove rst_mask and clk_mask of imx8mq_vpu_blk_ctl_domain_data.
+Let imx8mq_vpu_power_notifier() do really vpu reset.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-23117 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-23117</link>
+            <guid isPermaLink="false">CVE-2026-23117</guid>
+            <pubDate>Wed, 18 Mar 2026 13:40:23 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+ice: add missing ice_deinit_hw() in devlink reinit path
+
+devlink-reload results in ice_init_hw failed error, and then removing
+the ice driver causes a NULL pointer dereference.
+
+[  +0.102213] ice 0000:ca:00.0: ice_init_hw failed: -16
+...
+[  +0.000001] Call Trace:
+[  +0.000003]  <TASK>
+[  +0.000006]  ice_unload+0x8f/0x100 [ice]
+[  +0.000081]  ice_remove+0xba/0x300 [ice]
+
+Commit 1390b8b3d2be ("ice: remove duplicate call to ice_deinit_hw() on
+error paths") removed ice_deinit_hw() from ice_deinit_dev(). As a result
+ice_devlink_reinit_down() no longer calls ice_deinit_hw(), but
+ice_devlink_reinit_up() still calls ice_init_hw(). Since the control
+queues are not uninitialized, ice_init_hw() fails with -EBUSY.
+
+Add ice_deinit_hw() to ice_devlink_reinit_down() to correspond with
+ice_init_hw() in ice_devlink_reinit_up().
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-23083 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-23083</link>
+            <guid isPermaLink="false">CVE-2026-23083</guid>
+            <pubDate>Wed, 18 Mar 2026 13:40:23 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+fou: Don't allow 0 for FOU_ATTR_IPPROTO.
+
+fou_udp_recv() has the same problem mentioned in the previous
+patch.
+
+If FOU_ATTR_IPPROTO is set to 0, skb is not freed by
+fou_udp_recv() nor "resubmit"-ted in ip_protocol_deliver_rcu().
+
+Let's forbid 0 for FOU_ATTR_IPPROTO.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-23118 [CVSS:3.1 4.7 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-23118</link>
+            <guid isPermaLink="false">CVE-2026-23118</guid>
+            <pubDate>Wed, 18 Mar 2026 13:40:05 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+rxrpc: Fix data-race warning and potential load/store tearing
+
+Fix the following:
+
+        BUG: KCSAN: data-race in rxrpc_peer_keepalive_worker / rxrpc_send_data_packet
+
+which is reporting an issue with the reads and writes to ->last_tx_at in:
+
+        conn->peer->last_tx_at = ktime_get_seconds();
+
+and:
+
+        keepalive_at = peer->last_tx_at + RXRPC_KEEPALIVE_TIME;
+
+The lockless accesses to these to values aren't actually a problem as the
+read only needs an approximate time of last transmission for the purposes
+of deciding whether or not the transmission of a keepalive packet is
+warranted yet.
+
+Also, as ->last_tx_at is a 64-bit value, tearing can occur on a 32-bit
+arch.
+
+Fix both of these by switching to an unsigned int for ->last_tx_at and only
+storing the LSW of the time64_t.  It can then be reconstructed at need
+provided no more than 68 years has elapsed since the last transmission.
+
+Score: 4.7 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-23119 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-23119</link>
+            <guid isPermaLink="false">CVE-2026-23119</guid>
+            <pubDate>Wed, 18 Mar 2026 13:39:51 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+bonding: provide a net pointer to __skb_flow_dissect()
+
+After 3cbf4ffba5ee ("net: plumb network namespace into __skb_flow_dissect")
+we have to provide a net pointer to __skb_flow_dissect(),
+either via skb->dev, skb->sk, or a user provided pointer.
+
+In the following case, syzbot was able to cook a bare skb.
+
+WARNING: net/core/flow_dissector.c:1131 at __skb_flow_dissect+0xb57/0x68b0 net/core/flow_dissector.c:1131, CPU#1: syz.2.1418/11053
+Call Trace:
+ <TASK>
+  bond_flow_dissect drivers/net/bonding/bond_main.c:4093 [inline]
+  __bond_xmit_hash+0x2d7/0xba0 drivers/net/bonding/bond_main.c:4157
+  bond_xmit_hash_xdp drivers/net/bonding/bond_main.c:4208 [inline]
+  bond_xdp_xmit_3ad_xor_slave_get drivers/net/bonding/bond_main.c:5139 [inline]
+  bond_xdp_get_xmit_slave+0x1fd/0x710 drivers/net/bonding/bond_main.c:5515
+  xdp_master_redirect+0x13f/0x2c0 net/core/filter.c:4388
+  bpf_prog_run_xdp include/net/xdp.h:700 [inline]
+  bpf_test_run+0x6b2/0x7d0 net/bpf/test_run.c:421
+  bpf_prog_test_run_xdp+0x795/0x10e0 net/bpf/test_run.c:1390
+  bpf_prog_test_run+0x2c7/0x340 kernel/bpf/syscall.c:4703
+  __sys_bpf+0x562/0x860 kernel/bpf/syscall.c:6182
+  __do_sys_bpf kernel/bpf/syscall.c:6274 [inline]
+  __se_sys_bpf kernel/bpf/syscall.c:6272 [inline]
+  __x64_sys_bpf+0x7c/0x90 kernel/bpf/syscall.c:6272
+  do_syscall_x64 arch/x86/entry/syscall_64.c:63 [inline]
+  do_syscall_64+0xec/0xf80 arch/x86/entry/syscall_64.c:94
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-23120 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-23120</link>
+            <guid isPermaLink="false">CVE-2026-23120</guid>
+            <pubDate>Wed, 18 Mar 2026 13:39:35 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+l2tp: avoid one data-race in l2tp_tunnel_del_work()
+
+We should read sk->sk_socket only when dealing with kernel sockets.
+
+syzbot reported the following data-race:
+
+BUG: KCSAN: data-race in l2tp_tunnel_del_work / sk_common_release
+
+write to 0xffff88811c182b20 of 8 bytes by task 5365 on cpu 0:
+  sk_set_socket include/net/sock.h:2092 [inline]
+  sock_orphan include/net/sock.h:2118 [inline]
+  sk_common_release+0xae/0x230 net/core/sock.c:4003
+  udp_lib_close+0x15/0x20 include/net/udp.h:325
+  inet_release+0xce/0xf0 net/ipv4/af_inet.c:437
+  __sock_release net/socket.c:662 [inline]
+  sock_close+0x6b/0x150 net/socket.c:1455
+  __fput+0x29b/0x650 fs/file_table.c:468
+  ____fput+0x1c/0x30 fs/file_table.c:496
+  task_work_run+0x131/0x1a0 kernel/task_work.c:233
+  resume_user_mode_work include/linux/resume_user_mode.h:50 [inline]
+  __exit_to_user_mode_loop kernel/entry/common.c:44 [inline]
+  exit_to_user_mode_loop+0x1fe/0x740 kernel/entry/common.c:75
+  __exit_to_user_mode_prepare include/linux/irq-entry-common.h:226 [inline]
+  syscall_exit_to_user_mode_prepare include/linux/irq-entry-common.h:256 [inline]
+  syscall_exit_to_user_mode_work include/linux/entry-common.h:159 [inline]
+  syscall_exit_to_user_mode include/linux/entry-common.h:194 [inline]
+  do_syscall_64+0x1e1/0x2b0 arch/x86/entry/syscall_64.c:100
+ entry_SYSCALL_64_after_hwframe+0x77/0x7f
+
+read to 0xffff88811c182b20 of 8 bytes by task 827 on cpu 1:
+  l2tp_tunnel_del_work+0x2f/0x1a0 net/l2tp/l2tp_core.c:1418
+  process_one_work kernel/workqueue.c:3257 [inline]
+  process_scheduled_works+0x4ce/0x9d0 kernel/workqueue.c:3340
+  worker_thread+0x582/0x770 kernel/workqueue.c:3421
+  kthread+0x489/0x510 kernel/kthread.c:463
+  ret_from_fork+0x149/0x290 arch/x86/kernel/process.c:158
+  ret_from_fork_asm+0x1a/0x30 arch/x86/entry/entry_64.S:246
+
+value changed: 0xffff88811b818000 -> 0x0000000000000000
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-23121 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-23121</link>
+            <guid isPermaLink="false">CVE-2026-23121</guid>
+            <pubDate>Wed, 18 Mar 2026 13:39:23 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+mISDN: annotate data-race around dev->work
+
+dev->work can re read locklessly in mISDN_read()
+and mISDN_poll(). Add READ_ONCE()/WRITE_ONCE() annotations.
+
+BUG: KCSAN: data-race in mISDN_ioctl / mISDN_read
+
+write to 0xffff88812d848280 of 4 bytes by task 10864 on cpu 1:
+  misdn_add_timer drivers/isdn/mISDN/timerdev.c:175 [inline]
+  mISDN_ioctl+0x2fb/0x550 drivers/isdn/mISDN/timerdev.c:233
+  vfs_ioctl fs/ioctl.c:51 [inline]
+  __do_sys_ioctl fs/ioctl.c:597 [inline]
+  __se_sys_ioctl+0xce/0x140 fs/ioctl.c:583
+  __x64_sys_ioctl+0x43/0x50 fs/ioctl.c:583
+  x64_sys_call+0x14b0/0x3000 arch/x86/include/generated/asm/syscalls_64.h:17
+  do_syscall_x64 arch/x86/entry/syscall_64.c:63 [inline]
+  do_syscall_64+0xd8/0x2c0 arch/x86/entry/syscall_64.c:94
+ entry_SYSCALL_64_after_hwframe+0x77/0x7f
+
+read to 0xffff88812d848280 of 4 bytes by task 10857 on cpu 0:
+  mISDN_read+0x1f2/0x470 drivers/isdn/mISDN/timerdev.c:112
+  do_loop_readv_writev fs/read_write.c:847 [inline]
+  vfs_readv+0x3fb/0x690 fs/read_write.c:1020
+  do_readv+0xe7/0x210 fs/read_write.c:1080
+  __do_sys_readv fs/read_write.c:1165 [inline]
+  __se_sys_readv fs/read_write.c:1162 [inline]
+  __x64_sys_readv+0x45/0x50 fs/read_write.c:1162
+  x64_sys_call+0x2831/0x3000 arch/x86/include/generated/asm/syscalls_64.h:20
+  do_syscall_x64 arch/x86/entry/syscall_64.c:63 [inline]
+  do_syscall_64+0xd8/0x2c0 arch/x86/entry/syscall_64.c:94
+ entry_SYSCALL_64_after_hwframe+0x77/0x7f
+
+value changed: 0x00000000 -> 0x00000001
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-24097 [CVSS:4.0 5.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-24097</link>
+            <guid isPermaLink="false">CVE-2026-24097</guid>
+            <pubDate>Wed, 18 Mar 2026 13:37:29 GMT</pubDate>
+            <description><![CDATA[Improper permission enforcement in Checkmk versions 2.4.0 before 2.4.0p23, 2.3.0 before 2.3.0p43, and 2.2.0 (EOL) allows authenticated users to enumerate existing hosts by observing different HTTP response codes in agent-receiver/register_existing endpoint, which could lead to information disclosure.
+
+Score: 5.3 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-2581 [CVSS:3.1 5.9 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-2581</link>
+            <guid isPermaLink="false">CVE-2026-2581</guid>
+            <pubDate>Wed, 18 Mar 2026 13:37:08 GMT</pubDate>
+            <description><![CDATA[This is an uncontrolled resource consumption vulnerability (CWE-400) that can lead to Denial of Service (DoS).
+
+In vulnerable Undici versions, when interceptors.deduplicate() is enabled, response data for deduplicated requests could be accumulated in memory for downstream handlers. An attacker-controlled or untrusted upstream endpoint can exploit this with large/chunked responses and concurrent identical requests, causing high memory usage and potential OOM process termination.
+
+Impacted users are applications that use Undici’s deduplication interceptor against endpoints that may produce large or long-lived response bodies.
+
+PatchesThe issue has been patched by changing deduplication behavior to stream response chunks to downstream handlers as they arrive (instead of full-body accumulation), and by preventing late deduplication when body streaming has already started.
+
+Users should upgrade to the first official Undici (and Node.js, where applicable) releases that include this patch.
+
+Score: 5.9 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-23095 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-23095</link>
+            <guid isPermaLink="false">CVE-2026-23095</guid>
+            <pubDate>Wed, 18 Mar 2026 13:36:17 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+gue: Fix skb memleak with inner IP protocol 0.
+
+syzbot reported skb memleak below. [0]
+
+The repro generated a GUE packet with its inner protocol 0.
+
+gue_udp_recv() returns -guehdr->proto_ctype for "resubmit"
+in ip_protocol_deliver_rcu(), but this only works with
+non-zero protocol number.
+
+Let's drop such packets.
+
+Note that 0 is a valid number (IPv6 Hop-by-Hop Option).
+
+I think it is not practical to encap HOPOPT in GUE, so once
+someone starts to complain, we could pass down a resubmit
+flag pointer to distinguish two zeros from the upper layer:
+
+  * no error
+  * resubmit HOPOPT
+
+[0]
+BUG: memory leak
+unreferenced object 0xffff888109695a00 (size 240):
+  comm "syz.0.17", pid 6088, jiffies 4294943096
+  hex dump (first 32 bytes):
+    00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+    00 40 c2 10 81 88 ff ff 00 00 00 00 00 00 00 00  .@..............
+  backtrace (crc a84b336f):
+    kmemleak_alloc_recursive include/linux/kmemleak.h:44 [inline]
+    slab_post_alloc_hook mm/slub.c:4958 [inline]
+    slab_alloc_node mm/slub.c:5263 [inline]
+    kmem_cache_alloc_noprof+0x3b4/0x590 mm/slub.c:5270
+    __build_skb+0x23/0x60 net/core/skbuff.c:474
+    build_skb+0x20/0x190 net/core/skbuff.c:490
+    __tun_build_skb drivers/net/tun.c:1541 [inline]
+    tun_build_skb+0x4a1/0xa40 drivers/net/tun.c:1636
+    tun_get_user+0xc12/0x2030 drivers/net/tun.c:1770
+    tun_chr_write_iter+0x71/0x120 drivers/net/tun.c:1999
+    new_sync_write fs/read_write.c:593 [inline]
+    vfs_write+0x45d/0x710 fs/read_write.c:686
+    ksys_write+0xa7/0x170 fs/read_write.c:738
+    do_syscall_x64 arch/x86/entry/syscall_64.c:63 [inline]
+    do_syscall_64+0xa4/0xf80 arch/x86/entry/syscall_64.c:94
+    entry_SYSCALL_64_after_hwframe+0x77/0x7f
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-12576 [CVSS:3.1 6.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-12576</link>
+            <guid isPermaLink="false">CVE-2025-12576</guid>
+            <pubDate>Wed, 18 Mar 2026 13:35:10 GMT</pubDate>
+            <description><![CDATA[GitLab has remediated an issue in GitLab CE/EE affecting all versions from 9.3 before 18.7.6, 18.8 before 18.8.6, and 18.9 before 18.9.2 that under certain conditions could have allowed an authenticated user to cause a denial of service due to improper handling of webhook response data.
+
+Score: 6.5 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-23096 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-23096</link>
+            <guid isPermaLink="false">CVE-2026-23096</guid>
+            <pubDate>Wed, 18 Mar 2026 13:29:58 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+uacce: fix cdev handling in the cleanup path
+
+When cdev_device_add fails, it internally releases the cdev memory,
+and if cdev_device_del is then executed, it will cause a hang error.
+To fix it, we check the return value of cdev_device_add() and clear
+uacce->cdev to avoid calling cdev_device_del in the uacce_remove.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-23228 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-23228</link>
+            <guid isPermaLink="false">CVE-2026-23228</guid>
+            <pubDate>Wed, 18 Mar 2026 13:27:53 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+smb: server: fix leak of active_num_conn in ksmbd_tcp_new_connection()
+
+On kthread_run() failure in ksmbd_tcp_new_connection(), the transport is
+freed via free_transport(), which does not decrement active_num_conn,
+leaking this counter.
+
+Replace free_transport() with ksmbd_tcp_disconnect().
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-23229 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-23229</link>
+            <guid isPermaLink="false">CVE-2026-23229</guid>
+            <pubDate>Wed, 18 Mar 2026 13:25:23 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+crypto: virtio - Add spinlock protection with virtqueue notification
+
+When VM boots with one virtio-crypto PCI device and builtin backend,
+run openssl benchmark command with multiple processes, such as
+  openssl speed -evp aes-128-cbc -engine afalg  -seconds 10 -multi 32
+
+openssl processes will hangup and there is error reported like this:
+ virtio_crypto virtio0: dataq.0:id 3 is not a head!
+
+It seems that the data virtqueue need protection when it is handled
+for virtio done notification. If the spinlock protection is added
+in virtcrypto_done_task(), openssl benchmark with multiple processes
+works well.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-2859 [CVSS:4.0 6.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-2859</link>
+            <guid isPermaLink="false">CVE-2026-2859</guid>
+            <pubDate>Wed, 18 Mar 2026 13:23:32 GMT</pubDate>
+            <description><![CDATA[Improper permission enforcement in Checkmk versions 2.4.0 before 2.4.0p23, 2.3.0 before 2.3.0p43, and 2.2.0 (EOL) allows unauthenticated users to enumerate existing hosts by observing different HTTP response codes in deploy_agent endpoint, which could lead to information disclosure.
+
+Score: 6.3 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-3497 [CVSS:4.0 6.9 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-3497</link>
+            <guid isPermaLink="false">CVE-2026-3497</guid>
+            <pubDate>Wed, 18 Mar 2026 13:16:19 GMT</pubDate>
+            <description><![CDATA[Vulnerability in the OpenSSH GSSAPI delta included in various Linux distributions. This vulnerability affects the GSSAPI patches added by various Linux distributions and does not affect the OpenSSH upstream project itself. The usage of sshpkt_disconnect() on an error, which does not terminate the process, allows an attacker to send an unexpected GSSAPI message type during the GSSAPI key exchange to the server, which will call the underlying function and continue the execution of the program without setting the related connection variables. As the variables are not initialized to NULL the code later accesses those uninitialized variables, accessing random memory, which could lead to undefined behavior. The recommended workaround is to use ssh_packet_disconnect() instead, which does terminate the process. The impact of the vulnerability depends heavily on the compiler flag hardening configuration.
+
+Score: 6.9 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:L/VA:L/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-32693 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-32693</link>
+            <guid isPermaLink="false">CVE-2026-32693</guid>
+            <pubDate>Wed, 18 Mar 2026 13:16:18 GMT</pubDate>
+            <description><![CDATA[In Juju from version 3.0.0 through 3.6.18, the authorization of the "secret-set" tool is not performed correctly, which allows a grantee to update the secret content, and can lead to reading or updating other secrets. When the "secret-set" tool logs an error in an exploitation attempt, the secret is still updated contrary to expectations, and the new value is visible to both the owner and the grantee.
+
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-32692 [CVSS:3.1 7.6 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-32692</link>
+            <guid isPermaLink="false">CVE-2026-32692</guid>
+            <pubDate>Wed, 18 Mar 2026 13:16:18 GMT</pubDate>
+            <description><![CDATA[An authorization bypass vulnerability in the Vault secrets back-end implementation of Juju versions 3.1.6 through 3.6.18 allows an authenticated unit agent to perform unauthorized updates to secret revisions. With sufficient information, an attacker can poison any existing secret revision within the scope of that Vault secret back-end.
+
+Score: 7.6 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:H/A:L]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-32691 [CVSS:3.1 5.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-32691</link>
+            <guid isPermaLink="false">CVE-2026-32691</guid>
+            <pubDate>Wed, 18 Mar 2026 13:16:18 GMT</pubDate>
+            <description><![CDATA[A race condition in the secrets management subsystem of Juju versions 3.0.0 through 3.6.18 allows an authenticated unit agent to claim ownership of a newly initialized secret. Between generating a Juju Secret ID and creating the secret's first revision, an attacker authenticated as another unit agent can claim ownership of a known secret. This leads to the attacking unit being able to read the content of the initial secret revision.
+
+Score: 5.3 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:H/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2023-47663]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2023-47663</link>
+            <guid isPermaLink="false">CVE-2023-47663</guid>
+            <pubDate>Wed, 18 Mar 2026 13:16:17 GMT</pubDate>
+            <description><![CDATA[Rejected reason: This CVE ID has been rejected or withdrawn by its CVE Numbering Authority.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-31864 [CVSS:3.1 6.8 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-31864</link>
+            <guid isPermaLink="false">CVE-2026-31864</guid>
+            <pubDate>Wed, 18 Mar 2026 13:09:28 GMT</pubDate>
+            <description><![CDATA[JumpServer is an open source bastion host and an operation and maintenance security audit system. a Server-Side Template Injection (SSTI) vulnerability exists in JumpServer's Applet and VirtualApp upload functionality. This vulnerability can only be exploited by users with administrative privileges (Application Applet Management or Virtual Application Management permissions). Attackers can exploit this vulnerability to execute arbitrary code within the JumpServer Core container. The vulnerability arises from unsafe use of Jinja2 template rendering when processing user-uploaded YAML configuration files. When a user uploads an Applet or VirtualApp ZIP package, the manifest.yml file is rendered through Jinja2 without sandbox restrictions, allowing template injection attacks.
+
+Score: 6.8 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-31798 [CVSS:3.1 5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-31798</link>
+            <guid isPermaLink="false">CVE-2026-31798</guid>
+            <pubDate>Wed, 18 Mar 2026 13:07:58 GMT</pubDate>
+            <description><![CDATA[JumpServer is an open source bastion host and an operation and maintenance security audit system. Prior to v4.10.16-lts, JumpServer improperly validates certificates in the Custom SMS API Client. When JumpServer sends MFA/OTP codes via Custom SMS API, an attacker can intercept the request and capture the verification code BEFORE it reaches the user's phone. This vulnerability is fixed in v4.10.16-lts.
+
+Score: 5 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:L/I:L/A:L]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-23897 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-23897</link>
+            <guid isPermaLink="false">CVE-2026-23897</guid>
+            <pubDate>Wed, 18 Mar 2026 13:06:52 GMT</pubDate>
+            <description><![CDATA[Apollo Server is an open-source, spec-compliant GraphQL server that's compatible with any GraphQL client, including Apollo Client. In versions from 2.0.0 to 3.13.0, 4.2.0 to before 4.13.0, and 5.0.0 to before 5.4.0, the default configuration of startStandaloneServer from @apollo/server/standalone is vulnerable to denial of service (DoS) attacks through specially crafted request bodies with exotic character set encodings. This issue does not affect users that use @apollo/server as a dependency for integration packages, like @as-integrations/express5 or @as-integrations/next, only direct usage of startStandaloneServer.
+
+Score: 7.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-28675 [CVSS:3.1 5.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-28675</link>
+            <guid isPermaLink="false">CVE-2026-28675</guid>
+            <pubDate>Wed, 18 Mar 2026 13:04:29 GMT</pubDate>
+            <description><![CDATA[OpenSift is an AI study tool that sifts through large datasets using semantic search and generative AI. Prior to version 1.6.3-alpha, some endpoints returned raw exception strings to clients. Additionally, login token material was exposed in UI/rendered responses and token rotation output. This issue has been patched in version 1.6.3-alpha.
+
+Score: 5.3 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-25836 [CVSS:3.1 7.2 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-25836</link>
+            <guid isPermaLink="false">CVE-2026-25836</guid>
+            <pubDate>Wed, 18 Mar 2026 13:04:12 GMT</pubDate>
+            <description><![CDATA[An improper neutralization of special elements used in an os command ('os command injection') vulnerability in Fortinet FortiSandbox Cloud 5.0.4 may allow  a privileged attacker with super-admin profile and CLI access to execute unauthorized code or commands via crafted HTTP requests.
+
+Score: 7.2 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-30909 [CVSS:3.1 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-30909</link>
+            <guid isPermaLink="false">CVE-2026-30909</guid>
+            <pubDate>Wed, 18 Mar 2026 13:02:17 GMT</pubDate>
+            <description><![CDATA[Crypt::NaCl::Sodium versions through 2.002 for Perl has potential integer overflows.
+
+bin2hex, encrypt, aes256gcm_encrypt_afternm and seal functions do not check that output size will be less than SIZE_MAX, which could lead to integer wraparound causing an undersized output buffer.
+
+Encountering this issue is unlikely as the message length would need to be very large.
+
+For bin2hex() the bin_len would have to be > SIZE_MAX / 2 For encrypt() the msg_len would need to be > SIZE_MAX - 16U For aes256gcm_encrypt_afternm() the msg_len would need to be > SIZE_MAX - 16U For seal() the enc_len would need to be > SIZE_MAX - 64U
+
+Score: 9.8 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-28676 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-28676</link>
+            <guid isPermaLink="false">CVE-2026-28676</guid>
+            <pubDate>Wed, 18 Mar 2026 13:02:04 GMT</pubDate>
+            <description><![CDATA[OpenSift is an AI study tool that sifts through large datasets using semantic search and generative AI. Prior to version 1.6.3-alpha, multiple storage helpers used path construction patterns that did not uniformly enforce base-directory containment. This created path-injection risk in file read/write/delete flows if malicious path-like values were introduced. This issue has been patched in version 1.6.3-alpha.
+
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-28677 [CVSS:3.1 8.2 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-28677</link>
+            <guid isPermaLink="false">CVE-2026-28677</guid>
+            <pubDate>Wed, 18 Mar 2026 12:59:04 GMT</pubDate>
+            <description><![CDATA[OpenSift is an AI study tool that sifts through large datasets using semantic search and generative AI. Prior to version 1.6.3-alpha, the URL ingest pipeline accepted user-controlled remote URLs with incomplete destination restrictions. Although private/local host checks existed, missing restrictions for credentialed URLs, non-standard ports, and cross-host redirects left SSRF-class abuse paths in non-localhost deployments. This issue has been patched in version 1.6.3-alpha.
+
+Score: 8.2 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:L]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-23097 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-23097</link>
+            <guid isPermaLink="false">CVE-2026-23097</guid>
+            <pubDate>Wed, 18 Mar 2026 12:47:17 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+migrate: correct lock ordering for hugetlb file folios
+
+Syzbot has found a deadlock (analyzed by Lance Yang):
+
+1) Task (5749): Holds folio_lock, then tries to acquire i_mmap_rwsem(read lock).
+2) Task (5754): Holds i_mmap_rwsem(write lock), then tries to acquire
+folio_lock.
+
+migrate_pages()
+  -> migrate_hugetlbs()
+    -> unmap_and_move_huge_page()     <- Takes folio_lock!
+      -> remove_migration_ptes()
+        -> __rmap_walk_file()
+          -> i_mmap_lock_read()       <- Waits for i_mmap_rwsem(read lock)!
+
+hugetlbfs_fallocate()
+  -> hugetlbfs_punch_hole()           <- Takes i_mmap_rwsem(write lock)!
+    -> hugetlbfs_zero_partial_page()
+     -> filemap_lock_hugetlb_folio()
+      -> filemap_lock_folio()
+        -> __filemap_get_folio        <- Waits for folio_lock!
+
+The migration path is the one taking locks in the wrong order according to
+the documentation at the top of mm/rmap.c.  So expand the scope of the
+existing i_mmap_lock to cover the calls to remove_migration_ptes() too.
+
+This is (mostly) how it used to be after commit c0d0381ade79.  That was
+removed by 336bf30eb765 for both file & anon hugetlb pages when it should
+only have been removed for anon hugetlb pages.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-33265 [CVSS:3.1 6.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-33265</link>
+            <guid isPermaLink="false">CVE-2026-33265</guid>
+            <pubDate>Wed, 18 Mar 2026 12:16:19 GMT</pubDate>
+            <description><![CDATA[In LibreChat 0.8.1-rc2, a logged-in user obtains a JWT for both the LibreChat API and the RAG API.
+
+Score: 6.3 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:C/C:L/I:L/A:L]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-41258 [CVSS:3.1 8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-41258</link>
+            <guid isPermaLink="false">CVE-2025-41258</guid>
+            <pubDate>Wed, 18 Mar 2026 12:16:18 GMT</pubDate>
+            <description><![CDATA[LibreChat version 0.8.1-rc2 uses the same JWT secret for the user session mechanism and RAG API which compromises the service-level authentication of the RAG API.
+
+Score: 8 (HIGH)
+Vector: CVSS:3.1/AV:A/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
         <item>
             <title><![CDATA[CVE-2026-32249 [CVSS:3.1 5.5 MEDIUM]]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-32249</link>
@@ -849,393 +1772,6 @@ Vector: CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:C/C:H/I:L/A:L]]></description>
 
 Score: 7 (HIGH)
 Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:N/VI:H/VA:N/SC:H/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-28500 [CVSS:3.1 8.6 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-28500</link>
-            <guid isPermaLink="false">CVE-2026-28500</guid>
-            <pubDate>Wed, 18 Mar 2026 02:16:24 GMT</pubDate>
-            <description><![CDATA[Open Neural Network Exchange (ONNX) is an open standard for machine learning interoperability. In versions up to and including 1.20.1, a security control bypass exists in onnx.hub.load() due to improper logic in the repository trust verification mechanism. While the function is designed to warn users when loading models from non-official sources, the use of the silent=True parameter completely suppresses all security warnings and confirmation prompts. This vulnerability transforms a standard model-loading function into a vector for Zero-Interaction Supply-Chain Attacks. When chained with file-system vulnerabilities, an attacker can silently exfiltrate sensitive files (SSH keys, cloud credentials) from the victim's machine the moment the model is loaded. As of time of publication, no known patched versions are available.
-
-Score: 8.6 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-28499 [CVSS:4.0 6.9 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-28499</link>
-            <guid isPermaLink="false">CVE-2026-28499</guid>
-            <pubDate>Wed, 18 Mar 2026 02:16:24 GMT</pubDate>
-            <description><![CDATA[LeafKit is a templating language with Swift-inspired syntax. Prior to version 1.14.2, HTML escaping doesn't work correctly when a template prints a collection (Array / Dictionary) via `#(value)`. This can result in XSS, allowing potentially untrusted input to be rendered unescaped. Version 1.14.2 fixes the issue.
-
-Score: 6.9 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:N/SC:L/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-27545 [CVSS:4.0 6.9 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-27545</link>
-            <guid isPermaLink="false">CVE-2026-27545</guid>
-            <pubDate>Wed, 18 Mar 2026 02:16:23 GMT</pubDate>
-            <description><![CDATA[OpenClaw versions prior to 2026.2.26 contain an approval bypass vulnerability in system.run execution that allows attackers to execute commands from unintended filesystem locations by rebinding writable parent symlinks in the current working directory after approval. An attacker can modify mutable parent symlink path components between approval and execution time to redirect command execution to a different location while preserving the visible working directory string.
-
-Score: 6.9 (MEDIUM)
-Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:N/VC:N/VI:H/VA:L/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-27524 [CVSS:4.0 2.3 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-27524</link>
-            <guid isPermaLink="false">CVE-2026-27524</guid>
-            <pubDate>Wed, 18 Mar 2026 02:16:23 GMT</pubDate>
-            <description><![CDATA[OpenClaw versions prior to 2026.2.21 accept prototype-reserved keys in runtime /debug set override object values, allowing prototype pollution attacks. Authorized /debug set callers can inject __proto__, constructor, or prototype keys to manipulate object prototypes and bypass command gate restrictions.
-
-Score: 2.3 (LOW)
-Vector: CVSS:4.0/AV:N/AC:L/AT:P/PR:L/UI:N/VC:N/VI:L/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-27523 [CVSS:4.0 6.9 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-27523</link>
-            <guid isPermaLink="false">CVE-2026-27523</guid>
-            <pubDate>Wed, 18 Mar 2026 02:16:23 GMT</pubDate>
-            <description><![CDATA[OpenClaw versions prior to 2026.2.24 contain a sandbox bind validation vulnerability allowing attackers to bypass allowed-root and blocked-path checks via symlinked parent directories with non-existent leaf paths. Attackers can craft bind source paths that appear within allowed roots but resolve outside sandbox boundaries once missing leaf components are created, weakening bind-source isolation enforcement.
-
-Score: 6.9 (MEDIUM)
-Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:N/VC:N/VI:H/VA:L/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-27522 [CVSS:4.0 7.1 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-27522</link>
-            <guid isPermaLink="false">CVE-2026-27522</guid>
-            <pubDate>Wed, 18 Mar 2026 02:16:23 GMT</pubDate>
-            <description><![CDATA[OpenClaw versions prior to 2026.2.24 contain a local media root bypass vulnerability in sendAttachment and setGroupIcon message actions when sandboxRoot is unset. Attackers can hydrate media from local absolute paths to read arbitrary host files accessible by the runtime user.
-
-Score: 7.1 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:N/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-22217 [CVSS:4.0 5.8 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-22217</link>
-            <guid isPermaLink="false">CVE-2026-22217</guid>
-            <pubDate>Wed, 18 Mar 2026 02:16:23 GMT</pubDate>
-            <description><![CDATA[OpenClaw version 2026.2.22 prior to 2026.2.23 contain an arbitrary code execution vulnerability in shell-env that allows attackers to execute attacker-controlled binaries by exploiting trusted-prefix fallback logic for the $SHELL variable. An attacker can influence the $SHELL environment variable on systems with writable trusted-prefix directories such as /opt/homebrew/bin to execute arbitrary binaries in the OpenClaw process context.
-
-Score: 5.8 (MEDIUM)
-Vector: CVSS:4.0/AV:L/AC:L/AT:P/PR:L/UI:N/VC:N/VI:H/VA:L/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-22181 [CVSS:4.0 6.1 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-22181</link>
-            <guid isPermaLink="false">CVE-2026-22181</guid>
-            <pubDate>Wed, 18 Mar 2026 02:16:22 GMT</pubDate>
-            <description><![CDATA[OpenClaw versions prior to 2026.3.2 contain a DNS pinning bypass vulnerability in strict URL fetch paths that allows attackers to circumvent SSRF guards when environment proxy variables are configured. When HTTP_PROXY, HTTPS_PROXY, or ALL_PROXY environment variables are present, attacker-influenced URLs can be routed through proxy behavior instead of pinned-destination routing, enabling access to internal targets reachable from the proxy environment.
-
-Score: 6.1 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:P/PR:L/UI:N/VC:H/VI:L/VA:L/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-22180 [CVSS:4.0 4.8 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-22180</link>
-            <guid isPermaLink="false">CVE-2026-22180</guid>
-            <pubDate>Wed, 18 Mar 2026 02:16:22 GMT</pubDate>
-            <description><![CDATA[OpenClaw versions prior to 2026.3.2 contain a path-confinement bypass vulnerability in browser output handling that allows writes outside intended root directories. Attackers can exploit insufficient canonical path-boundary validation in file write operations to escape root-bound restrictions and write files to arbitrary locations.
-
-Score: 4.8 (MEDIUM)
-Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-22179 [CVSS:4.0 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-22179</link>
-            <guid isPermaLink="false">CVE-2026-22179</guid>
-            <pubDate>Wed, 18 Mar 2026 02:16:22 GMT</pubDate>
-            <description><![CDATA[OpenClaw versions prior to 2026.2.22 in macOS node-host system.run contain an allowlist bypass vulnerability that allows remote attackers to execute non-allowlisted commands by exploiting improper parsing of command substitution tokens. Attackers can craft shell payloads with command substitution syntax within double-quoted text to bypass security restrictions and execute arbitrary commands on the system.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:P/PR:H/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-22178 [CVSS:4.0 6.9 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-22178</link>
-            <guid isPermaLink="false">CVE-2026-22178</guid>
-            <pubDate>Wed, 18 Mar 2026 02:16:22 GMT</pubDate>
-            <description><![CDATA[OpenClaw versions prior to 2026.2.19 construct RegExp objects directly from unescaped Feishu mention metadata in the stripBotMention function, allowing regex injection and denial of service. Attackers can craft nested-quantifier patterns or metacharacters in mention metadata to trigger catastrophic backtracking, block message processing, or remove unintended content before model processing.
-
-Score: 6.9 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:L/VA:L/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-22177 [CVSS:4.0 6.9 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-22177</link>
-            <guid isPermaLink="false">CVE-2026-22177</guid>
-            <pubDate>Wed, 18 Mar 2026 02:16:21 GMT</pubDate>
-            <description><![CDATA[OpenClaw versions prior to 2026.2.21 fail to filter dangerous process-control environment variables from config env.vars, allowing startup-time code execution. Attackers can inject variables like NODE_OPTIONS or LD_* through configuration to execute arbitrary code in the OpenClaw gateway service runtime context.
-
-Score: 6.9 (MEDIUM)
-Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:N/VC:N/VI:H/VA:L/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-22175 [CVSS:4.0 7.1 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-22175</link>
-            <guid isPermaLink="false">CVE-2026-22175</guid>
-            <pubDate>Wed, 18 Mar 2026 02:16:21 GMT</pubDate>
-            <description><![CDATA[OpenClaw versions prior to 2026.2.23 contain an exec approval bypass vulnerability in allowlist mode where allow-always grants could be circumvented through unrecognized multiplexer shell wrappers like busybox and toybox sh -c commands. Attackers can exploit this by invoking arbitrary payloads under the same multiplexer wrapper to satisfy stored allowlist rules, bypassing intended execution restrictions.
-
-Score: 7.1 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:N/VI:H/VA:L/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-22174 [CVSS:4.0 5.9 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-22174</link>
-            <guid isPermaLink="false">CVE-2026-22174</guid>
-            <pubDate>Wed, 18 Mar 2026 02:16:21 GMT</pubDate>
-            <description><![CDATA[OpenClaw versions prior to 2026.2.22 inject the x-OpenClaw-relay-token header into Chrome CDP probe traffic on loopback interfaces, allowing local processes to capture the Gateway authentication token. An attacker controlling a loopback port can intercept CDP reachability probes to the /json/version endpoint and reuse the leaked token as Gateway bearer authentication.
-
-Score: 5.9 (MEDIUM)
-Vector: CVSS:4.0/AV:L/AC:L/AT:P/PR:N/UI:N/VC:H/VI:L/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-22171 [CVSS:4.0 8.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-22171</link>
-            <guid isPermaLink="false">CVE-2026-22171</guid>
-            <pubDate>Wed, 18 Mar 2026 02:16:21 GMT</pubDate>
-            <description><![CDATA[OpenClaw versions prior to 2026.2.19 contain a path traversal vulnerability in the Feishu media download flow where untrusted media keys are interpolated directly into temporary file paths in extensions/feishu/src/media.ts. An attacker who can control Feishu media key values returned to the client can use traversal segments to escape os.tmpdir() and write arbitrary files within the OpenClaw process permissions.
-
-Score: 8.8 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:H/VA:L/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-22170 [CVSS:4.0 6.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-22170</link>
-            <guid isPermaLink="false">CVE-2026-22170</guid>
-            <pubDate>Wed, 18 Mar 2026 02:16:21 GMT</pubDate>
-            <description><![CDATA[OpenClaw versions prior to 2026.2.22 with the optional BlueBubbles plugin contain an access control bypass vulnerability where empty allowFrom configuration causes dmPolicy pairing and allowlist restrictions to be ineffective. Remote attackers can send direct messages to BlueBubbles accounts by exploiting the misconfigured allowlist validation logic to bypass intended sender authorization checks.
-
-Score: 6.3 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:L/VI:L/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-22169 [CVSS:4.0 7.1 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-22169</link>
-            <guid isPermaLink="false">CVE-2026-22169</guid>
-            <pubDate>Wed, 18 Mar 2026 02:16:20 GMT</pubDate>
-            <description><![CDATA[OpenClaw versions prior to 2026.2.22 contain an allowlist bypass vulnerability in the safeBins configuration that allows attackers to invoke external helpers through the compress-program option. When sort is explicitly added to tools.exec.safeBins, remote attackers can bypass intended safe-bin approval constraints by leveraging the compress-program parameter to execute unauthorized external programs.
-
-Score: 7.1 (HIGH)
-Vector: CVSS:4.0/AV:L/AC:L/AT:P/PR:H/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-22168 [CVSS:4.0 7.1 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-22168</link>
-            <guid isPermaLink="false">CVE-2026-22168</guid>
-            <pubDate>Wed, 18 Mar 2026 02:16:20 GMT</pubDate>
-            <description><![CDATA[OpenClaw versions prior to 2026.2.21 contain an approval-integrity mismatch vulnerability in system.run that allows authenticated operators to execute arbitrary trailing arguments after cmd.exe /c while approval text reflects only a benign command. Attackers can smuggle malicious arguments through cmd.exe /c to achieve local command execution on trusted Windows nodes with mismatched audit logs.
-
-Score: 7.1 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:N/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2024-11079 [CVSS:3.1 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2024-11079</link>
-            <guid isPermaLink="false">CVE-2024-11079</guid>
-            <pubDate>Wed, 18 Mar 2026 02:16:18 GMT</pubDate>
-            <description><![CDATA[A flaw was found in Ansible-Core. This vulnerability allows attackers to bypass unsafe content protections using the hostvars object to reference and execute templated content. This issue can lead to arbitrary code execution if remote data or module outputs are improperly templated within playbooks.
-
-Score: 5.5 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:H/PR:L/UI:R/S:C/C:L/I:L/A:L]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-29057 [CVSS:4.0 6.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-29057</link>
-            <guid isPermaLink="false">CVE-2026-29057</guid>
-            <pubDate>Wed, 18 Mar 2026 01:16:05 GMT</pubDate>
-            <description><![CDATA[Next.js is a React framework for building full-stack web applications. Starting in version 9.5.0 and prior to versions 15.5.13 and 16.1.7, when Next.js rewrites proxy traffic to an external backend, a crafted `DELETE`/`OPTIONS` request using `Transfer-Encoding: chunked` could trigger request boundary disagreement between the proxy and backend. This could allow request smuggling through rewritten routes. An attacker could smuggle a second request to unintended backend routes (for example, internal/admin endpoints), bypassing assumptions that only the configured rewrite destination/path is reachable. This does not impact applications hosted on providers that handle rewrites at the CDN level, such as Vercel.  The vulnerability originated in an upstream library vendored by Next.js. It is fixed in Next.js 15.5.13 and 16.1.7 by updating that dependency’s behavior so `content-length: 0` is added only when both `content-length` and `transfer-encoding` are absent, and `transfer-encoding` is no longer removed in that code path. If upgrading is not immediately possible, block chunked `DELETE`/`OPTIONS` requests on rewritten routes at the edge/proxy, and/or enforce authentication/authorization on backend routes.
-
-Score: 6.3 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:L/VI:L/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-28674 [CVSS:3.1 7.2 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-28674</link>
-            <guid isPermaLink="false">CVE-2026-28674</guid>
-            <pubDate>Wed, 18 Mar 2026 01:16:05 GMT</pubDate>
-            <description><![CDATA[xiaoheiFS is a self-hosted financial and operational system for cloud service businesses. In versions up to and including 0.3.15, the `AdminPaymentPluginUpload` endpoint lets admins upload any file to `plugins/payment/`. It only checks a hardcoded password (`qweasd123456`) and ignores file content. A background watcher (`StartWatcher`) then scans this folder every 5 seconds. If it finds a new executable, it runs it immediately, resulting in RCE. Version 4.0.0 fixes the issue.
-
-Score: 7.2 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-28673 [CVSS:3.1 7.2 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-28673</link>
-            <guid isPermaLink="false">CVE-2026-28673</guid>
-            <pubDate>Wed, 18 Mar 2026 01:16:05 GMT</pubDate>
-            <description><![CDATA[xiaoheiFS is a self-hosted financial and operational system for cloud service businesses. In versions up to and including 0.3.15, the standard plugin system allows admins to upload a ZIP file containing a binary and a `manifest.json`. The server trusts the `binaries` field in the manifest and executes the specified file without any validation of its contents or behavior, leading to Remote Code Execution (RCE). Version 0.4.0 fixes the issue.
-
-Score: 7.2 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-27980 [CVSS:4.0 6.9 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-27980</link>
-            <guid isPermaLink="false">CVE-2026-27980</guid>
-            <pubDate>Wed, 18 Mar 2026 01:16:04 GMT</pubDate>
-            <description><![CDATA[Next.js is a React framework for building full-stack web applications. Starting in version 10.0.0 and prior to version 16.1.7, the default Next.js image optimization disk cache (`/_next/image`) did not have a configurable upper bound, allowing unbounded cache growth. An attacker could generate many unique image-optimization variants and exhaust disk space, causing denial of service. This is fixed in version 16.1.7 by adding an LRU-backed disk cache with `images.maximumDiskCacheSize`, including eviction of least-recently-used entries when the limit is exceeded. Setting `maximumDiskCacheSize: 0` disables disk caching. If upgrading is not immediately possible, periodically clean `.next/cache/images` and/or reduce variant cardinality (e.g., tighten values for `images.localPatterns`, `images.remotePatterns`, and `images.qualities`).
-
-Score: 6.9 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-27979 [CVSS:4.0 6.9 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-27979</link>
-            <guid isPermaLink="false">CVE-2026-27979</guid>
-            <pubDate>Wed, 18 Mar 2026 01:16:04 GMT</pubDate>
-            <description><![CDATA[Next.js is a React framework for building full-stack web applications. Starting in version 16.0.1 and prior to version 16.1.7, a request containing the `next-resume: 1` header (corresponding with a PPR resume request) would buffer request bodies without consistently enforcing `maxPostponedStateSize` in certain setups. The previous mitigation protected minimal-mode deployments, but equivalent non-minimal deployments remained vulnerable to the same unbounded postponed resume-body buffering behavior. In applications using the App Router with Partial Prerendering capability enabled (via `experimental.ppr` or `cacheComponents`), an attacker could send oversized `next-resume` POST payloads that were buffered without consistent size enforcement in non-minimal deployments, causing excessive memory usage and potential denial of service. This is fixed in version 16.1.7 by enforcing size limits across all postponed-body buffering paths and erroring when limits are exceeded. If upgrading is not immediately possible, block requests containing the `next-resume` header, as this is never valid to be sent from an untrusted client.
-
-Score: 6.9 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-27978 [CVSS:4.0 5.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-27978</link>
-            <guid isPermaLink="false">CVE-2026-27978</guid>
-            <pubDate>Wed, 18 Mar 2026 01:16:04 GMT</pubDate>
-            <description><![CDATA[Next.js is a React framework for building full-stack web applications. Starting in version 16.0.1 and prior to version 16.1.7, `origin: null` was treated as a "missing" origin during Server Action CSRF validation. As a result, requests from opaque contexts (such as sandboxed iframes) could bypass origin verification instead of being validated as cross-origin requests. An attacker could induce a victim browser to submit Server Actions from a sandboxed context, potentially executing state-changing actions with victim credentials (CSRF). This is fixed in version 16.1.7 by treating `'null'` as an explicit origin value and enforcing host/origin checks unless `'null'` is explicitly allowlisted in `experimental.serverActions.allowedOrigins`. If upgrading is not immediately possible, add CSRF tokens for sensitive Server Actions, prefer `SameSite=Strict` on sensitive auth cookies, and/or do not allow `'null'` in `serverActions.allowedOrigins` unless intentionally required and additionally protected.
-
-Score: 5.3 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:P/VC:N/VI:L/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-27977 [CVSS:4.0 2.3 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-27977</link>
-            <guid isPermaLink="false">CVE-2026-27977</guid>
-            <pubDate>Wed, 18 Mar 2026 01:16:03 GMT</pubDate>
-            <description><![CDATA[Next.js is a React framework for building full-stack web applications. Starting in version 16.0.1 and prior to version 16.1.7, in `next dev`, cross-site protection for internal websocket endpoints could treat `Origin: null` as a bypass case even if `allowedDevOrigins` is configured, allowing privacy-sensitive/opaque contexts (for example sandboxed documents) to connect unexpectedly. If a dev server is reachable from attacker-controlled content, an attacker may be able to connect to the HMR websocket channel and interact with dev websocket traffic. This affects development mode only. Apps without a configured `allowedDevOrigins` still allow connections from any origin. The issue is fixed in version 16.1.7 by validating `Origin: null` through the same cross-site origin-allowance checks used for other origins. If upgrading is not immediately possible, do not expose `next dev` to untrusted networks and/or block websocket upgrades to `/_next/webpack-hmr` when `Origin` is `null` at the proxy.
-
-Score: 2.3 (LOW)
-Vector: CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:P/VC:L/VI:L/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-4355 [CVSS:4.0 5.1 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-4355</link>
-            <guid isPermaLink="false">CVE-2026-4355</guid>
-            <pubDate>Wed, 18 Mar 2026 00:16:20 GMT</pubDate>
-            <description><![CDATA[A vulnerability was detected in Portabilis i-Educar 2.11. This impacts an unknown function of the file /intranet/educar_servidor_curso_lst.php of the component Endpoint. Performing a manipulation of the argument Name results in cross site scripting. The attack may be initiated remotely. The exploit is now public and may be used. The vendor was contacted early about this disclosure but did not respond in any way.
-
-Score: 5.1 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:P/VC:N/VI:L/VA:N/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-4354 [CVSS:4.0 5.1 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-4354</link>
-            <guid isPermaLink="false">CVE-2026-4354</guid>
-            <pubDate>Wed, 18 Mar 2026 00:16:20 GMT</pubDate>
-            <description><![CDATA[A vulnerability was identified in TRENDnet TEW-824DRU 1.010B01/1.04B01. The impacted element is the function sub_420A78 of the file apply_sec.cgi of the component Web Interface. Such manipulation of the argument Language leads to cross site scripting. It is possible to launch the attack remotely. The exploit is publicly available and might be used. The vendor was contacted early about this disclosure but did not respond in any way.
-
-Score: 5.1 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:P/VC:N/VI:L/VA:N/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-27895 [CVSS:3.1 4.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-27895</link>
-            <guid isPermaLink="false">CVE-2026-27895</guid>
-            <pubDate>Wed, 18 Mar 2026 00:16:19 GMT</pubDate>
-            <description><![CDATA[LDAP Account Manager (LAM) is a webfrontend for managing entries (e.g. users, groups, DHCP settings) stored in an LDAP directory. Prior to version 9.5, the PDF export component does not correctly validate uploaded file extensions. This way any file type (including .php files) can be uploaded. With GHSA-w7xq-vjr3-p9cf, an attacker can achieve remote code execution as the web server user. Version 9.5 fixes the issue. Although upgrading is recommended, a workaround would be to make /var/lib/ldap-account-manager/config read-only for the web-server user.
-
-Score: 4.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-27894 [CVSS:3.1 8.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-27894</link>
-            <guid isPermaLink="false">CVE-2026-27894</guid>
-            <pubDate>Wed, 18 Mar 2026 00:16:19 GMT</pubDate>
-            <description><![CDATA[LDAP Account Manager (LAM) is a webfrontend for managing entries (e.g. users, groups, DHCP settings) stored in an LDAP directory. Prior to version 9.5, a local file inclusion was detected in the PDF export that allows users to include local PHP files and this way execute code. In combination with GHSA-88hf-2cjm-m9g8 this allows to execute arbitrary code. Users need to login to LAM to exploit this vulnerability. Version 9.5 fixes the issue. Although upgrading is recommended, a workaround would be to make /var/lib/ldap-account-manager/config read-only for the web-server user and delete the PDF profile files (making PDF exports impossible).
-
-Score: 8.8 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-27811 [CVSS:3.1 8.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-27811</link>
-            <guid isPermaLink="false">CVE-2026-27811</guid>
-            <pubDate>Wed, 18 Mar 2026 00:16:19 GMT</pubDate>
-            <description><![CDATA[Roxy-WI is a web interface for managing Haproxy, Nginx, Apache and Keepalived servers. Prior to version 8.2.6.3, a command injection vulnerability exists in the `/config/compare/<service>/<server_ip>/show` endpoint, allowed authenticated users to execute arbitrary system commands on the app host. The vulnerability exists in `app/modules/config/config.py` on line 362, where user input is directly formatted in the template string that is eventually executed. Version 8.2.6.3 fixes the issue.
-
-Score: 8.8 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-27459 [CVSS:4.0 7.2 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-27459</link>
-            <guid isPermaLink="false">CVE-2026-27459</guid>
-            <pubDate>Wed, 18 Mar 2026 00:16:19 GMT</pubDate>
-            <description><![CDATA[pyOpenSSL is a Python wrapper around the OpenSSL library. Starting in version 22.0.0 and prior to version 26.0.0, if a user provided callback to `set_cookie_generate_callback` returned a cookie value greater than 256 bytes, pyOpenSSL would overflow an OpenSSL provided buffer. Starting in version 26.0.0, cookie values that are too long are now rejected.
-
-Score: 7.2 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:H/AT:P/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:U/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-27448 [CVSS:4.0 1.7 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-27448</link>
-            <guid isPermaLink="false">CVE-2026-27448</guid>
-            <pubDate>Wed, 18 Mar 2026 00:16:19 GMT</pubDate>
-            <description><![CDATA[pyOpenSSL is a Python wrapper around the OpenSSL library. Starting in version 0.14.0 and prior to version 26.0.0, if a user provided callback to `set_tlsext_servername_callback` raised an unhandled exception, this would result in a connection being accepted. If a user was relying on this callback for any security-sensitive behavior, this could allow bypassing it. Starting in version 26.0.0, unhandled exceptions now result in rejecting the connection.
-
-Score: 1.7 (LOW)
-Vector: CVSS:4.0/AV:N/AC:H/AT:P/PR:N/UI:N/VC:N/VI:L/VA:N/SC:N/SI:N/SA:N/E:U/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-26004 [CVSS:4.0 5.7 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-26004</link>
-            <guid isPermaLink="false">CVE-2026-26004</guid>
-            <pubDate>Wed, 18 Mar 2026 00:16:18 GMT</pubDate>
-            <description><![CDATA[Sentry is a developer-first error tracking and performance monitoring tool. Versions prior to 26.1.0 have a cross-organization Insecure Direct Object Reference (IDOR) vulnerability in Sentry's GroupEventJsonView endpoint. Version 26.1.0 patches the issue.
-
-Score: 5.7 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:N/VA:N/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-26001 [CVSS:3.1 7.1 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-26001</link>
-            <guid isPermaLink="false">CVE-2026-26001</guid>
-            <pubDate>Wed, 18 Mar 2026 00:16:18 GMT</pubDate>
-            <description><![CDATA[The GLPI Inventory Plugin handles network discovery, inventory, software deployment, and data collection for GLPI agents. Prior to 1.6.6, non sanitized user input can lend to an SQL injection from reports, with adequate rights. This vulnerability is fixed in 1.6.6.
-
-Score: 7.1 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-25937 [CVSS:3.1 6.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-25937</link>
-            <guid isPermaLink="false">CVE-2026-25937</guid>
-            <pubDate>Wed, 18 Mar 2026 00:16:18 GMT</pubDate>
-            <description><![CDATA[GLPI is a free Asset and IT management software package. Starting in version 11.0.0 and prior to version 11.0.6, a malicious actor with knowledge of a user's credentials can bypass MFA and steal their account. Version 11.0.6 fixes the issue.
-
-Score: 6.5 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-3856 [CVSS:3.1 5.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-3856</link>
-            <guid isPermaLink="false">CVE-2026-3856</guid>
-            <pubDate>Tue, 17 Mar 2026 23:16:17 GMT</pubDate>
-            <description><![CDATA[IBM Db2 Recovery Expert for Linux, UNIX and Windows 5.5 IF 2 could allow an attacker to modify or corrupt data due to an insecure mechanism used for verifying the integrity of the data during transmission.
-
-Score: 5.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-22727 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-22727</link>
-            <guid isPermaLink="false">CVE-2026-22727</guid>
-            <pubDate>Tue, 17 Mar 2026 23:16:17 GMT</pubDate>
-            <description><![CDATA[Unprotected internal endpoints in Cloud Foundry Capi Release 1.226.0 and below, and CF Deployment v54.9.0 and below on all platforms allows any user who has bypassed the firewall to potentially replace droplets and therefore applications allowing them to access secure application information.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:A/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-20643]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-20643</link>
-            <guid isPermaLink="false">CVE-2026-20643</guid>
-            <pubDate>Tue, 17 Mar 2026 23:16:17 GMT</pubDate>
-            <description><![CDATA[A cross-origin issue in the Navigation API was addressed with improved input validation. This issue is fixed in Background Security Improvements for iOS 26.3.1, iPadOS 26.3.1, macOS 26.3.1, and macOS 26.3.2. Processing maliciously crafted web content may bypass Same Origin Policy.]]></description>
         </item>
     </channel>
 </rss>
