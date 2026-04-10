@@ -4,11 +4,71 @@
         <title>NVD CVE Feed</title>
         <link>https://github.com/TasukuKuchinomachi/NVD-RSS-feed</link>
         <description>Latest CVE entries from the National Vulnerability Database. This product uses the NVD API but is not endorsed or certified by the NVD.</description>
-        <lastBuildDate>Fri, 10 Apr 2026 21:22:50 GMT</lastBuildDate>
+        <lastBuildDate>Fri, 10 Apr 2026 22:16:21 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>National Vulnerability Database - NIST</copyright>
+        <item>
+            <title><![CDATA[CVE-2026-40199]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-40199</link>
+            <guid isPermaLink="false">CVE-2026-40199</guid>
+            <pubDate>Fri, 10 Apr 2026 22:16:21 GMT</pubDate>
+            <description><![CDATA[Net::CIDR::Lite versions before 0.23 for Perl mishandles IPv4 mapped IPv6 addresses, which may allow IP ACL bypass.
+
+_pack_ipv6() includes the sentinel byte from _pack_ipv4() when building the packed representation of IPv4 mapped addresses like ::ffff:192.168.1.1. This produces an 18 byte value instead of 17 bytes, misaligning the IPv4 part of the address.
+
+The wrong length causes incorrect results in mask operations (bitwise AND truncates to the shorter operand) and in find() / bin_find() which use Perl string comparison (lt/gt). This can cause find() to incorrectly match or miss addresses.
+
+Example:
+
+  my $cidr = Net::CIDR::Lite->new("::ffff:192.168.1.0/120");
+  $cidr->find("::ffff:192.168.2.0");  # incorrectly returns true
+
+This is triggered by valid RFC 4291 IPv4 mapped addresses (::ffff:x.x.x.x).
+
+See also CVE-2026-40198, a related issue in the same function affecting malformed IPv6 addresses.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-40198]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-40198</link>
+            <guid isPermaLink="false">CVE-2026-40198</guid>
+            <pubDate>Fri, 10 Apr 2026 22:16:21 GMT</pubDate>
+            <description><![CDATA[Net::CIDR::Lite versions before 0.23 for Perl does not validate IPv6 group count, which may allow IP ACL bypass.
+
+_pack_ipv6() does not check that uncompressed IPv6 addresses (without ::) have exactly 8 hex groups. Inputs like "abcd", "1:2:3", or "1:2:3:4:5:6:7" are accepted and produce packed values of wrong length (3, 7, or 15 bytes instead of 17).
+
+The packed values are used internally for mask and comparison operations. find() and bin_find() use Perl string comparison (lt/gt) on these values, and comparing strings of different lengths gives wrong results. This can cause find() to incorrectly report an address as inside or outside a range.
+
+Example:
+
+  my $cidr = Net::CIDR::Lite->new("::/8");
+  $cidr->find("1:2:3");  # invalid input, incorrectly returns true
+
+This is the same class of input validation issue as CVE-2021-47154 (IPv4 leading zeros) previously fixed in this module.
+
+See also CVE-2026-40199, a related issue in the same function affecting IPv4 mapped IPv6 addresses.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-33119 [CVSS:3.1 5.4 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-33119</link>
+            <guid isPermaLink="false">CVE-2026-33119</guid>
+            <pubDate>Fri, 10 Apr 2026 22:16:21 GMT</pubDate>
+            <description><![CDATA[User interface (ui) misrepresentation of critical information in Microsoft Edge (Chromium-based) allows an unauthorized attacker to perform spoofing over a network.
+
+Score: 5.4 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:L/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-33118 [CVSS:3.1 4.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-33118</link>
+            <guid isPermaLink="false">CVE-2026-33118</guid>
+            <pubDate>Fri, 10 Apr 2026 22:16:21 GMT</pubDate>
+            <description><![CDATA[Microsoft Edge (Chromium-based) Spoofing Vulnerability
+
+Score: 4.3 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:N/A:N]]></description>
+        </item>
         <item>
             <title><![CDATA[CVE-2026-35534 [CVSS:3.1 7.6 HIGH]]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-35534</link>
@@ -1086,46 +1146,6 @@ Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N]]></description>
 
 Score: 7.7 (HIGH)
 Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:H/VA:N/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-40178 [CVSS:4.0 6.9 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-40178</link>
-            <guid isPermaLink="false">CVE-2026-40178</guid>
-            <pubDate>Fri, 10 Apr 2026 20:16:23 GMT</pubDate>
-            <description><![CDATA[ajenti.plugin.core defines all necessary core elements to allow Ajenti to run properly. Prior to 0.112, if the 2FA was activated, it was possible during a short moment after the authentication of an user to bypass its authentication. This vulnerability is fixed in 0.112.
-
-Score: 6.9 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:H/AT:N/PR:N/UI:N/VC:H/VI:H/VA:N/SC:N/SI:N/SA:N/E:U/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-40177 [CVSS:4.0 9.3 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-40177</link>
-            <guid isPermaLink="false">CVE-2026-40177</guid>
-            <pubDate>Fri, 10 Apr 2026 20:16:22 GMT</pubDate>
-            <description><![CDATA[ajenti.plugin.core defines all necessary core elements to allow Ajenti to run properly. Prior to 0.112, if the 2FA was activated, it was possible to bypass the password authentication This vulnerability is fixed in 0.112.
-
-Score: 9.3 (CRITICAL)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-40175 [CVSS:3.1 10 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-40175</link>
-            <guid isPermaLink="false">CVE-2026-40175</guid>
-            <pubDate>Fri, 10 Apr 2026 20:16:22 GMT</pubDate>
-            <description><![CDATA[Axios is a promise based HTTP client for the browser and Node.js. Prior to 1.15.0, the Axios library is vulnerable to a specific "Gadget" attack chain that allows Prototype Pollution in any third-party dependency to be escalated into Remote Code Execution (RCE) or Full Cloud Compromise (via AWS IMDSv2 bypass). This vulnerability is fixed in 1.15.0.
-
-Score: 10 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-40168 [CVSS:3.1 8.2 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-40168</link>
-            <guid isPermaLink="false">CVE-2026-40168</guid>
-            <pubDate>Fri, 10 Apr 2026 20:16:22 GMT</pubDate>
-            <description><![CDATA[Postiz is an AI social media scheduling tool. Prior to 2.21.5, the /api/public/stream endpoint is vulnerable to SSRF. Although the application validates the initially supplied URL and blocks direct private/internal hosts, it does not re-validate the final destination after HTTP redirects. As a result, an attacker can supply a public HTTPS URL that passes validation and then redirects the server-side request to an internal resource.
-
-Score: 8.2 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:L]]></description>
         </item>
     </channel>
 </rss>
