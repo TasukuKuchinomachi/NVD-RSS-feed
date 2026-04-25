@@ -4,11 +4,270 @@
         <title>NVD CVE Feed</title>
         <link>https://github.com/TasukuKuchinomachi/NVD-RSS-feed</link>
         <description>Latest CVE entries from the National Vulnerability Database. This product uses the NVD API but is not endorsed or certified by the NVD.</description>
-        <lastBuildDate>Sat, 25 Apr 2026 06:16:16 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 25 Apr 2026 09:16:02 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>National Vulnerability Database - NIST</copyright>
+        <item>
+            <title><![CDATA[CVE-2026-31685]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-31685</link>
+            <guid isPermaLink="false">CVE-2026-31685</guid>
+            <pubDate>Sat, 25 Apr 2026 09:16:02 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+netfilter: ip6t_eui64: reject invalid MAC header for all packets
+
+`eui64_mt6()` derives a modified EUI-64 from the Ethernet source address
+and compares it with the low 64 bits of the IPv6 source address.
+
+The existing guard only rejects an invalid MAC header when
+`par->fragoff != 0`. For packets with `par->fragoff == 0`, `eui64_mt6()`
+can still reach `eth_hdr(skb)` even when the MAC header is not valid.
+
+Fix this by removing the `par->fragoff != 0` condition so that packets
+with an invalid MAC header are rejected before accessing `eth_hdr(skb)`.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-31684]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-31684</link>
+            <guid isPermaLink="false">CVE-2026-31684</guid>
+            <pubDate>Sat, 25 Apr 2026 09:16:02 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+net: sched: act_csum: validate nested VLAN headers
+
+tcf_csum_act() walks nested VLAN headers directly from skb->data when an
+skb still carries in-payload VLAN tags. The current code reads
+vlan->h_vlan_encapsulated_proto and then pulls VLAN_HLEN bytes without
+first ensuring that the full VLAN header is present in the linear area.
+
+If only part of an inner VLAN header is linearized, accessing
+h_vlan_encapsulated_proto reads past the linear area, and the following
+skb_pull(VLAN_HLEN) may violate skb invariants.
+
+Fix this by requiring pskb_may_pull(skb, VLAN_HLEN) before accessing and
+pulling each nested VLAN header. If the header still is not fully
+available, drop the packet through the existing error path.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-31683]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-31683</link>
+            <guid isPermaLink="false">CVE-2026-31683</guid>
+            <pubDate>Sat, 25 Apr 2026 09:16:02 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+batman-adv: avoid OGM aggregation when skb tailroom is insufficient
+
+When OGM aggregation state is toggled at runtime, an existing forwarded
+packet may have been allocated with only packet_len bytes, while a later
+packet can still be selected for aggregation. Appending in this case can
+hit skb_put overflow conditions.
+
+Reject aggregation when the target skb tailroom cannot accommodate the new
+packet. The caller then falls back to creating a new forward packet
+instead of appending.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-31682]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-31682</link>
+            <guid isPermaLink="false">CVE-2026-31682</guid>
+            <pubDate>Sat, 25 Apr 2026 09:16:01 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+bridge: br_nd_send: linearize skb before parsing ND options
+
+br_nd_send() parses neighbour discovery options from ns->opt[] and
+assumes that these options are in the linear part of request.
+
+Its callers only guarantee that the ICMPv6 header and target address
+are available, so the option area can still be non-linear. Parsing
+ns->opt[] in that case can access data past the linear buffer.
+
+Linearize request before option parsing and derive ns from the linear
+network header.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-31681]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-31681</link>
+            <guid isPermaLink="false">CVE-2026-31681</guid>
+            <pubDate>Sat, 25 Apr 2026 09:16:01 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+netfilter: xt_multiport: validate range encoding in checkentry
+
+ports_match_v1() treats any non-zero pflags entry as the start of a
+port range and unconditionally consumes the next ports[] element as
+the range end.
+
+The checkentry path currently validates protocol, flags and count, but
+it does not validate the range encoding itself. As a result, malformed
+rules can mark the last slot as a range start or place two range starts
+back to back, leaving ports_match_v1() to step past the last valid
+ports[] element while interpreting the rule.
+
+Reject malformed multiport v1 rules in checkentry by validating that
+each range start has a following element and that the following element
+is not itself marked as another range start.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-31680]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-31680</link>
+            <guid isPermaLink="false">CVE-2026-31680</guid>
+            <pubDate>Sat, 25 Apr 2026 09:16:01 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+net: ipv6: flowlabel: defer exclusive option free until RCU teardown
+
+`ip6fl_seq_show()` walks the global flowlabel hash under the seq-file
+RCU read-side lock and prints `fl->opt->opt_nflen` when an option block
+is present.
+
+Exclusive flowlabels currently free `fl->opt` as soon as `fl->users`
+drops to zero in `fl_release()`. However, the surrounding
+`struct ip6_flowlabel` remains visible in the global hash table until
+later garbage collection removes it and `fl_free_rcu()` finally tears it
+down.
+
+A concurrent `/proc/net/ip6_flowlabel` reader can therefore race that
+early `kfree()` and dereference freed option state, triggering a crash
+in `ip6fl_seq_show()`.
+
+Fix this by keeping `fl->opt` alive until `fl_free_rcu()`. That matches
+the lifetime already required for the enclosing flowlabel while readers
+can still reach it under RCU.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-31679]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-31679</link>
+            <guid isPermaLink="false">CVE-2026-31679</guid>
+            <pubDate>Sat, 25 Apr 2026 09:16:01 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+openvswitch: validate MPLS set/set_masked payload length
+
+validate_set() accepted OVS_KEY_ATTR_MPLS as variable-sized payload for
+SET/SET_MASKED actions. In action handling, OVS expects fixed-size
+MPLS key data (struct ovs_key_mpls).
+
+Use the already normalized key_len (masked case included) and reject
+non-matching MPLS action key sizes.
+
+Reject invalid MPLS action payload lengths early.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-31678]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-31678</link>
+            <guid isPermaLink="false">CVE-2026-31678</guid>
+            <pubDate>Sat, 25 Apr 2026 09:16:01 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+openvswitch: defer tunnel netdev_put to RCU release
+
+ovs_netdev_tunnel_destroy() may run after NETDEV_UNREGISTER already
+detached the device. Dropping the netdev reference in destroy can race
+with concurrent readers that still observe vport->dev.
+
+Do not release vport->dev in ovs_netdev_tunnel_destroy(). Instead, let
+vport_netdev_free() drop the reference from the RCU callback, matching
+the non-tunnel destroy path and avoiding additional synchronization
+under RTNL.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-31677]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-31677</link>
+            <guid isPermaLink="false">CVE-2026-31677</guid>
+            <pubDate>Sat, 25 Apr 2026 09:16:01 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+crypto: af_alg - limit RX SG extraction by receive buffer budget
+
+Make af_alg_get_rsgl() limit each RX scatterlist extraction to the
+remaining receive buffer budget.
+
+af_alg_get_rsgl() currently uses af_alg_readable() only as a gate
+before extracting data into the RX scatterlist. Limit each extraction
+to the remaining af_alg_rcvbuf(sk) budget so that receive-side
+accounting matches the amount of data attached to the request.
+
+If skcipher cannot obtain enough RX space for at least one chunk while
+more data remains to be processed, reject the recvmsg call instead of
+rounding the request length down to zero.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-31676]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-31676</link>
+            <guid isPermaLink="false">CVE-2026-31676</guid>
+            <pubDate>Sat, 25 Apr 2026 09:16:01 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+rxrpc: only handle RESPONSE during service challenge
+
+Only process RESPONSE packets while the service connection is still in
+RXRPC_CONN_SERVICE_CHALLENGING. Check that state under state_lock before
+running response verification and security initialization, then use a local
+secured flag to decide whether to queue the secured-connection work after
+the state transition. This keeps duplicate or late RESPONSE packets from
+re-running the setup path and removes the unlocked post-transition state
+test.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-31675]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-31675</link>
+            <guid isPermaLink="false">CVE-2026-31675</guid>
+            <pubDate>Sat, 25 Apr 2026 09:16:01 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+net/sched: sch_netem: fix out-of-bounds access in packet corruption
+
+In netem_enqueue(), the packet corruption logic uses
+get_random_u32_below(skb_headlen(skb)) to select an index for
+modifying skb->data. When an AF_PACKET TX_RING sends fully non-linear
+packets over an IPIP tunnel, skb_headlen(skb) evaluates to 0.
+
+Passing 0 to get_random_u32_below() takes the variable-ceil slow path
+which returns an unconstrained 32-bit random integer. Using this
+unconstrained value as an offset into skb->data results in an
+out-of-bounds memory access.
+
+Fix this by verifying skb_headlen(skb) is non-zero before attempting
+to corrupt the linear data area. Fully non-linear packets will silently
+bypass the corruption logic.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-31674]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-31674</link>
+            <guid isPermaLink="false">CVE-2026-31674</guid>
+            <pubDate>Sat, 25 Apr 2026 09:16:00 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+netfilter: ip6t_rt: reject oversized addrnr in rt_mt6_check()
+
+Reject rt match rules whose addrnr exceeds IP6T_RT_HOPS.
+
+rt_mt6() expects addrnr to stay within the bounds of rtinfo->addrs[].
+Validate addrnr during rule installation so malformed rules are rejected
+before the match logic can use an out-of-range value.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-31673]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-31673</link>
+            <guid isPermaLink="false">CVE-2026-31673</guid>
+            <pubDate>Sat, 25 Apr 2026 09:16:00 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+af_unix: read UNIX_DIAG_VFS data under unix_state_lock
+
+Exact UNIX diag lookups hold a reference to the socket, but not to
+u->path. Meanwhile, unix_release_sock() clears u->path under
+unix_state_lock() and drops the path reference after unlocking.
+
+Read the inode and device numbers for UNIX_DIAG_VFS while holding
+unix_state_lock(), then emit the netlink attribute after dropping the
+lock.
+
+This keeps the VFS data stable while the reply is being built.]]></description>
+        </item>
         <item>
             <title><![CDATA[CVE-2026-6951 [CVSS:4.0 9.2 CRITICAL]]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-6951</link>
@@ -890,136 +1149,6 @@ Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
 
 Score: 7.2 (HIGH)
 Vector: CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2024-57728 [CVSS:3.1 7.2 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2024-57728</link>
-            <guid isPermaLink="false">CVE-2024-57728</guid>
-            <pubDate>Fri, 24 Apr 2026 19:27:00 GMT</pubDate>
-            <description><![CDATA[SimpleHelp remote support software v5.5.7 and before allows admin users to upload arbitrary files anywhere on the file system by uploading a crafted zip file (i.e. zip slip). This can be exploited to execute arbitrary code on the host in the context of the SimpleHelp server user.
-
-Score: 7.2 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2024-57726 [CVSS:3.1 9.9 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2024-57726</link>
-            <guid isPermaLink="false">CVE-2024-57726</guid>
-            <pubDate>Fri, 24 Apr 2026 19:26:52 GMT</pubDate>
-            <description><![CDATA[SimpleHelp remote support software v5.5.7 and before has a vulnerability that allows low-privileges technicians to create API keys with excessive permissions. These API keys can be used to escalate privileges to the server admin role.
-
-Score: 9.9 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-29645 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-29645</link>
-            <guid isPermaLink="false">CVE-2026-29645</guid>
-            <pubDate>Fri, 24 Apr 2026 19:25:35 GMT</pubDate>
-            <description><![CDATA[NEMU (OpenXiangShan/NEMU) before v2025.12.r2 contains an improper instruction-validation flaw in its RISC-V Vector (RVV) decoder. The decoder does not correctly validate the funct3 field when decoding vsetvli/vsetivli/vsetvl, allowing certain invalid OP-V instruction encodings to be misinterpreted and executed as vset* configuration instructions rather than raising an illegal-instruction exception. This can be exploited by providing crafted RISC-V binaries to cause incorrect trap behavior, architectural state corruption/divergence, and potential denial of service in systems that rely on NEMU for correct execution or sandboxing.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-29649 [CVSS:3.1 9.8 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-29649</link>
-            <guid isPermaLink="false">CVE-2026-29649</guid>
-            <pubDate>Fri, 24 Apr 2026 19:23:46 GMT</pubDate>
-            <description><![CDATA[NEMU contains an implementation flaw in its RISC-V Hypervisor CSR handling where henvcfg[7:4] (CBIE/CBCFE/CBZE-related fields) is incorrectly masked/updated based on menvcfg[7:4], so a machine-mode write to menvcfg can implicitly modify the hypervisor's environment configuration. This can lead to incorrect enforcement of virtualization configuration and may cause unexpected traps or denial of service when executing cache-block management instructions in virtualized contexts (V=1).
-
-Score: 9.8 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-35381 [CVSS:3.1 3.3 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-35381</link>
-            <guid isPermaLink="false">CVE-2026-35381</guid>
-            <pubDate>Fri, 24 Apr 2026 19:19:34 GMT</pubDate>
-            <description><![CDATA[A logic error in the cut utility of uutils coreutils causes the utility to ignore the -s (only-delimited) flag when using the -z (null-terminated) and -d '' (empty delimiter) options together. The implementation incorrectly routes this specific combination through a specialized newline-delimiter code path that fails to check the record suppression status. Consequently, uutils cut emits the entire record plus a NUL byte instead of suppressing it. This divergence from GNU coreutils behavior creates a data integrity risk for automated pipelines that rely on cut -s to filter out undelimited data.
-
-Score: 3.3 (LOW)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-33431 [CVSS:4.0 5.7 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-33431</link>
-            <guid isPermaLink="false">CVE-2026-33431</guid>
-            <pubDate>Fri, 24 Apr 2026 19:19:26 GMT</pubDate>
-            <description><![CDATA[Roxy-WI is a web interface for managing Haproxy, Nginx, Apache and Keepalived servers. Prior to version 8.2.6.4, the POST /config/<service>/show API endpoint accepts a configver parameter that is directly appended to a base directory path to construct a local file path, which is subsequently opened and its contents returned to the caller. The existing path traversal guard only inspects the base directory variable (which is never user-controlled) and entirely ignores the user-supplied configver value. An authenticated attacker can supply a configver value containing `../` sequences to escape the intended directory and read arbitrary files accessible to the web application process. Version 8.2.6.4 contains a patch for the issue.
-
-Score: 5.7 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:N/VA:N/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-35364 [CVSS:3.1 6.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-35364</link>
-            <guid isPermaLink="false">CVE-2026-35364</guid>
-            <pubDate>Fri, 24 Apr 2026 19:19:11 GMT</pubDate>
-            <description><![CDATA[A Time-of-Check to Time-of-Use (TOCTOU) race condition exists in the mv utility of uutils coreutils during cross-device operations. The utility removes the destination path before recreating it through a copy operation. A local attacker with write access to the destination directory can exploit this window to replace the destination with a symbolic link. The subsequent privileged move operation will follow the symlink, allowing the attacker to redirect the write and overwrite an arbitrary target file with contents from the source.
-
-Score: 6.3 (MEDIUM)
-Vector: CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:N/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-35367 [CVSS:3.1 3.3 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-35367</link>
-            <guid isPermaLink="false">CVE-2026-35367</guid>
-            <pubDate>Fri, 24 Apr 2026 19:19:05 GMT</pubDate>
-            <description><![CDATA[The nohup utility in uutils coreutils creates its default output file, nohup.out, without specifying explicit restricted permissions. This causes the file to inherit umask-based permissions, typically resulting in a world-readable file (0644). In multi-user environments, this allows any user on the system to read the captured stdout/stderr output of a command, potentially exposing sensitive information. This behavior diverges from GNU coreutils, which creates nohup.out with owner-only (0600) permissions.
-
-Score: 3.3 (LOW)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-35368 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-35368</link>
-            <guid isPermaLink="false">CVE-2026-35368</guid>
-            <pubDate>Fri, 24 Apr 2026 19:18:55 GMT</pubDate>
-            <description><![CDATA[A vulnerability exists in the chroot utility of uutils coreutils when using the --userspec option. The utility resolves the user specification via getpwnam() after entering the chroot but before dropping root privileges. On glibc-based systems, this can trigger the Name Service Switch (NSS) to load shared libraries (e.g., libnss_*.so.2) from the new root directory. If the NEWROOT is writable by an attacker, they can inject a malicious NSS module to execute arbitrary code as root, facilitating a full container escape or privilege escalation.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:C/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-33432 [CVSS:4.0 7.7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-33432</link>
-            <guid isPermaLink="false">CVE-2026-33432</guid>
-            <pubDate>Fri, 24 Apr 2026 19:18:10 GMT</pubDate>
-            <description><![CDATA[Roxy-WI is a web interface for managing Haproxy, Nginx, Apache and Keepalived servers. In versions up to and including 8.2.8.2, when LDAP authentication is enabled, Roxy-WI constructs an LDAP search filter by directly concatenating the user-supplied login username into the filter string without escaping LDAP special characters. An unauthenticated attacker can inject LDAP filter metacharacters into the username field to manipulate the search query, cause the directory to return an unintended user entry, and bypass authentication entirely — gaining access to the application without knowing any valid password. As of time of publication, no known patches are available.
-
-Score: 7.7 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:H/VA:N/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-42044 [CVSS:3.1 6.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-42044</link>
-            <guid isPermaLink="false">CVE-2026-42044</guid>
-            <pubDate>Fri, 24 Apr 2026 19:17:15 GMT</pubDate>
-            <description><![CDATA[Axios is a promise based HTTP client for the browser and Node.js. From 1.0.0 to before 1.15.2, he Axios library is vulnerable to a Prototype Pollution "Gadget" attack that allows any Object.prototype pollution in the application's dependency tree to be escalated into surgical, invisible modification of all JSON API responses — including privilege escalation, balance manipulation, and authorization bypass. The default transformResponse function at lib/defaults/index.js:124 calls JSON.parse(data, this.parseReviver), where this is the merged config object. Because parseReviver is not present in Axios defaults, not validated by assertOptions, and not subject to any constraints, a polluted Object.prototype.parseReviver function is called for every key-value pair in every JSON response, allowing the attacker to selectively modify individual values while leaving the rest of the response intact. This vulnerability is fixed in 1.15.2.
-
-Score: 6.5 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:H/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-42041 [CVSS:3.1 4.8 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-42041</link>
-            <guid isPermaLink="false">CVE-2026-42041</guid>
-            <pubDate>Fri, 24 Apr 2026 19:17:15 GMT</pubDate>
-            <description><![CDATA[Axios is a promise based HTTP client for the browser and Node.js. Prior to 1.15.1 and 0.31.1, the Axios library is vulnerable to a Prototype Pollution "Gadget" attack that allows any Object.prototype pollution to silently suppress all HTTP error responses (401, 403, 500, etc.), causing them to be treated as successful responses. This completely bypasses application-level authentication and error handling. The root cause is that validateStatus is the only config property using the mergeDirectKeys merge strategy, which uses JavaScript's in operator — an operator that inherently traverses the prototype chain. When Object.prototype.validateStatus is polluted with () => true, all HTTP status codes are accepted as success. This vulnerability is fixed in 1.15.1 and 0.31.1.
-
-Score: 4.8 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-42039 [CVSS:4.0 6.9 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-42039</link>
-            <guid isPermaLink="false">CVE-2026-42039</guid>
-            <pubDate>Fri, 24 Apr 2026 19:17:15 GMT</pubDate>
-            <description><![CDATA[Axios is a promise based HTTP client for the browser and Node.js. Prior to 1.15.1 and 0.31.1, toFormData recursively walks nested objects with no depth limit, so a deeply nested value passed as request data crashes the Node.js process with a RangeError. This vulnerability is fixed in 1.15.1 and 0.31.1.
-
-Score: 6.9 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
         </item>
     </channel>
 </rss>
