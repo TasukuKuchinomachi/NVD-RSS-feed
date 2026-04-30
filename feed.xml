@@ -4,11 +4,147 @@
         <title>NVD CVE Feed</title>
         <link>https://github.com/TasukuKuchinomachi/NVD-RSS-feed</link>
         <description>Latest CVE entries from the National Vulnerability Database. This product uses the NVD API but is not endorsed or certified by the NVD.</description>
-        <lastBuildDate>Thu, 30 Apr 2026 09:16:03 GMT</lastBuildDate>
+        <lastBuildDate>Thu, 30 Apr 2026 11:16:21 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>National Vulnerability Database - NIST</copyright>
+        <item>
+            <title><![CDATA[CVE-2026-3861 [CVSS:4.0 7.1 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-3861</link>
+            <guid isPermaLink="false">CVE-2026-3861</guid>
+            <pubDate>Thu, 30 Apr 2026 11:16:21 GMT</pubDate>
+            <description><![CDATA[LINE client for iOS versions prior to 26.3.0 contains a vulnerability in the in-app browser where opening a crafted web page can repeatedly trigger OS-level dialogs due to insufficient safeguards when handling arbitrary URL schemes, potentially causing the iOS device to become temporarily inoperable.
+
+Score: 7.1 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:P/VC:N/VI:N/VA:H/SC:N/SI:N/SA:L/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-31787]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-31787</link>
+            <guid isPermaLink="false">CVE-2026-31787</guid>
+            <pubDate>Thu, 30 Apr 2026 11:16:21 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+xen/privcmd: fix double free via VMA splitting
+
+privcmd_vm_ops defines .close (privcmd_close), but neither .may_split
+nor .open. When userspace does a partial munmap() on a privcmd mapping,
+the kernel splits the VMA via __split_vma(). Since may_split is NULL,
+the split is allowed. vm_area_dup() copies vm_private_data (a pages
+array allocated in alloc_empty_pages()) into the new VMA without any
+fixup, because there is no .open callback.
+
+Both VMAs now point to the same pages array. When the unmapped portion
+is closed, privcmd_close() calls:
+    - xen_unmap_domain_gfn_range()
+    - xen_free_unpopulated_pages()
+    - kvfree(pages)
+
+The surviving VMA still holds the dangling pointer. When it is later
+destroyed, the same sequence runs again, which leads to a double free.
+
+Fix this issue by adding a .may_split callback denying the VMA split.
+
+This is XSA-487 / CVE-2026-31787]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-31786]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-31786</link>
+            <guid isPermaLink="false">CVE-2026-31786</guid>
+            <pubDate>Thu, 30 Apr 2026 11:16:20 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+Buffer overflow in drivers/xen/sys-hypervisor.c
+
+The build id returned by HYPERVISOR_xen_version(XENVER_build_id) is
+neither NUL terminated nor a string.
+
+The first causes a buffer overflow as sprintf in buildid_show will
+read and copy till it finds a NUL.
+
+00000000  f4 91 51 f4 dd 38 9e 9d  65 47 52 eb 10 71 db 50  |..Q..8..eGR..q.P|
+00000010  b9 a8 01 42 6f 2e 32                              |...Bo.2|
+00000017
+
+So use a memcpy instead of sprintf to have the correct value:
+
+00000000  f4 91 51 f4 dd 00 9e 9d  65 47 52 eb 10 71 db 50  |..Q.....eGR..q.P|
+00000010  b9 a8 01 42                                       |...B|
+00000014
+
+(the above have a hack to embed a zero inside and check it's
+returned correctly).
+
+This is XSA-485 / CVE-2026-31786]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-31692]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-31692</link>
+            <guid isPermaLink="false">CVE-2026-31692</guid>
+            <pubDate>Thu, 30 Apr 2026 11:16:20 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+rtnetlink: add missing netlink_ns_capable() check for peer netns
+
+rtnl_newlink() lacks a CAP_NET_ADMIN capability check on the peer
+network namespace when creating paired devices (veth, vxcan,
+netkit). This allows an unprivileged user with a user namespace
+to create interfaces in arbitrary network namespaces, including
+init_net.
+
+Add a netlink_ns_capable() check for CAP_NET_ADMIN in the peer
+namespace before allowing device creation to proceed.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-31431 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-31431</link>
+            <guid isPermaLink="false">CVE-2026-31431</guid>
+            <pubDate>Thu, 30 Apr 2026 11:16:20 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+crypto: algif_aead - Revert to operating out-of-place
+
+This mostly reverts commit 72548b093ee3 except for the copying of
+the associated data.
+
+There is no benefit in operating in-place in algif_aead since the
+source and destination come from different mappings.  Get rid of
+all the complexity added for in-place operation and just copy the
+AD directly.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-6498 [CVSS:3.1 5.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-6498</link>
+            <guid isPermaLink="false">CVE-2026-6498</guid>
+            <pubDate>Thu, 30 Apr 2026 10:16:02 GMT</pubDate>
+            <description><![CDATA[The Five Star Restaurant Reservations plugin for WordPress is vulnerable to a payment bypass via PHP type juggling in versions up to, and including, 2.7.16 This is due to the valid_payment() function using a PHP loose comparison (==) between the attacker-controlled payment_id POST parameter and the booking's stripe_payment_intent_id property. When an unauthenticated attacker submits a request to the nopriv AJAX handler rtb_stripe_pmt_succeed before the Stripe payment intent has been created for a booking (i.e., before the JavaScript-triggered create_stripe_pmtIntnt() call has stored an intent ID in post meta), the stripe_payment_intent_id property on the booking object remains null. The comparison sanitize_text_field('') == null evaluates to TRUE in PHP loose comparison, causing the payment verification check to pass with zero actual payment. This makes it possible for unauthenticated attackers to mark any existing payment_pending booking as paid without completing a Stripe payment by submitting an empty payment_id parameter.
+
+Score: 5.3 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-42800 [CVSS:3.1 7.4 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-42800</link>
+            <guid isPermaLink="false">CVE-2026-42800</guid>
+            <pubDate>Thu, 30 Apr 2026 10:16:02 GMT</pubDate>
+            <description><![CDATA[NULL pointer dereference vulnerability in ASR1903 in ASR Lapwing_Linux on Linux (ims_client modules) allows Pointer Manipulation.
+
+ This vulnerability is associated with program files sip/utils/src/sipuri.c.
+
+Score: 7.4 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:L/I:L/A:L]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-41016]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-41016</link>
+            <guid isPermaLink="false">CVE-2026-41016</guid>
+            <pubDate>Thu, 30 Apr 2026 10:16:01 GMT</pubDate>
+            <description><![CDATA[Apache Airflow's SMTP provider `SmtpHook` called Python's `smtplib.SMTP.starttls()` without an SSL context, so no certificate validation was performed on the TLS upgrade. A man-in-the-middle between the Airflow worker and the SMTP server could present a self-signed certificate, complete the STARTTLS upgrade, and capture the SMTP credentials sent during the subsequent `login()` call. Users are advised to upgrade to the `apache-airflow-providers-smtp` version that contains the fix.]]></description>
+        </item>
         <item>
             <title><![CDATA[CVE-2026-42799 [CVSS:3.1 7.4 HIGH]]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-42799</link>
@@ -51,26 +187,6 @@ An attacker who is able to force a libnv application to allocate large file desc
             <description><![CDATA[When processing the header of an incoming message, libnv failed to properly validate the message size.
 
 The lack of validation allows a malicious program to write outside the bounds of a heap allocation.  This can trigger a crash or system panic, and it may be possible for an unprivileged user to exploit the bug to elevate their privileges.]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-31431 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-31431</link>
-            <guid isPermaLink="false">CVE-2026-31431</guid>
-            <pubDate>Thu, 30 Apr 2026 09:16:03 GMT</pubDate>
-            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
-
-crypto: algif_aead - Revert to operating out-of-place
-
-This mostly reverts commit 72548b093ee3 except for the copying of
-the associated data.
-
-There is no benefit in operating in-place in algif_aead since the
-source and destination come from different mappings.  Get rid of
-all the complexity added for in-place operation and just copy the
-AD directly.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
             <title><![CDATA[CVE-2026-22070 [CVSS:3.1 7.1 HIGH]]]></title>
@@ -977,76 +1093,6 @@ Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X
 
 Score: 1.9 (LOW)
 Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-4566 [CVSS:4.0 7.4 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-4566</link>
-            <guid isPermaLink="false">CVE-2026-4566</guid>
-            <pubDate>Wed, 29 Apr 2026 22:10:13 GMT</pubDate>
-            <description><![CDATA[A flaw has been found in Belkin F9K1122 1.00.33. The affected element is the function formWISP5G of the file /goform/formWISP5G. Executing a manipulation of the argument webpage can lead to stack-based buffer overflow. The attack can be launched remotely. The exploit has been published and may be used. The vendor was contacted early about this disclosure but did not respond in any way.
-
-Score: 7.4 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-4962 [CVSS:4.0 6.4 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-4962</link>
-            <guid isPermaLink="false">CVE-2026-4962</guid>
-            <pubDate>Wed, 29 Apr 2026 22:09:21 GMT</pubDate>
-            <description><![CDATA[A security flaw has been discovered in UltraVNC up to 1.6.4.0. Affected by this issue is some unknown functionality in the library version.dll of the component Service. The manipulation results in uncontrolled search path. The attack needs to be approached locally. This attack is characterized by high complexity. The exploitation is known to be difficult. The exploit has been released to the public and may be used for attacks. The vendor was contacted early about this disclosure but did not respond in any way.
-
-Score: 6.4 (MEDIUM)
-Vector: CVSS:4.0/AV:L/AC:H/AT:N/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-4965 [CVSS:4.0 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-4965</link>
-            <guid isPermaLink="false">CVE-2026-4965</guid>
-            <pubDate>Wed, 29 Apr 2026 22:07:31 GMT</pubDate>
-            <description><![CDATA[A vulnerability was detected in letta-ai letta 0.16.4. This issue affects the function resolve_type of the file letta/functions/ast_parsers.py of the component Incomplete Fix CVE-2025-6101. Performing a manipulation results in improper neutralization of directives in dynamically evaluated code. The attack can be initiated remotely. The exploit is now public and may be used. The vendor was contacted early about this disclosure but did not respond in any way.
-
-Score: 5.5 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-4964 [CVSS:4.0 2.1 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-4964</link>
-            <guid isPermaLink="false">CVE-2026-4964</guid>
-            <pubDate>Wed, 29 Apr 2026 22:04:01 GMT</pubDate>
-            <description><![CDATA[A security vulnerability has been detected in letta-ai letta 0.16.4. This vulnerability affects the function _convert_message_create_to_message of the file letta/helpers/message_helper.py of the component File URL Handler. Such manipulation of the argument ImageContent leads to server-side request forgery. It is possible to launch the attack remotely. The exploit has been disclosed publicly and may be used. The vendor was contacted early about this disclosure but did not respond in any way.
-
-Score: 2.1 (LOW)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-5107 [CVSS:4.0 2.3 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-5107</link>
-            <guid isPermaLink="false">CVE-2026-5107</guid>
-            <pubDate>Wed, 29 Apr 2026 22:01:48 GMT</pubDate>
-            <description><![CDATA[A vulnerability has been found in FRRouting FRR up to 10.5.1. This affects the function process_type2_route of the file bgpd/bgp_evpn.c of the component EVPN Type-2 Route Handler. The manipulation leads to improper access controls. The attack can be initiated remotely. The attack is considered to have high complexity. The exploitability is reported as difficult. The identifier of the patch is 7676cad65114aa23adde583d91d9d29e2debd045. To fix this issue, it is recommended to deploy a patch.
-
-Score: 2.3 (LOW)
-Vector: CVSS:4.0/AV:N/AC:H/AT:N/PR:L/UI:N/VC:N/VI:L/VA:L/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-5318 [CVSS:4.0 2.1 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-5318</link>
-            <guid isPermaLink="false">CVE-2026-5318</guid>
-            <pubDate>Wed, 29 Apr 2026 21:53:04 GMT</pubDate>
-            <description><![CDATA[A weakness has been identified in LibRaw up to 0.22.0. This impacts the function HuffTable::initval of the file src/decompressors/losslessjpeg.cpp of the component JPEG DHT Parser. This manipulation of the argument bits[] causes out-of-bounds write. It is possible to initiate the attack remotely. The exploit has been made available to the public and could be used for attacks. Upgrading to version 0.22.1 will fix this issue. Patch name: a6734e867b19d75367c05f872ac26322464e3995. It is advisable to upgrade the affected component.
-
-Score: 2.1 (LOW)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:P/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-5244 [CVSS:4.0 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-5244</link>
-            <guid isPermaLink="false">CVE-2026-5244</guid>
-            <pubDate>Wed, 29 Apr 2026 21:46:14 GMT</pubDate>
-            <description><![CDATA[A vulnerability has been found in Cesanta Mongoose up to 7.20. This affects the function mg_tls_recv_cert of the file mongoose.c of the component TLS 1.3 Handler. Such manipulation of the argument pubkey leads to heap-based buffer overflow. The attack may be launched remotely. The exploit has been disclosed to the public and may be used. Upgrading to version 7.21 mitigates this issue. The name of the patch is 0d882f1b43ff2308b7486a56a9d60cd6dba8a3f1. It is advisable to upgrade the affected component. The vendor was contacted early, responded in a very professional manner and quickly released a fixed version of the affected product.
-
-Score: 5.5 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
         </item>
     </channel>
 </rss>
