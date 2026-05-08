@@ -4,11 +4,73 @@
         <title>NVD CVE Feed</title>
         <link>https://github.com/TasukuKuchinomachi/NVD-RSS-feed</link>
         <description>Latest CVE entries from the National Vulnerability Database. This product uses the NVD API but is not endorsed or certified by the NVD.</description>
-        <lastBuildDate>Fri, 08 May 2026 10:16:29 GMT</lastBuildDate>
+        <lastBuildDate>Fri, 08 May 2026 12:04:08 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>National Vulnerability Database - NIST</copyright>
+        <item>
+            <title><![CDATA[CVE-2026-31431 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-31431</link>
+            <guid isPermaLink="false">CVE-2026-31431</guid>
+            <pubDate>Fri, 08 May 2026 12:04:08 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+crypto: algif_aead - Revert to operating out-of-place
+
+This mostly reverts commit 72548b093ee3 except for the copying of
+the associated data.
+
+There is no benefit in operating in-place in algif_aead since the
+source and destination come from different mappings.  Get rid of
+all the complexity added for in-place operation and just copy the
+AD directly.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-43284]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-43284</link>
+            <guid isPermaLink="false">CVE-2026-43284</guid>
+            <pubDate>Fri, 08 May 2026 11:16:29 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+xfrm: esp: avoid in-place decrypt on shared skb frags
+
+MSG_SPLICE_PAGES can attach pages from a pipe directly to an skb. TCP
+marks such skbs with SKBFL_SHARED_FRAG after skb_splice_from_iter(),
+so later paths that may modify packet data can first make a private
+copy. The IPv4/IPv6 datagram append paths did not set this flag when
+splicing pages into UDP skbs.
+
+That leaves an ESP-in-UDP packet made from shared pipe pages looking
+like an ordinary uncloned nonlinear skb. ESP input then takes the no-COW
+fast path for uncloned skbs without a frag_list and decrypts in place
+over data that is not owned privately by the skb.
+
+Mark IPv4/IPv6 datagram splice frags with SKBFL_SHARED_FRAG, matching
+TCP. Also make ESP input fall back to skb_cow_data() when the flag is
+present, so ESP does not decrypt externally backed frags in place.
+Private nonlinear skb frags still use the existing fast path.
+
+This intentionally does not change ESP output. In esp_output_head(),
+the path that appends the ESP trailer to existing skb tailroom without
+calling skb_cow_data() is not reachable for nonlinear skbs:
+skb_tailroom() returns zero when skb->data_len is nonzero, while ESP
+tailen is positive. Thus ESP output will either use the separate
+destination-frag path or fall back to skb_cow_data().]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-42279 [CVSS:3.1 5.8 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-42279</link>
+            <guid isPermaLink="false">CVE-2026-42279</guid>
+            <pubDate>Fri, 08 May 2026 11:16:28 GMT</pubDate>
+            <description><![CDATA[solidtime is an open-source time-tracking app. In version 0.12.0, the PUT /api/v1/organizations/{organization}/time-entries/{timeEntry} API accepts a route-bound timeEntry from another organization when the caller has time-entries:update:all in the URL organization, allowing a known foreign time-entry UUID to be modified and rebound to objects in the caller's organization. This issue has been patched in version 0.12.1.
+
+Score: 5.8 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:H/PR:H/UI:N/S:C/C:N/I:H/A:N]]></description>
+        </item>
         <item>
             <title><![CDATA[CVE-2026-7650 [CVSS:3.1 6.4 MEDIUM]]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-7650</link>
@@ -48,38 +110,6 @@ Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H/E:A/CR:X
 
 Score: 6.4 (MEDIUM)
 Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:L/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-43284]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-43284</link>
-            <guid isPermaLink="false">CVE-2026-43284</guid>
-            <pubDate>Fri, 08 May 2026 10:16:27 GMT</pubDate>
-            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
-
-xfrm: esp: avoid in-place decrypt on shared skb frags
-
-MSG_SPLICE_PAGES can attach pages from a pipe directly to an skb. TCP
-marks such skbs with SKBFL_SHARED_FRAG after skb_splice_from_iter(),
-so later paths that may modify packet data can first make a private
-copy. The IPv4/IPv6 datagram append paths did not set this flag when
-splicing pages into UDP skbs.
-
-That leaves an ESP-in-UDP packet made from shared pipe pages looking
-like an ordinary uncloned nonlinear skb. ESP input then takes the no-COW
-fast path for uncloned skbs without a frag_list and decrypts in place
-over data that is not owned privately by the skb.
-
-Mark IPv4/IPv6 datagram splice frags with SKBFL_SHARED_FRAG, matching
-TCP. Also make ESP input fall back to skb_cow_data() when the flag is
-present, so ESP does not decrypt externally backed frags in place.
-Private nonlinear skb frags still use the existing fast path.
-
-This intentionally does not change ESP output. In esp_output_head(),
-the path that appends the ESP trailer to existing skb tailroom without
-calling skb_cow_data() is not reachable for nonlinear skbs:
-skb_tailroom() returns zero when skb->data_len is nonzero, while ESP
-tailen is positive. Thus ESP output will either use the separate
-destination-frag path or fall back to skb_cow_data().]]></description>
         </item>
         <item>
             <title><![CDATA[CVE-2026-7330 [CVSS:3.1 7.2 HIGH]]]></title>
@@ -348,16 +378,6 @@ Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:P/CR:X
 
 Score: 7.4 (HIGH)
 Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-42279 [CVSS:3.1 5.8 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-42279</link>
-            <guid isPermaLink="false">CVE-2026-42279</guid>
-            <pubDate>Fri, 08 May 2026 05:16:11 GMT</pubDate>
-            <description><![CDATA[solidtime is an open-source time-tracking app. In version 0.12.0, the PUT /api/v1/organizations/{organization}/time-entries/{timeEntry} API accepts a route-bound timeEntry from another organization when the caller has time-entries:update:all in the URL organization, allowing a known foreign time-entry UUID to be modified and rebound to objects in the caller's organization. This issue has been patched in version 0.12.1.
-
-Score: 5.8 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:H/PR:H/UI:N/S:C/C:N/I:H/A:N]]></description>
         </item>
         <item>
             <title><![CDATA[CVE-2026-42278 [CVSS:4.0 8.8 HIGH]]]></title>
@@ -786,26 +806,6 @@ Security Update for MyASUS ' section on the ASUS Security Advisory for more inf
 
 Score: 6.8 (MEDIUM)
 Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-31431 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-31431</link>
-            <guid isPermaLink="false">CVE-2026-31431</guid>
-            <pubDate>Fri, 08 May 2026 03:16:24 GMT</pubDate>
-            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
-
-crypto: algif_aead - Revert to operating out-of-place
-
-This mostly reverts commit 72548b093ee3 except for the copying of
-the associated data.
-
-There is no benefit in operating in-place in algif_aead since the
-source and destination come from different mappings.  Get rid of
-all the complexity added for in-place operation and just copy the
-AD directly.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
             <title><![CDATA[CVE-2026-8125 [CVSS:4.0 2.1 LOW]]]></title>
