@@ -4,11 +4,91 @@
         <title>NVD CVE Feed</title>
         <link>https://github.com/TasukuKuchinomachi/NVD-RSS-feed</link>
         <description>Latest CVE entries from the National Vulnerability Database. This product uses the NVD API but is not endorsed or certified by the NVD.</description>
-        <lastBuildDate>Sat, 30 May 2026 11:17:28 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 30 May 2026 14:16:24 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>National Vulnerability Database - NIST</copyright>
+        <item>
+            <title><![CDATA[CVE-2026-10119 [CVSS:4.0 7.4 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-10119</link>
+            <guid isPermaLink="false">CVE-2026-10119</guid>
+            <pubDate>Sat, 30 May 2026 14:16:24 GMT</pubDate>
+            <description><![CDATA[A security vulnerability has been detected in TRENDnet TEW-432BRP 3.10B20. Impacted is the function formSetMACFilter of the file /goform/formSetMACFilter. The manipulation of the argument filter_name leads to stack-based buffer overflow. Remote exploitation of the attack is possible. The exploit has been disclosed publicly and may be used. The vendor explains: "This product has been EOL for 15 years (since 2009). As the item has been EOL for such a long time, we are not able to replicate or fix any vulnerabilities." This vulnerability only affects products that are no longer supported by the maintainer.
+
+Score: 7.4 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-46242]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-46242</link>
+            <guid isPermaLink="false">CVE-2026-46242</guid>
+            <pubDate>Sat, 30 May 2026 13:16:21 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+eventpoll: fix ep_remove struct eventpoll / struct file UAF
+
+ep_remove() (via ep_remove_file()) cleared file->f_ep under
+file->f_lock but then kept using @file inside the critical section
+(is_file_epoll(), hlist_del_rcu() through the head, spin_unlock).
+A concurrent __fput() taking the eventpoll_release() fastpath in
+that window observed the transient NULL, skipped
+eventpoll_release_file() and ran to f_op->release / file_free().
+
+For the epoll-watches-epoll case, f_op->release is
+ep_eventpoll_release() -> ep_clear_and_put() -> ep_free(), which
+kfree()s the watched struct eventpoll. Its embedded ->refs
+hlist_head is exactly where epi->fllink.pprev points, so the
+subsequent hlist_del_rcu()'s "*pprev = next" scribbles into freed
+kmalloc-192 memory.
+
+In addition, struct file is SLAB_TYPESAFE_BY_RCU, so the slot
+backing @file could be recycled by alloc_empty_file() --
+reinitializing f_lock and f_ep -- while ep_remove() is still
+nominally inside that lock. The upshot is an attacker-controllable
+kmem_cache_free() against the wrong slab cache.
+
+Pin @file via epi_fget() at the top of ep_remove() and gate the
+critical section on the pin succeeding. With the pin held @file
+cannot reach refcount zero, which holds __fput() off and
+transitively keeps the watched struct eventpoll alive across the
+hlist_del_rcu() and the f_lock use, closing both UAFs.
+
+If the pin fails @file has already reached refcount zero and its
+__fput() is in flight. Because we bailed before clearing f_ep,
+that path takes the eventpoll_release() slow path into
+eventpoll_release_file() and blocks on ep->mtx until the waiter
+side's ep_clear_and_put() drops it. The bailed epi's share of
+ep->refcount stays intact, so the trailing ep_refcount_dec_and_test()
+in ep_clear_and_put() cannot free the eventpoll out from under
+eventpoll_release_file(); the orphaned epi is then cleaned up
+there.
+
+A successful pin also proves we are not racing
+eventpoll_release_file() on this epi, so drop the now-redundant
+re-check of epi->dying under f_lock. The cheap lockless
+READ_ONCE(epi->dying) fast-path bailout stays.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-10117 [CVSS:4.0 2.1 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-10117</link>
+            <guid isPermaLink="false">CVE-2026-10117</guid>
+            <pubDate>Sat, 30 May 2026 13:16:20 GMT</pubDate>
+            <description><![CDATA[A weakness has been identified in Open5GS up to 2.7.7. This issue affects the function ogs_pool_id_calloc in the library /lib/sbi/nghttp2-server.c. Executing a manipulation can lead to denial of service. The attack may be launched remotely. The exploit has been made available to the public and could be used for attacks. It is best practice to apply a patch to resolve this issue.
+
+Score: 2.1 (LOW)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-10116 [CVSS:4.0 2.1 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-10116</link>
+            <guid isPermaLink="false">CVE-2026-10116</guid>
+            <pubDate>Sat, 30 May 2026 12:16:23 GMT</pubDate>
+            <description><![CDATA[A security flaw has been discovered in Open5GS up to 2.7.7. This vulnerability affects the function ogs_sbi_xact_add in the library /lib/core/ogs-timer.c of the component ue-authentications Endpoint. Performing a manipulation results in denial of service. The attack may be initiated remotely. The exploit has been released to the public and may be used for attacks. Applying a patch is the recommended action to fix this issue.
+
+Score: 2.1 (LOW)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
         <item>
             <title><![CDATA[CVE-2026-46300 [CVSS:3.1 7.8 HIGH]]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-46300</link>
@@ -2862,99 +2942,6 @@ in bond_alb_deinitialize().
 
 Score: 7.8 (HIGH)
 Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-45959 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-45959</link>
-            <guid isPermaLink="false">CVE-2026-45959</guid>
-            <pubDate>Sat, 30 May 2026 11:17:17 GMT</pubDate>
-            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
-
-crypto: ccp - Fix a crash due to incorrect cleanup usage of kfree
-
-Annotating a local pointer variable, which will be assigned with the
-kmalloc-family functions, with the `__cleanup(kfree)` attribute will
-make the address of the local variable, rather than the address returned
-by kmalloc, passed to kfree directly and lead to a crash due to invalid
-deallocation of stack address. According to other places in the repo,
-the correct usage should be `__free(kfree)`. The code coincidentally
-compiled because the parameter type `void *` of kfree is compatible with
-the desired type `struct { ... } **`.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-45958 [CVSS:3.1 7.1 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-45958</link>
-            <guid isPermaLink="false">CVE-2026-45958</guid>
-            <pubDate>Sat, 30 May 2026 11:17:16 GMT</pubDate>
-            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
-
-drm/exynos: vidi: fix to avoid directly dereferencing user pointer
-
-In vidi_connection_ioctl(), vidi->edid(user pointer) is directly
-dereferenced in the kernel.
-
-This allows arbitrary kernel memory access from the user space, so instead
-of directly accessing the user pointer in the kernel, we should modify it
-to copy edid to kernel memory using copy_from_user() and use it.
-
-Score: 7.1 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-45951 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-45951</link>
-            <guid isPermaLink="false">CVE-2026-45951</guid>
-            <pubDate>Sat, 30 May 2026 11:17:16 GMT</pubDate>
-            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
-
-bpf: Fix a potential use-after-free of BTF object
-
-Refcounting in the check_pseudo_btf_id() function is incorrect:
-the __check_pseudo_btf_id() function might get called with a zero
-refcounted btf. Fix this, and patch related code accordingly.
-
-v3: rephrase a comment (AI)
-v2: fix a refcount leak introduced in v1 (AI)
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-45945 [CVSS:3.1 8.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-45945</link>
-            <guid isPermaLink="false">CVE-2026-45945</guid>
-            <pubDate>Sat, 30 May 2026 11:17:16 GMT</pubDate>
-            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
-
-iommu/vt-d: Fix race condition during PASID entry replacement
-
-The Intel VT-d PASID table entry is 512 bits (64 bytes). When replacing
-an active PASID entry (e.g., during domain replacement), the current
-implementation calculates a new entry on the stack and copies it to the
-table using a single structure assignment.
-
-        struct pasid_entry *pte, new_pte;
-
-        pte = intel_pasid_get_entry(dev, pasid);
-        pasid_pte_config_first_level(iommu, &new_pte, ...);
-        *pte = new_pte;
-
-Because the hardware may fetch the 512-bit PASID entry in multiple
-128-bit chunks, updating the entire entry while it is active (Present
-bit set) risks a "torn" read. In this scenario, the IOMMU hardware
-could observe an inconsistent state — partially new data and partially
-old data — leading to unpredictable behavior or spurious faults.
-
-Fix this by removing the unsafe "replace" helpers and following the
-"clear-then-update" flow, which ensures the Present bit is cleared and
-the required invalidation handshake is completed before the new
-configuration is applied.
-
-Score: 8.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H]]></description>
         </item>
     </channel>
 </rss>
