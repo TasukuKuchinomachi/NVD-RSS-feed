@@ -4,11 +4,106 @@
         <title>NVD CVE Feed</title>
         <link>https://github.com/TasukuKuchinomachi/NVD-RSS-feed</link>
         <description>Latest CVE entries from the National Vulnerability Database. This product uses the NVD API but is not endorsed or certified by the NVD.</description>
-        <lastBuildDate>Sun, 07 Jun 2026 04:16:30 GMT</lastBuildDate>
+        <lastBuildDate>Sun, 07 Jun 2026 09:16:22 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>National Vulnerability Database - NIST</copyright>
+        <item>
+            <title><![CDATA[CVE-2026-43073 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-43073</link>
+            <guid isPermaLink="false">CVE-2026-43073</guid>
+            <pubDate>Sun, 07 Jun 2026 09:16:22 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+x86-64: rename misleadingly named '__copy_user_nocache()' function
+
+This function was a masterclass in bad naming, for various historical
+reasons.
+
+It claimed to be a non-cached user copy.  It is literally _neither_ of
+those things.  It's a specialty memory copy routine that uses
+non-temporal stores for the destination (but not the source), and that
+does exception handling for both source and destination accesses.
+
+Also note that while it works for unaligned targets, any unaligned parts
+(whether at beginning or end) will not use non-temporal stores, since
+only words and quadwords can be non-temporal on x86.
+
+The exception handling means that it _can_ be used for user space
+accesses, but not on its own - it needs all the normal "start user space
+access" logic around it.
+
+But typically the user space access would be the source, not the
+non-temporal destination.  That was the original intention of this,
+where the destination was some fragile persistent memory target that
+needed non-temporal stores in order to catch machine check exceptions
+synchronously and deal with them gracefully.
+
+Thus that non-descriptive name: one use case was to copy from user space
+into a non-cached kernel buffer.  However, the existing users are a mix
+of that intended use-case, and a couple of random drivers that just did
+this as a performance tweak.
+
+Some of those random drivers then actively misused the user copying
+version (with STAC/CLAC and all) to do kernel copies without ever even
+caring about the exception handling, _just_ for the non-temporal
+destination.
+
+Rename it as a first small step to actually make it halfway sane, and
+change the prototype to be more normal: it doesn't take a user pointer
+unless the caller has done the proper conversion, and the argument size
+is the full size_t (it still won't actually copy more than 4GB in one
+go, but there's also no reason to silently truncate the size argument in
+the caller).
+
+Finally, use this now sanely named function in the NTB code, which
+mis-used a user copy version (with STAC/CLAC and all) of this interface
+despite it not actually being a user copy at all.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-11458 [CVSS:4.0 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-11458</link>
+            <guid isPermaLink="false">CVE-2026-11458</guid>
+            <pubDate>Sun, 07 Jun 2026 09:16:22 GMT</pubDate>
+            <description><![CDATA[A weakness has been identified in erzhongxmu JeeWMS up to 141740afb2ba14d441c82a833d0a418d07ca2d69. This issue affects some unknown processing of the file /base-boot/actuator of the component Boot Actuator Endpoint. Executing a manipulation can lead to information disclosure. The attack can be executed remotely. The exploit has been made available to the public and could be used for attacks. This product implements a rolling release for ongoing delivery, which means version information for affected or updated releases is unavailable. The vendor was contacted early about this disclosure but did not respond in any way.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-11457 [CVSS:4.0 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-11457</link>
+            <guid isPermaLink="false">CVE-2026-11457</guid>
+            <pubDate>Sun, 07 Jun 2026 09:16:21 GMT</pubDate>
+            <description><![CDATA[A security flaw has been discovered in erzhongxmu JeeWMS up to 141740afb2ba14d441c82a833d0a418d07ca2d69. This vulnerability affects unknown code of the file /base-boot/jmreport/testConnection of the component JimuReport test-connection Endpoint. Performing a manipulation of the argument dbType/dbDriver/dbUrl/dbUsername/dbPassword results in injection. Remote exploitation of the attack is possible. The exploit has been released to the public and may be used for attacks. This product follows a rolling release approach for continuous delivery, so version details for affected or updated releases are not provided. The vendor was contacted early about this disclosure but did not respond in any way.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-11456 [CVSS:4.0 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-11456</link>
+            <guid isPermaLink="false">CVE-2026-11456</guid>
+            <pubDate>Sun, 07 Jun 2026 09:16:21 GMT</pubDate>
+            <description><![CDATA[A vulnerability was identified in Chanjet CRM 1.0. This affects an unknown part of the file /tools/jxf_dump_systable.php of the component HTTP GET Request Handler. Such manipulation of the argument gblOrgID leads to sql injection. The attack may be launched remotely. The exploit is publicly available and might be used. The vendor was contacted early about this disclosure but did not respond in any way.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-11455 [CVSS:4.0 1.3 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-11455</link>
+            <guid isPermaLink="false">CVE-2026-11455</guid>
+            <pubDate>Sun, 07 Jun 2026 09:16:20 GMT</pubDate>
+            <description><![CDATA[A vulnerability was determined in FoundationAgents MetaGPT up to 0.8.2. Affected by this issue is the function check_cmd_exists of the file metagpt/utils/common.py. This manipulation of the argument mermaid.path causes command injection. The attack may be initiated remotely. A high degree of complexity is needed for the attack. The exploitation is known to be difficult. The exploit has been publicly disclosed and may be utilized. The project was informed of the problem early through an issue report but has not responded yet.
+
+Score: 1.3 (LOW)
+Vector: CVSS:4.0/AV:N/AC:H/AT:N/PR:L/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
         <item>
             <title><![CDATA[CVE-2026-11453 [CVSS:4.0 2.1 LOW]]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-11453</link>
@@ -1068,66 +1163,6 @@ This issue affects OctoCloud: from s1.09.02 before v1.11.01.
 
 Score: 4.7 (MEDIUM)
 Vector: CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:L/I:L/A:L]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2025-0616 [CVSS:3.1 8.2 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-0616</link>
-            <guid isPermaLink="false">CVE-2025-0616</guid>
-            <pubDate>Sat, 06 Jun 2026 08:16:47 GMT</pubDate>
-            <description><![CDATA[Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection') vulnerability in Teknolojik Center Telecommunication Industry Trade Co. Ltd. B2B - Netsis Panel allows SQL Injection.
-
-This issue affects B2B - Netsis Panel: through 20251003. NOTE: The vendor was contacted early about this disclosure but did not respond in any way.
-
-Score: 8.2 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2025-0610 [CVSS:3.1 8.6 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-0610</link>
-            <guid isPermaLink="false">CVE-2025-0610</guid>
-            <pubDate>Sat, 06 Jun 2026 08:16:47 GMT</pubDate>
-            <description><![CDATA[Cross-Site Request Forgery (CSRF) vulnerability in Akınsoft QR Menü allows Cross Site Request Forgery.
-
-This issue affects QR Menü: from s1.05.06 before v1.05.12.
-
-Score: 8.6 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2025-0609 [CVSS:3.1 4.7 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-0609</link>
-            <guid isPermaLink="false">CVE-2025-0609</guid>
-            <pubDate>Sat, 06 Jun 2026 08:16:47 GMT</pubDate>
-            <description><![CDATA[Improper Neutralization of Input During Web Page Generation (XSS or 'Cross-site Scripting') vulnerability in Logo Software Inc. Logo Cloud allows Cross-Site Scripting (XSS).
-
-This issue affects Logo Cloud: before 1.18.
-
-Score: 4.7 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:L/I:L/A:L]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2025-0608 [CVSS:3.1 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-0608</link>
-            <guid isPermaLink="false">CVE-2025-0608</guid>
-            <pubDate>Sat, 06 Jun 2026 08:16:47 GMT</pubDate>
-            <description><![CDATA[URL Redirection to Untrusted Site ('Open Redirect') vulnerability in Logo Software Inc. Logo Cloud allows Phishing, Forceful Browsing.
-
-This issue affects Logo Cloud: before 2025.R6.
-
-Score: 5.5 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:R/S:U/C:L/I:L/A:L]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2025-0607 [CVSS:3.1 4.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-0607</link>
-            <guid isPermaLink="false">CVE-2025-0607</guid>
-            <pubDate>Sat, 06 Jun 2026 08:16:47 GMT</pubDate>
-            <description><![CDATA[Improper Encoding or Escaping of Output vulnerability in Logo Software Inc. Logo Cloud allows Phishing.
-
-This issue affects Logo Cloud: before 2.57.
-
-Score: 4.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:U/C:L/I:L/A:L]]></description>
         </item>
     </channel>
 </rss>
