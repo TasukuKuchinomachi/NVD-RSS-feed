@@ -4,11 +4,51 @@
         <title>NVD CVE Feed</title>
         <link>https://github.com/TasukuKuchinomachi/NVD-RSS-feed</link>
         <description>Latest CVE entries from the National Vulnerability Database. This product uses the NVD API but is not endorsed or certified by the NVD.</description>
-        <lastBuildDate>Sun, 14 Jun 2026 15:16:34 GMT</lastBuildDate>
+        <lastBuildDate>Sun, 14 Jun 2026 18:17:20 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>National Vulnerability Database - NIST</copyright>
+        <item>
+            <title><![CDATA[CVE-2026-54413 [CVSS:4.0 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-54413</link>
+            <guid isPermaLink="false">CVE-2026-54413</guid>
+            <pubDate>Sun, 14 Jun 2026 18:17:20 GMT</pubDate>
+            <description><![CDATA[driftregion iso14229 through 0.9.0 contains an integer underflow and downstream out-of-bounds read in the Handle_0x27_SecurityAccess() function in iso14229.c that allows a remote unauthenticated attacker to crash a UDS server and potentially read memory past the receive buffer by sending a single-byte 0x27 SecurityAccess request that follows any earlier well-formed 0x27 message. The handler reads the SecurityAccess subFunction from recv_buf[1] without first checking that recv_len is at least 2, then computes the key-data length as the unsigned subtraction (uint16_t)(recv_len - UDS_0X27_REQ_BASE_LEN); when recv_len equals 1 the result underflows to 65535 and is passed as args.len to the application's SecAccessValidateKey or SecAccessRequestSeed callback, which typically iterates or copies that many bytes from the 4-KB receive buffer. Every other UDS sub-function handler in the library (0x10, 0x11, 0x14, 0x19, 0x22, 0x23, 0x28, and others) performs an explicit recv_len lower-bound check before indexing; Handle_0x27_SecurityAccess is the sole outlier. The vulnerable handler reaches over CAN bus, OBD-II, ISO-TP, and DoIP transports and is exposed in the default diagnostic session without prior authentication; deployments on automotive ECUs, industrial controllers, and IoT devices that ship iso14229 as their UDS server are affected.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:N/VA:H/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:Y/R:X/V:D/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-54412 [CVSS:4.0 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-54412</link>
+            <guid isPermaLink="false">CVE-2026-54412</guid>
+            <pubDate>Sun, 14 Jun 2026 18:17:20 GMT</pubDate>
+            <description><![CDATA[LiamBindle MQTT-C through version 1.1.6 contains a heap-based out-of-bounds read and integer underflow in the mqtt_unpack_publish_response() function in src/mqtt.c that allows a remote unauthenticated attacker controlling an MQTT broker - or able to inject MQTT traffic into an unencrypted session - to crash a subscribed MQTT-C client and potentially disclose adjacent heap memory by sending a single crafted PUBLISH packet. The function validates only that the fixed-header remaining_length is at least 4, then reads the 16-bit topic_name_size field from the broker-controlled packet and advances the parse pointer by that value without verifying that topic_name_size plus the surrounding overhead fits within remaining_length; it subsequently computes application_message_size as remaining_length - topic_name_size - 2 (QoS 0) or - 4 (QoS greater than 0) in unsigned arithmetic, producing an integer underflow that is then passed to memmove(). A PUBLISH packet with topic_name_size = 0xFFFF and remaining_length = 7 advances the parse pointer 65535 bytes past the receive buffer (out-of-bounds read) and causes an application_message_size near 2^32, crashing the process when the resulting memmove() is executed.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:N/VA:H/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:Y/R:X/V:D/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-54411 [CVSS:4.0 6.9 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-54411</link>
+            <guid isPermaLink="false">CVE-2026-54411</guid>
+            <pubDate>Sun, 14 Jun 2026 18:17:20 GMT</pubDate>
+            <description><![CDATA[Linux-PAM through 1.7.2 contains an observable timing discrepancy (CWE-208) in the pam_userdb module's plaintext-password comparison path in modules/pam_userdb/pam_userdb.c that allows a local or network-adjacent attacker able to repeatedly drive authentication through a calling service to recover the plaintext password of a target account by measuring response-timing differences. The comparison uses strncmp() (or strncasecmp() when PAM_ICASE_ARG is set) preceded by a length-equality check, so the time to reject a candidate depends on the index of the first differing byte and on whether the candidate's length matches the stored password, leaking the password length and individual prefix bytes. The vulnerable path is reached when the administrator configures pam_userdb with crypt=none, with an unrecognized crypt method, or without a crypt= argument, causing the module to store and compare credentials in plaintext.
+
+Score: 6.9 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:H/AT:P/PR:N/UI:N/VC:H/VI:N/VA:N/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:N/R:X/V:D/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-54410 [CVSS:4.0 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-54410</link>
+            <guid isPermaLink="false">CVE-2026-54410</guid>
+            <pubDate>Sun, 14 Jun 2026 18:17:20 GMT</pubDate>
+            <description><![CDATA[nanoMODBUS through v1.23.0 contains an off-by-one buffer overflow in the recv_msg_header() function of the Modbus/TCP server that allows remote unauthenticated attackers to write one attacker-controlled byte past the end of the 260-byte receive buffer by sending a crafted MBAP frame whose Length field is set to 255. The overflow corrupts the adjacent buffer-index field of the nanoMODBUS state structure, resulting in denial of service through invalid memory accesses and, on bare-metal and RTOS targets without memory protection, one-byte information disclosure and writes to unintended register addresses on the Write Multiple Registers (FC16) handler path.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:L/VA:H/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:Y/R:X/V:X/RE:X/U:X]]></description>
+        </item>
         <item>
             <title><![CDATA[CVE-2026-9641 [CVSS:3.1 5.3 MEDIUM]]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-9641</link>
@@ -1883,58 +1923,6 @@ Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:H/I:N/A:N]]></description>
             <description><![CDATA[Heap buffer out-of-bounds read vulnerability in Avira Antivirus engine when scanning a malformed PDF file may allow Local Execution of Code or Denial-of-Service of the antivirus engine process.
 
 This issue affects Avira Antivirus on Windows, macOS, and Linux for engine builds before 8.3.70.76.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2025-9032 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-9032</link>
-            <guid isPermaLink="false">CVE-2025-9032</guid>
-            <pubDate>Fri, 12 Jun 2026 23:16:30 GMT</pubDate>
-            <description><![CDATA[Heap buffer out-of-bounds read vulnerability in Avira Antivirus engine when scanning a malformed Windows PE file may allow Local Execution of Code or Denial-of-Service of the antivirus engine process.
-
-This issue affects Avira Antivirus on Windows, macOS, and Linux for engine builds before 8.3.70.98.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2025-8351 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-8351</link>
-            <guid isPermaLink="false">CVE-2025-8351</guid>
-            <pubDate>Fri, 12 Jun 2026 23:16:28 GMT</pubDate>
-            <description><![CDATA[Heap-based Buffer Overflow, Out-of-bounds Read vulnerability in Avira Antivirus engine when scanning a malformed file may allow Local Execution of Code or Denial-of-Service of the antivirus engine process.
-
-This issue affects Avira Antivirus on Windows, macOS, and Linux for engine builds before 8.3.70.98.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2025-14098 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-14098</link>
-            <guid isPermaLink="false">CVE-2025-14098</guid>
-            <pubDate>Fri, 12 Jun 2026 23:16:27 GMT</pubDate>
-            <description><![CDATA[Heap buffer out-of-bounds write vulnerability due to integer overflow in Avira Antivirus engine when scanning a malformed MS-DOS executable file may allow Local Execution of Code or Denial-of-Service of the antivirus engine process.
-
-This issue affects Avira Antivirus on Windows, macOS, and Linux for engine builds before 8.3.70.104.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2025-10101 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-10101</link>
-            <guid isPermaLink="false">CVE-2025-10101</guid>
-            <pubDate>Fri, 12 Jun 2026 23:16:26 GMT</pubDate>
-            <description><![CDATA[Heap buffer out-of-bounds read vulnerability in Avast Antivirus when scanning a malformed Mach-O file may allow Local Execution of Code or Denial-of-Service of the antivirus process.
-
-This issue affects Avast Antivirus, AVG Antivirus, Norton Antivirus, Avast One, and Avast Business Antivirus on Windows, macOS, and Linux for virus definition builds before VPS 25090300.
-
-
-
-The affected scanning logic is delivered through a shared Gen Digital virus definition update stream. The same stream feeds the consumer antivirus products listed in this advisory and other Gen Digital products that embed the same engine. Mitigation flows through this update channel; installations at or above the listed build are not vulnerable regardless of which product consumes the stream.
 
 Score: 7.8 (HIGH)
 Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
