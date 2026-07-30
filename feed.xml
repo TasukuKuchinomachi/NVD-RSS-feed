@@ -4,722 +4,1720 @@
         <title>NVD CVE Feed</title>
         <link>https://github.com/TasukuKuchinomachi/NVD-RSS-feed</link>
         <description>Latest CVE entries from the National Vulnerability Database. This product uses the NVD API but is not endorsed or certified by the NVD.</description>
-        <lastBuildDate>Thu, 30 Jul 2026 02:16:45 GMT</lastBuildDate>
+        <lastBuildDate>Thu, 30 Jul 2026 06:25:59 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>National Vulnerability Database - NIST</copyright>
         <item>
-            <title><![CDATA[CVE-2026-16727 [CVSS:4.0 7.3 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-16727</link>
-            <guid isPermaLink="false">CVE-2026-16727</guid>
-            <pubDate>Thu, 30 Jul 2026 02:16:45 GMT</pubDate>
-            <description><![CDATA[Concurrent Execution using Shared Resource with Improper Synchronization (“Race Condition”) in ASUS Armoury Crate allows a local user to execute arbitrary code with elevated privileges via a crafted file replacement.
-Refer to the ' Security Update for ASUS Armoury Crate ' section on the ASUS Security Advisory for more information.
+            <title><![CDATA[CVE-2026-64635 [CVSS:3.1 5.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64635</link>
+            <guid isPermaLink="false">CVE-2026-64635</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:59 GMT</pubDate>
+            <description><![CDATA[Improper handling of the returnUrl parameter in the Forgot Password function of Veeam Service Provider Console allows an unauthenticated attacker to control the domain of the generated password reset link. When the targeted user clicks the link delivered by email, the reset code is transmitted to an attacker-controlled host, allowing the attacker to take over the account.
+
+Score: 5.3 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-64560 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64560</link>
+            <guid isPermaLink="false">CVE-2026-64560</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:59 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+posix-cpu-timers: Prevent UAF caused by non-leader exec() race
+
+Wongi and Jungwoo decoded and reported a non-leader exec() related race
+which can result in an UAF:
+
+ sys_timer_delete()			exec()
+   posix_cpu_timer_del()
+   // Observes old leader
+   p = pid_task(pid, pid_type);		de_thread()
+   					  switch_leader();
+					  release_task(old_leader)
+					    __exit_signal(old_leader)
+					      sighand = lock(old_leader, sighand);
+					      posix_cpu_timers*_exit();
+   sighand = lock_task_sighand(p)	      unhash_task(old_leader);
+     sh = lock(p, sighand)	    	      old_leader->sighand = NULL;
+					      unlock(sighand);
+     (p->sighand == NULL)
+	unlock(sh)
+	return NULL;
+
+   // Returns without action
+   if(!sighand)
+      return 0;
+   free_posix_timer();
+
+This is "harmless" unless the deleted timer was armed and enqueued in
+p->signal because on exec() a TGID targeted timer is inherited.
+
+As sys_timer_delete() freed the underlying posix timer object
+run_posix_cpu_timers() or any timerqueue related add/delete operations on
+other timers will access the freed object's timerqueue node, which results
+in an UAF.
+
+There is a similar problem vs. posix_cpu_timer_set(). For regular posix
+timers it just transiently returns -ESRCH to user space, but for the use
+case in do_cpu_nanosleep() it's the same UAF just that the k_itimer is
+allocated on the stack.
+
+Also posix_cpu_timer_rearm() fails to rearm the timer, which means it stops
+to expire.
+
+While debating solutions Frederic pointed out another problem:
+
+   posix_cpu_timer_del(tmr)
+					__exit_signal(p)
+					  posix_cpu_timers*_exit(p);
+					  unhash_task(p);
+					  p->sighand = NULL;
+     sh = lock_task_sighand(p)
+        sighand = p->sighand;
+	if (!sighand)
+	    return NULL;
+	lock(sighand);
+
+     if (!sh)
+	WARN_ON_ONCE(timer_queued(tmr));
+
+On weakly ordered architectures it is not guaranteed that
+posix_cpu_timer_del() will observe the stores in posix_cpu_timers*_exit()
+when p->sighand is observed as NULL, which means the WARN() can be a false
+positive.
+
+Solve these issues by:
+
+  1) Changing the store in __exit_signal() to smp_store_release().
+
+  2) Adding a smp_acquire__after_ctrl_dep() into the !sighand path
+     of lock_task_sighand().
+
+  3) Creating a helper function for looking up the task and locking sighand
+     which does not return when sighand == NULL. Instead it retries the
+     task lookup and only if that fails it gives up.
+
+  4) Using that helper in the three affected functions.
+
+#1/#2 ensures that the reader side which observes sighand == NULL also
+observes all preceeding stores, i.e. the stores in posix_cpu_timers*_exit()
+and the ones in unhash_task().
+
+#3 ensures that the above described non-leader exec() situation is handled
+gracefully. When the task lookup returns the old leader, but sighand ==
+NULL then it retries. In the non-leader exec() case the subsequent task
+lookup will observe the new leader due to #1/#2. In normal exit() scenarios
+the subsequent lookup fails.
+
+When the task lookup fails, the function also checks whether the timer is
+still enqueued and issues a warning if that's the case. Unfortunately there
+is nothing which can be done about it, but as the task is already not
+longer visible the timer should not be accessed anymore. This check also
+requires memory ordering, which is not provided when the first lookup
+fails. To achieve that the check is preceeded by a smp_rmb() which pairs
+with the smp_wmb() in write_seqlock() in __exit_signal(). That ensures that
+the stores in posix_cpu_timers*_exit() are visible.
+
+The history of the non-leader exec() issue goes back to the early days of
+posix CPU timers, which stored a pointer to the group leader task in the
+timer. That obviously fails when a non-leader exec() switches the leader.
+commit e0a70217107e ("posix-cpu-timers: workaround to suppress the problems
+with mt exec") added a temporary workaround for that in 2010 which surv
+---truncated---
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-64559 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64559</link>
+            <guid isPermaLink="false">CVE-2026-64559</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:59 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+s390/pkey: Check length in PKEY_VERIFYPROTK ioctl
+
+Explicitly check the buffer length request structure provided by
+user-space and fail, if it exceeds the buffer size.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-64558 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64558</link>
+            <guid isPermaLink="false">CVE-2026-64558</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:59 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+s390/pkey: Check length in pkey_pckmo handler implementation
+
+Explicitly check the length of the target buffer in the pkey_pckmo
+implementation of the key_to_protkey() handler function. The handler
+function fails, if the generated output data exceeds the length of the
+provided target buffer.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-64557 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64557</link>
+            <guid isPermaLink="false">CVE-2026-64557</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:59 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+Bluetooth: L2CAP: Fix use-after-free in l2cap_sock_new_connection_cb()
+
+l2cap_sock_new_connection_cb() returned l2cap_pi(sk)->chan after
+release_sock(parent). Once the parent lock is dropped the newly
+enqueued child socket sk is reachable via the accept queue, so another
+task can accept and free it before the callback dereferences sk,
+resulting in a use-after-free.
+
+Rework the ->new_connection() op so the core, rather than the callback,
+owns the child channel's lifetime. The op now receives a pre-allocated
+new_chan and returns an errno instead of allocating and returning a
+channel. l2cap_new_connection() allocates the child channel and links
+it into the conn list via __l2cap_chan_add() before invoking the
+callback, so the conn-list reference keeps the channel alive once
+release_sock(parent) exposes the socket to other tasks.
+
+Channel configuration that was duplicated in l2cap_sock_init() and the
+various new_connection callbacks is consolidated into
+l2cap_chan_set_defaults(), which now inherits from the parent channel
+when one is supplied.
+
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:A/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-64556 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64556</link>
+            <guid isPermaLink="false">CVE-2026-64556</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:59 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+perf/core: Detach event groups during remove_on_exec
+
+perf_event_remove_on_exec() removes events by calling
+perf_event_exit_event(). For top-level events, this removes the event from
+the context with DETACH_EXIT only.
+
+This can leave inconsistent group state when a removed event is a group
+leader and the group contains siblings without remove_on_exec. If the group
+was active, the surviving siblings can remain active and attached to the
+removed leader's sibling list, but are no longer represented by a valid
+group leader on the PMU context active lists.
+
+A later close of the removed leader uses DETACH_GROUP and can promote the
+still-active siblings from this stale group state. The next schedule-in can
+then add an already-linked active_list entry again, corrupting the PMU
+context active list.
+
+With DEBUG_LIST enabled, this is caught as a list_add double-add in
+merge_sched_in().
+
+Fix this by detaching group relationships when remove_on_exec removes an
+event. This preserves the existing task-exit and revoke behavior, while
+ensuring surviving siblings are ungrouped before the removed event leaves
+the context.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-64555 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64555</link>
+            <guid isPermaLink="false">CVE-2026-64555</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:59 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+KVM: arm64: nv: Fix SPSR_EL2 restore in kvm_hyp_handle_mops()
+
+kvm_hyp_handle_mops() resets the single-step state machine as part of
+rewinding state for a MOPS exception by modifying vcpu_cpsr() and
+writing the result directly into hardware.
+
+In the case of nested virtualization, vcpu_cpsr() is a synthetic value
+such that the rest of KVM can deal with vEL2 cleanly. That means the
+value requires translation before being written into hardware, which is
+unfortunately missing from the MOPS handler.
+
+Fix it by directly modifying SPSR_EL2 and avoiding the synthetic state
+altogether, which will be resynchronized on the next 'full' exit back
+to KVM.
+
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-64554 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64554</link>
+            <guid isPermaLink="false">CVE-2026-64554</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:59 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+netfilter: bridge: fix stale prevhdr pointer in br_ip6_fragment()
+
+br_ip6_fragment() gets prevhdr, a pointer into the skb head, from
+ip6_find_1stfragopt(), then calls skb_checksum_help().  For a cloned skb
+skb_checksum_help() reallocates the head via pskb_expand_head(), leaving
+prevhdr dangling.  It is later dereferenced in ip6_frag_next(), causing a
+use-after-free write.
+
+Save prevhdr's offset before skb_checksum_help() and recompute it after,
+like commit ef0efcd3bd3f ("ipv6: Fix dangling pointer when ipv6
+fragment").
+
+  BUG: KASAN: slab-use-after-free in ip6_frag_next (net/ipv6/ip6_output.c:857)
+  Write of size 1 at addr ffff888013ff5016 by task exploit/141
+  Call Trace:
+   ...
+   kasan_report (mm/kasan/report.c:595)
+   ip6_frag_next (net/ipv6/ip6_output.c:857)
+   br_ip6_fragment (net/ipv6/netfilter.c:212)
+   nf_ct_bridge_post (net/bridge/netfilter/nf_conntrack_bridge.c:407)
+   nf_hook_slow (net/netfilter/core.c:619)
+   br_forward_finish (net/bridge/br_forward.c:66)
+   __br_forward (net/bridge/br_forward.c:115)
+   maybe_deliver (net/bridge/br_forward.c:191)
+   br_flood (net/bridge/br_forward.c:245)
+   br_handle_frame_finish (net/bridge/br_input.c:229)
+   br_handle_frame (net/bridge/br_input.c:442)
+   ...
+   packet_sendmsg (net/packet/af_packet.c:3114)
+   ...
+   do_syscall_64 (arch/x86/entry/syscall_64.c:94)
+   entry_SYSCALL_64_after_hwframe (arch/x86/entry/entry_64.S:121)
+  Kernel panic - not syncing: Fatal exception in interrupt
+
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:A/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-64552 [CVSS:3.1 8.4 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64552</link>
+            <guid isPermaLink="false">CVE-2026-64552</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:58 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+virtio-net: fix len check in receive_big()
+
+receive_big() bounds the device-announced length by
+(big_packets_num_skbfrags + 1) * PAGE_SIZE.  That is still too loose:
+add_recvbuf_big() sets sg[1] to start at offset
+sizeof(struct padded_vnet_hdr) into the first page, so the chain
+actually carries hdr_len + (PAGE_SIZE - sizeof(padded_vnet_hdr)) +
+big_packets_num_skbfrags * PAGE_SIZE bytes -- 20 bytes less than the
+check allows for the common hdr_len == 12 case.
+
+A malicious virtio backend can announce a len in that gap.  page_to_skb()
+then walks one frag past the page chain, storing a NULL page->private
+into skb_shinfo()->frags[MAX_SKB_FRAGS], which is both an out-of-bounds
+write past the static frag array and a NULL frag handed up the rx path.
+
+Bound len by the size add_recvbuf_big() actually advertised.
+
+Score: 8.4 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-64551 [CVSS:3.1 9.1 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64551</link>
+            <guid isPermaLink="false">CVE-2026-64551</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:58 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+sctp: validate STALE_COOKIE cause length before reading staleness
+
+When an ERROR chunk with a STALE_COOKIE cause is received in the
+COOKIE_ECHOED state, sctp_sf_do_5_2_6_stale() reads the 4-byte Measure
+of Staleness that follows the cause header:
+
+	err   = (struct sctp_errhdr *)(chunk->skb->data);
+	stale = ntohl(*(__be32 *)((u8 *)err + sizeof(*err)));
+
+err is the first cause in the chunk, not the STALE_COOKIE cause that
+caused the dispatch, and nothing guarantees the staleness field is
+present. sctp_walk_errors() only requires a cause to be as long as the
+4-byte header, so for a STALE_COOKIE cause of length 4 the read runs
+past the cause, and for a minimal ERROR chunk past skb->tail. The value
+is echoed to the peer in the Cookie Preservative of the reply INIT,
+leaking uninitialized memory.
+
+sctp_sf_cookie_echoed_err() already walks to the STALE_COOKIE cause, so
+check its length there and pass it to sctp_sf_do_5_2_6_stale(), which
+reads that cause instead of the first one. A STALE_COOKIE cause too
+short to hold the staleness field is discarded.
+
+The read is reachable by any peer that can drive an association into
+COOKIE_ECHOED, including an unprivileged process using a raw SCTP socket
+in a user and network namespace.
+
+Score: 9.1 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-64550 [CVSS:3.1 7.3 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64550</link>
+            <guid isPermaLink="false">CVE-2026-64550</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:58 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+net: qualcomm: rmnet: validate MAP frame length before ingress parsing
+
+When ingress deaggregation is disabled, rmnet_map_ingress_handler() passes
+the skb straight to __rmnet_map_ingress_handler(), skipping the length
+validation that rmnet_map_deaggregate() performs on the aggregated path.
+The parser then dereferences the MAP header and csum header/trailer based on
+the on-wire pkt_len without checking skb->len, so a short frame is read out
+of bounds:
+
+  BUG: KASAN: slab-out-of-bounds in rmnet_map_checksum_downlink_packet
+  Read of size 1 at addr ffff88801118ed00 by task exploit/147
+  Call Trace:
+   ...
+   rmnet_map_checksum_downlink_packet (drivers/net/ethernet/qualcomm/rmnet/rmnet_map_data.c:413)
+   __rmnet_map_ingress_handler (drivers/net/ethernet/qualcomm/rmnet/rmnet_handlers.c:96)
+   rmnet_rx_handler (drivers/net/ethernet/qualcomm/rmnet/rmnet_handlers.c:129)
+   __netif_receive_skb_core.constprop.0 (net/core/dev.c:6089)
+   netif_receive_skb (net/core/dev.c:6460)
+   tun_get_user (drivers/net/tun.c:1955)
+   tun_chr_write_iter (drivers/net/tun.c:2001)
+   vfs_write (fs/read_write.c:688)
+   ksys_write (fs/read_write.c:740)
+   do_syscall_64 (arch/x86/entry/syscall_64.c:94)
+   ...
+
+Factor that validation out of rmnet_map_deaggregate() into
+rmnet_map_validate_packet_len() and run it on the no-aggregation path too.
+The MAP header is bounds-checked first, since this path can receive a frame
+shorter than the header.
 
 Score: 7.3 (HIGH)
-Vector: CVSS:4.0/AV:L/AC:L/AT:P/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:L/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-15929 [CVSS:4.0 7.1 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-15929</link>
-            <guid isPermaLink="false">CVE-2026-15929</guid>
-            <pubDate>Thu, 30 Jul 2026 02:16:45 GMT</pubDate>
-            <description><![CDATA[Improper neutralization of special elements used in an SQL command ('SQL injection') vulnerability in LG Electronics SmartShare allows SQL Injection.
+            <title><![CDATA[CVE-2026-64548 [CVSS:3.1 8.4 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64548</link>
+            <guid isPermaLink="false">CVE-2026-64548</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:58 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
 
-This issue affects SmartShare: through 2.3.1712.1202, which is supported on Microsoft Windows 10 and earlier versions.
+bpf, sockmap: reject overflowing copy + len in bpf_msg_push_data()
+
+When the scatterlist ring is full or nearly full, bpf_msg_push_data()
+enters a copy fallback path and computes copy + len for the page
+allocation size. Since len comes from BPF with arg3_type = ARG_ANYTHING
+and both are u32, a crafted len can wrap the sum to a small value,
+causing an undersized allocation followed by an out-of-bounds memcpy.
+
+ BUG: unable to handle page fault for address: ffffed104089a402
+ Oops: Oops: 0000 [#1] SMP KASAN NOPTI
+ Call Trace:
+  __asan_memcpy (mm/kasan/shadow.c:105)
+  bpf_msg_push_data (net/core/filter.c:2852 net/core/filter.c:2788)
+  bpf_prog_9ed8b5711920a7d7+0x2e/0x36
+  sk_psock_msg_verdict (net/core/skmsg.c:934)
+  tcp_bpf_sendmsg (net/ipv4/tcp_bpf.c:421 net/ipv4/tcp_bpf.c:584)
+  __sys_sendto (net/socket.c:2206)
+  do_syscall_64 (arch/x86/entry/syscall_64.c:94)
+  entry_SYSCALL_64_after_hwframe (arch/x86/entry/entry_64.S:130)
+
+Add an overflow check before the allocation.
+
+Score: 8.4 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-64547 [CVSS:3.1 8.1 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64547</link>
+            <guid isPermaLink="false">CVE-2026-64547</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:58 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+net: usb: net1080: validate packet_len before pad-byte access in rx_fixup
+
+For an even packet_len, net1080_rx_fixup() reads the pad byte at
+skb->data[packet_len] before the skb->len != packet_len check further
+down, and packet_len is only bounded against NC_MAX_PACKET. A malicious
+NetChip 1080 device can send a short frame advertising a large even
+packet_len (e.g. 0x4000), so the pad-byte read lands past the end of the
+skb:
+
+  BUG: KASAN: slab-out-of-bounds in net1080_rx_fixup
+  Read of size 1 at addr ffff8880106c83c6 by task ksoftirqd/0/14
+   ...
+   net1080_rx_fixup (drivers/net/usb/net1080.c:384)
+   usbnet_bh (drivers/net/usb/usbnet.c:1589)
+   process_one_work (kernel/workqueue.c:3322)
+   bh_worker (kernel/workqueue.c:3708)
+   tasklet_action (kernel/softirq.c:965)
+   handle_softirqs (kernel/softirq.c:622)
+   ...
+
+Reject the frame when packet_len >= skb->len before reading.
+
+Score: 8.1 (HIGH)
+Vector: CVSS:3.1/AV:A/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-64546 [CVSS:3.1 7.1 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64546</link>
+            <guid isPermaLink="false">CVE-2026-64546</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:58 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+drm/edid: fix OOB read in drm_parse_tiled_block()
+
+drm_parse_tiled_block() casts the DisplayID block to a
+struct displayid_tiled_block and reads the full fixed layout up to
+tile->topology_id[7] without checking block->num_bytes. The DisplayID
+iterator only validates the declared payload length, so a crafted EDID
+can advertise a tiled-display block (tag DATA_BLOCK_TILED_DISPLAY, or
+DATA_BLOCK_2_TILED_DISPLAY_TOPOLOGY for v2.0) with a small num_bytes at
+the end of a DisplayID extension. The read then runs past the end of the
+exact-sized kmemdup()'d EDID allocation, a heap out-of-bounds read.
+
+Reject blocks shorter than the spec's 22-byte tiled payload before
+reading the fixed struct, as drm_parse_vesa_mso_data() already does.
+
+  BUG: KASAN: slab-out-of-bounds in drm_edid_connector_update
+  Read of size 2 at addr ffff888010077700 by task exploit/147
+   dump_stack_lvl (lib/dump_stack.c:94 ...)
+   print_report (mm/kasan/report.c:378 ...)
+   kasan_report (mm/kasan/report.c:595)
+   drm_edid_connector_update (drivers/gpu/drm/drm_edid.c:7581)
+   bochs_connector_helper_get_modes (drivers/gpu/drm/tiny/bochs.c:574)
+   drm_helper_probe_single_connector_modes (drivers/gpu/drm/drm_probe_helper.c:426)
+   status_store (drivers/gpu/drm/drm_sysfs.c:219)
+   ...
+   vfs_write (fs/read_write.c:595 fs/read_write.c:688)
+   ksys_write (fs/read_write.c:740)
 
 Score: 7.1 (HIGH)
-Vector: CVSS:4.0/AV:A/AC:L/AT:N/PR:N/UI:N/VC:H/VI:L/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-59952 [CVSS:4.0 6.9 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-59952</link>
-            <guid isPermaLink="false">CVE-2026-59952</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:06 GMT</pubDate>
-            <description><![CDATA[Valibot helps validate data using a schema. Versions prior to 1.4.2 can throw a TypeError inside its flatten() helper when validation issues contain attacker-controlled object keys such as toString, valueOf, or hasOwnProperty. The issue is reachable through normal record() validation. record() intentionally filters __proto__, prototype, and constructor, but it still accepts other own keys that collide with inherited Object.prototype properties. If the record key schema or value schema rejects such an entry, Valibot creates an issue path containing that key. Passing the resulting issues to Valibot's documented flatten() helper causes flatErrors.nested[dotPath] to resolve to the inherited method instead of an own error array, and the helper calls .push(...) on that function. This is not a global prototype pollution issue. The impact is availability/error handling: applications that validate user-controlled objects with record() and flatten validation errors for API responses can crash the request path with a TypeError instead of returning structured validation errors. This issue has been fixed in version 1.4.2.
+            <title><![CDATA[CVE-2026-64545 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64545</link>
+            <guid isPermaLink="false">CVE-2026-64545</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:58 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
 
-Score: 6.9 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-18019]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-18019</link>
-            <guid isPermaLink="false">CVE-2026-18019</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:06 GMT</pubDate>
-            <description><![CDATA[Side-channel information leakage in Media in Google Chrome prior to 151.0.7922.72 allowed a remote attacker to leak cross-origin data via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-18018]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-18018</link>
-            <guid isPermaLink="false">CVE-2026-18018</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:06 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in Updater in Google Chrome on Windows prior to 151.0.7922.72 allowed a local attacker to perform UI spoofing via a malicious file. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-18017]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-18017</link>
-            <guid isPermaLink="false">CVE-2026-18017</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:06 GMT</pubDate>
-            <description><![CDATA[Use after free in Dawn in Google Chrome prior to 151.0.7922.72 allowed a remote attacker to execute arbitrary code inside a sandbox via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-18016]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-18016</link>
-            <guid isPermaLink="false">CVE-2026-18016</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:06 GMT</pubDate>
-            <description><![CDATA[Insufficient policy enforcement in Chrome for iOS in Google Chrome on iOS prior to 151.0.7922.72 allowed a remote attacker to perform UI spoofing via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-18015]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-18015</link>
-            <guid isPermaLink="false">CVE-2026-18015</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:06 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in Tint in Google Chrome on Mac prior to 151.0.7922.72 allowed a remote attacker to potentially perform a sandbox escape via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-18014]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-18014</link>
-            <guid isPermaLink="false">CVE-2026-18014</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:06 GMT</pubDate>
-            <description><![CDATA[Insufficient validation of untrusted input in DevTools in Google Chrome prior to 151.0.7922.72 allowed a remote attacker to bypass navigation restrictions via a malicious file. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-18013]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-18013</link>
-            <guid isPermaLink="false">CVE-2026-18013</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:06 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in Chrome for iOS in Google Chrome on iOS prior to 151.0.7922.72 allowed a remote attacker to perform UI spoofing via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-18012]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-18012</link>
-            <guid isPermaLink="false">CVE-2026-18012</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:05 GMT</pubDate>
-            <description><![CDATA[Use after free in PDFium in Google Chrome prior to 151.0.7922.72 allowed a remote attacker to execute arbitrary code inside a sandbox via a crafted PDF file. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-18011]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-18011</link>
-            <guid isPermaLink="false">CVE-2026-18011</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:05 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in Chrome for iOS in Google Chrome on iOS prior to 151.0.7922.72 allowed a local attacker to obtain potentially sensitive information from process memory via physical access to the device. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-18010]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-18010</link>
-            <guid isPermaLink="false">CVE-2026-18010</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:05 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in Passwords in Google Chrome prior to 151.0.7922.72 allowed a remote attacker to perform UI spoofing via malicious network traffic. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-18009]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-18009</link>
-            <guid isPermaLink="false">CVE-2026-18009</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:05 GMT</pubDate>
-            <description><![CDATA[Insufficient validation of untrusted input in Passwords in Google Chrome prior to 151.0.7922.72 allowed a remote attacker to perform UI spoofing via malicious network traffic. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-18008]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-18008</link>
-            <guid isPermaLink="false">CVE-2026-18008</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:05 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in Settings in Google Chrome prior to 151.0.7922.72 allowed a remote attacker to perform UI spoofing via malicious network traffic. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-18007]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-18007</link>
-            <guid isPermaLink="false">CVE-2026-18007</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:05 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in Input in Google Chrome on Android prior to 151.0.7922.72 allowed a remote attacker to perform UI spoofing via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-18006]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-18006</link>
-            <guid isPermaLink="false">CVE-2026-18006</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:05 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in Google Lens in Google Chrome prior to 151.0.7922.72 allowed a remote attacker who had compromised the renderer process to perform UI spoofing via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-18005]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-18005</link>
-            <guid isPermaLink="false">CVE-2026-18005</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:05 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in WebXR in Google Chrome prior to 151.0.7922.72 allowed a remote attacker to obtain potentially sensitive information from process memory via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-18004]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-18004</link>
-            <guid isPermaLink="false">CVE-2026-18004</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:05 GMT</pubDate>
-            <description><![CDATA[Insufficient policy enforcement in Speech in Google Chrome prior to 151.0.7922.72 allowed a remote attacker who had compromised the renderer process to leak cross-origin data via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-18003]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-18003</link>
-            <guid isPermaLink="false">CVE-2026-18003</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:05 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in Chrome for iOS in Google Chrome on iOS prior to 151.0.7922.72 allowed a remote attacker to perform UI spoofing via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-18002]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-18002</link>
-            <guid isPermaLink="false">CVE-2026-18002</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:04 GMT</pubDate>
-            <description><![CDATA[Insufficient validation of untrusted input in Google Lens in Google Chrome prior to 151.0.7922.72 allowed a remote attacker who had compromised the renderer process to potentially perform a sandbox escape via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-18001]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-18001</link>
-            <guid isPermaLink="false">CVE-2026-18001</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:04 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in WebGL in Google Chrome prior to 151.0.7922.72 allowed a remote attacker to obtain potentially sensitive information from process memory via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-18000]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-18000</link>
-            <guid isPermaLink="false">CVE-2026-18000</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:04 GMT</pubDate>
-            <description><![CDATA[Insufficient policy enforcement in USB in Google Chrome on Android prior to 151.0.7922.72 allowed a remote attacker who had compromised the renderer process to leak cross-origin data via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17999]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17999</link>
-            <guid isPermaLink="false">CVE-2026-17999</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:04 GMT</pubDate>
-            <description><![CDATA[Race in PictureInPicture in Google Chrome on Android prior to 151.0.7922.72 allowed a remote attacker to perform domain spoofing via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17998]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17998</link>
-            <guid isPermaLink="false">CVE-2026-17998</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:04 GMT</pubDate>
-            <description><![CDATA[Incorrect security UI in Extensions in Google Chrome prior to 151.0.7922.72 allowed an attacker who convinced a user to install a malicious extension to perform UI spoofing via a crafted Chrome Extension. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17997]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17997</link>
-            <guid isPermaLink="false">CVE-2026-17997</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:04 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in Passwords in Google Chrome prior to 151.0.7922.72 allowed a remote attacker who had compromised the renderer process to leak cross-origin data via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17996]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17996</link>
-            <guid isPermaLink="false">CVE-2026-17996</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:04 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in Browser in Google Chrome on Mac prior to 151.0.7922.72 allowed a local attacker to bypass navigation restrictions via a malicious file. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17995]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17995</link>
-            <guid isPermaLink="false">CVE-2026-17995</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:04 GMT</pubDate>
-            <description><![CDATA[Out of bounds read in Dawn in Google Chrome prior to 151.0.7922.72 allowed a remote attacker to perform an out of bounds memory read via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17994]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17994</link>
-            <guid isPermaLink="false">CVE-2026-17994</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:04 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in Media in Google Chrome on Android prior to 151.0.7922.72 allowed a remote attacker to bypass navigation restrictions via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17993]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17993</link>
-            <guid isPermaLink="false">CVE-2026-17993</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:03 GMT</pubDate>
-            <description><![CDATA[Race in Updater in Google Chrome on Windows prior to 151.0.7922.72 allowed a local attacker to perform privilege escalation via a malicious file. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17992]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17992</link>
-            <guid isPermaLink="false">CVE-2026-17992</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:03 GMT</pubDate>
-            <description><![CDATA[Uninitialized Use in Skia in Google Chrome on Windows prior to 151.0.7922.72 allowed a remote attacker to obtain potentially sensitive information from process memory via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17991]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17991</link>
-            <guid isPermaLink="false">CVE-2026-17991</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:03 GMT</pubDate>
-            <description><![CDATA[Insufficient validation of untrusted input in AI in Google Chrome prior to 151.0.7922.72 allowed a remote attacker who had compromised the renderer process to potentially perform a sandbox escape via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17990]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17990</link>
-            <guid isPermaLink="false">CVE-2026-17990</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:03 GMT</pubDate>
-            <description><![CDATA[Insufficient validation of untrusted input in WebAuthn in Google Chrome prior to 151.0.7922.72 allowed a remote attacker who had compromised the renderer process to potentially perform a sandbox escape via a crafted PDF file. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17989]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17989</link>
-            <guid isPermaLink="false">CVE-2026-17989</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:03 GMT</pubDate>
-            <description><![CDATA[Type Confusion in V8 in Google Chrome prior to 151.0.7922.72 allowed a remote attacker to execute arbitrary code inside a sandbox via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17988]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17988</link>
-            <guid isPermaLink="false">CVE-2026-17988</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:03 GMT</pubDate>
-            <description><![CDATA[Insufficient validation of untrusted input in Navigation in Google Chrome prior to 151.0.7922.72 allowed a remote attacker who had compromised the renderer process to bypass navigation restrictions via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17987]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17987</link>
-            <guid isPermaLink="false">CVE-2026-17987</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:03 GMT</pubDate>
-            <description><![CDATA[Insufficient validation of untrusted input in Notifications in Google Chrome prior to 151.0.7922.72 allowed a remote attacker who had compromised the renderer process to potentially perform a sandbox escape via a crafted PDF file. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17986]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17986</link>
-            <guid isPermaLink="false">CVE-2026-17986</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:03 GMT</pubDate>
-            <description><![CDATA[Insufficient policy enforcement in Bluetooth in Google Chrome prior to 151.0.7922.72 allowed a remote attacker who had compromised the renderer process to bypass same origin policy via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17985]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17985</link>
-            <guid isPermaLink="false">CVE-2026-17985</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:03 GMT</pubDate>
-            <description><![CDATA[Insufficient policy enforcement in Speech in Google Chrome prior to 151.0.7922.72 allowed a remote attacker to bypass site isolation via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17984]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17984</link>
-            <guid isPermaLink="false">CVE-2026-17984</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:03 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in Browser in Google Chrome on Android prior to 151.0.7922.72 allowed a local attacker to leak cross-origin data via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17983]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17983</link>
-            <guid isPermaLink="false">CVE-2026-17983</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:02 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in Global Media Controls in Google Chrome prior to 151.0.7922.72 allowed a remote attacker to perform UI spoofing via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17982]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17982</link>
-            <guid isPermaLink="false">CVE-2026-17982</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:02 GMT</pubDate>
-            <description><![CDATA[Insufficient validation of untrusted input in Cast in Google Chrome prior to 151.0.7922.72 allowed a remote attacker to bypass same origin policy via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17981]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17981</link>
-            <guid isPermaLink="false">CVE-2026-17981</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:02 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in Blink in Google Chrome prior to 151.0.7922.72 allowed a remote attacker to leak cross-origin data via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17980]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17980</link>
-            <guid isPermaLink="false">CVE-2026-17980</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:02 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in UI in Google Chrome on Android prior to 151.0.7922.72 allowed a remote attacker who convinced a user to engage in specific UI gestures to leak cross-origin data via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17979]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17979</link>
-            <guid isPermaLink="false">CVE-2026-17979</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:02 GMT</pubDate>
-            <description><![CDATA[Race in V8 in Google Chrome prior to 151.0.7922.72 allowed a remote attacker to execute arbitrary code inside a sandbox via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17978]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17978</link>
-            <guid isPermaLink="false">CVE-2026-17978</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:02 GMT</pubDate>
-            <description><![CDATA[Side-channel information leakage in WebCodecs in Google Chrome prior to 151.0.7922.72 allowed a remote attacker to obtain potentially sensitive information from process memory via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17977]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17977</link>
-            <guid isPermaLink="false">CVE-2026-17977</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:02 GMT</pubDate>
-            <description><![CDATA[Policy bypass in CSS in Google Chrome prior to 151.0.7922.72 allowed a remote attacker to leak cross-origin data via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17976]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17976</link>
-            <guid isPermaLink="false">CVE-2026-17976</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:02 GMT</pubDate>
-            <description><![CDATA[Insufficient policy enforcement in Extensions in Google Chrome prior to 151.0.7922.72 allowed an attacker who convinced a user to install a malicious extension to bypass discretionary access control via a crafted domain name. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17975]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17975</link>
-            <guid isPermaLink="false">CVE-2026-17975</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:02 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in IME in Google Chrome on Mac prior to 151.0.7922.72 allowed a remote attacker to obtain potentially sensitive information from process memory via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17974]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17974</link>
-            <guid isPermaLink="false">CVE-2026-17974</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:01 GMT</pubDate>
-            <description><![CDATA[Insufficient policy enforcement in DevTools in Google Chrome prior to 151.0.7922.72 allowed a local attacker to bypass navigation restrictions via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17973]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17973</link>
-            <guid isPermaLink="false">CVE-2026-17973</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:01 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in Views in Google Chrome on Mac prior to 151.0.7922.72 allowed a local attacker to obtain potentially sensitive information from process memory via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17972]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17972</link>
-            <guid isPermaLink="false">CVE-2026-17972</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:01 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in Chrome for iOS in Google Chrome on iOS prior to 151.0.7922.72 allowed a remote attacker to perform UI spoofing via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17971]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17971</link>
-            <guid isPermaLink="false">CVE-2026-17971</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:01 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in Frame in Google Chrome prior to 151.0.7922.72 allowed a remote attacker to potentially perform out of bounds memory access via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17970]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17970</link>
-            <guid isPermaLink="false">CVE-2026-17970</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:01 GMT</pubDate>
-            <description><![CDATA[Insufficient validation of untrusted input in Passwords in Google Chrome prior to 151.0.7922.72 allowed an attacker in a privileged network position to perform UI spoofing via malicious network traffic. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17969]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17969</link>
-            <guid isPermaLink="false">CVE-2026-17969</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:01 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in Passwords in Google Chrome prior to 151.0.7922.72 allowed a remote attacker to execute arbitrary code inside a sandbox via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17968]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17968</link>
-            <guid isPermaLink="false">CVE-2026-17968</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:01 GMT</pubDate>
-            <description><![CDATA[Uninitialized Use in WebXR in Google Chrome on Android prior to 151.0.7922.72 allowed a remote attacker to obtain potentially sensitive information from process memory via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17967]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17967</link>
-            <guid isPermaLink="false">CVE-2026-17967</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:01 GMT</pubDate>
-            <description><![CDATA[Use after free in Chrome for iOS in Google Chrome on iOS prior to 151.0.7922.72 allowed a remote attacker to potentially exploit heap corruption via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17966]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17966</link>
-            <guid isPermaLink="false">CVE-2026-17966</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:01 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in Views in Google Chrome on Mac prior to 151.0.7922.72 allowed a local attacker to obtain potentially sensitive information from process memory via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17965]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17965</link>
-            <guid isPermaLink="false">CVE-2026-17965</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:00 GMT</pubDate>
-            <description><![CDATA[Incorrect security UI in Chrome for iOS in Google Chrome on iOS prior to 151.0.7922.72 allowed a remote attacker to perform UI spoofing via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17964]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17964</link>
-            <guid isPermaLink="false">CVE-2026-17964</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:00 GMT</pubDate>
-            <description><![CDATA[Incorrect security UI in UI in Google Chrome on Android prior to 151.0.7922.72 allowed a remote attacker to perform domain spoofing via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17963]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17963</link>
-            <guid isPermaLink="false">CVE-2026-17963</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:00 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in SVG in Google Chrome prior to 151.0.7922.72 allowed a remote attacker to leak cross-origin data via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17962]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17962</link>
-            <guid isPermaLink="false">CVE-2026-17962</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:00 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in Blink in Google Chrome prior to 151.0.7922.72 allowed a remote attacker to inject arbitrary scripts or HTML (UXSS) via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17961]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17961</link>
-            <guid isPermaLink="false">CVE-2026-17961</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:00 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in Session in Google Chrome on Android prior to 151.0.7922.72 allowed a remote attacker to bypass navigation restrictions via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17960]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17960</link>
-            <guid isPermaLink="false">CVE-2026-17960</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:00 GMT</pubDate>
-            <description><![CDATA[Insufficient policy enforcement in Chrome for iOS in Google Chrome on iOS prior to 151.0.7922.72 allowed a remote attacker to bypass no-referrer policy via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17959]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17959</link>
-            <guid isPermaLink="false">CVE-2026-17959</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:00 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in Network in Google Chrome prior to 151.0.7922.72 allowed a remote attacker to leak cross-origin data via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17958]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17958</link>
-            <guid isPermaLink="false">CVE-2026-17958</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:00 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in Views in Google Chrome prior to 151.0.7922.72 allowed a remote attacker to perform UI spoofing via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17957]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17957</link>
-            <guid isPermaLink="false">CVE-2026-17957</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:00 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in CORS in Google Chrome prior to 151.0.7922.72 allowed a remote attacker who had compromised the renderer process to leak cross-origin data via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17956]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17956</link>
-            <guid isPermaLink="false">CVE-2026-17956</guid>
-            <pubDate>Thu, 30 Jul 2026 01:17:00 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in Scheduling in Google Chrome prior to 151.0.7922.72 allowed a remote attacker to execute arbitrary code inside a sandbox via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17955]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17955</link>
-            <guid isPermaLink="false">CVE-2026-17955</guid>
-            <pubDate>Thu, 30 Jul 2026 01:16:59 GMT</pubDate>
-            <description><![CDATA[Insufficient validation of untrusted input in Payments in Google Chrome prior to 151.0.7922.72 allowed a remote attacker to perform UI spoofing via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17954]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17954</link>
-            <guid isPermaLink="false">CVE-2026-17954</guid>
-            <pubDate>Thu, 30 Jul 2026 01:16:59 GMT</pubDate>
-            <description><![CDATA[Policy bypass in MHTML in Google Chrome prior to 151.0.7922.72 allowed a remote attacker to leak cross-origin data via a crafted MHTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17953]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17953</link>
-            <guid isPermaLink="false">CVE-2026-17953</guid>
-            <pubDate>Thu, 30 Jul 2026 01:16:59 GMT</pubDate>
-            <description><![CDATA[Insufficient policy enforcement in WebView in Google Chrome on Android prior to 151.0.7922.72 allowed a remote attacker to bypass navigation restrictions via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17952]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17952</link>
-            <guid isPermaLink="false">CVE-2026-17952</guid>
-            <pubDate>Thu, 30 Jul 2026 01:16:59 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in V8 in Google Chrome prior to 151.0.7922.72 allowed an attacker who convinced a user to install a malicious extension to execute arbitrary code inside a sandbox via a crafted Chrome Extension. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17951]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17951</link>
-            <guid isPermaLink="false">CVE-2026-17951</guid>
-            <pubDate>Thu, 30 Jul 2026 01:16:59 GMT</pubDate>
-            <description><![CDATA[Heap buffer overflow in WebRTC in Google Chrome prior to 151.0.7922.72 allowed a remote attacker to perform an out of bounds memory read via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17950]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17950</link>
-            <guid isPermaLink="false">CVE-2026-17950</guid>
-            <pubDate>Thu, 30 Jul 2026 01:16:59 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in Safebrowsing in Google Chrome on Mac prior to 151.0.7922.72 allowed a remote attacker to execute arbitrary code via a malicious file. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17949]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17949</link>
-            <guid isPermaLink="false">CVE-2026-17949</guid>
-            <pubDate>Thu, 30 Jul 2026 01:16:59 GMT</pubDate>
-            <description><![CDATA[Uninitialized Use in GPU in Google Chrome on Android prior to 151.0.7922.72 allowed a remote attacker to leak cross-origin data via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17948]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17948</link>
-            <guid isPermaLink="false">CVE-2026-17948</guid>
-            <pubDate>Thu, 30 Jul 2026 01:16:59 GMT</pubDate>
-            <description><![CDATA[Type Confusion in V8 in Google Chrome prior to 151.0.7922.72 allowed an attacker who convinced a user to install a malicious extension to execute arbitrary code inside a sandbox via a crafted Chrome Extension. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17947]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17947</link>
-            <guid isPermaLink="false">CVE-2026-17947</guid>
-            <pubDate>Thu, 30 Jul 2026 01:16:59 GMT</pubDate>
-            <description><![CDATA[Use after free in WebSockets in Google Chrome prior to 151.0.7922.72 allowed a remote attacker to potentially perform a sandbox escape via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17946]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17946</link>
-            <guid isPermaLink="false">CVE-2026-17946</guid>
-            <pubDate>Thu, 30 Jul 2026 01:16:58 GMT</pubDate>
-            <description><![CDATA[Uninitialized Use in Dawn in Google Chrome prior to 151.0.7922.72 allowed a remote attacker who had compromised the renderer process to obtain potentially sensitive information from process memory via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17945]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17945</link>
-            <guid isPermaLink="false">CVE-2026-17945</guid>
-            <pubDate>Thu, 30 Jul 2026 01:16:58 GMT</pubDate>
-            <description><![CDATA[Insufficient validation of untrusted input in Navigation in Google Chrome prior to 151.0.7922.72 allowed a remote attacker who had compromised the renderer process to perform UI spoofing via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17944]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17944</link>
-            <guid isPermaLink="false">CVE-2026-17944</guid>
-            <pubDate>Thu, 30 Jul 2026 01:16:58 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in Chrome for iOS in Google Chrome on iOS prior to 151.0.7922.72 allowed a remote attacker to bypass navigation restrictions via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17943]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17943</link>
-            <guid isPermaLink="false">CVE-2026-17943</guid>
-            <pubDate>Thu, 30 Jul 2026 01:16:58 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in Parser in Google Chrome prior to 151.0.7922.72 allowed a remote attacker to bypass content security policy via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17942]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17942</link>
-            <guid isPermaLink="false">CVE-2026-17942</guid>
-            <pubDate>Thu, 30 Jul 2026 01:16:58 GMT</pubDate>
-            <description><![CDATA[Side-channel information leakage in SVG in Google Chrome prior to 151.0.7922.72 allowed a remote attacker to leak cross-origin data via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17941]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17941</link>
-            <guid isPermaLink="false">CVE-2026-17941</guid>
-            <pubDate>Thu, 30 Jul 2026 01:16:58 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in Chrome for iOS in Google Chrome on iOS prior to 151.0.7922.72 allowed a remote attacker to spoof the contents of the Omnibox (URL bar) via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17940]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17940</link>
-            <guid isPermaLink="false">CVE-2026-17940</guid>
-            <pubDate>Thu, 30 Jul 2026 01:16:58 GMT</pubDate>
-            <description><![CDATA[Insufficient validation of untrusted input in Picture-in-Picture in Google Chrome on Android prior to 151.0.7922.72 allowed a remote attacker who had compromised the renderer process to potentially perform a sandbox escape via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17939]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17939</link>
-            <guid isPermaLink="false">CVE-2026-17939</guid>
-            <pubDate>Thu, 30 Jul 2026 01:16:58 GMT</pubDate>
-            <description><![CDATA[Insufficient validation of untrusted input in Passwords in Google Chrome prior to 151.0.7922.72 allowed a remote attacker to perform UI spoofing via malicious network traffic. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17938]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17938</link>
-            <guid isPermaLink="false">CVE-2026-17938</guid>
-            <pubDate>Thu, 30 Jul 2026 01:16:58 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in FullScreen in Google Chrome on Android prior to 151.0.7922.72 allowed a remote attacker to perform UI spoofing via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17937]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17937</link>
-            <guid isPermaLink="false">CVE-2026-17937</guid>
-            <pubDate>Thu, 30 Jul 2026 01:16:57 GMT</pubDate>
-            <description><![CDATA[Insufficient validation of untrusted input in DevTools in Google Chrome prior to 151.0.7922.72 allowed a remote attacker to bypass navigation restrictions via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17936]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17936</link>
-            <guid isPermaLink="false">CVE-2026-17936</guid>
-            <pubDate>Thu, 30 Jul 2026 01:16:57 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in DevTools in Google Chrome prior to 151.0.7922.72 allowed a remote attacker who convinced a user to engage in specific UI gestures to bypass navigation restrictions via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17935]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17935</link>
-            <guid isPermaLink="false">CVE-2026-17935</guid>
-            <pubDate>Thu, 30 Jul 2026 01:16:57 GMT</pubDate>
-            <description><![CDATA[Heap buffer overflow in Codecs in Google Chrome prior to 151.0.7922.72 allowed a remote attacker to execute arbitrary code inside a sandbox via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17934]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17934</link>
-            <guid isPermaLink="false">CVE-2026-17934</guid>
-            <pubDate>Thu, 30 Jul 2026 01:16:57 GMT</pubDate>
-            <description><![CDATA[Insufficient validation of untrusted input in DevTools in Google Chrome prior to 151.0.7922.72 allowed a remote attacker to bypass navigation restrictions via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17933]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17933</link>
-            <guid isPermaLink="false">CVE-2026-17933</guid>
-            <pubDate>Thu, 30 Jul 2026 01:16:57 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in DOMStorage in Google Chrome prior to 151.0.7922.72 allowed a remote attacker to leak cross-origin data via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17932]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17932</link>
-            <guid isPermaLink="false">CVE-2026-17932</guid>
-            <pubDate>Thu, 30 Jul 2026 01:16:57 GMT</pubDate>
-            <description><![CDATA[Use after free in DataTransfer in Google Chrome on Windows prior to 151.0.7922.72 allowed a local attacker to obtain potentially sensitive information from process memory via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17931]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17931</link>
-            <guid isPermaLink="false">CVE-2026-17931</guid>
-            <pubDate>Thu, 30 Jul 2026 01:16:57 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in DevTools in Google Chrome prior to 151.0.7922.72 allowed a remote attacker to bypass navigation restrictions via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17930]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17930</link>
-            <guid isPermaLink="false">CVE-2026-17930</guid>
-            <pubDate>Thu, 30 Jul 2026 01:16:57 GMT</pubDate>
-            <description><![CDATA[Insufficient validation of untrusted input in Extensions in Google Chrome prior to 151.0.7922.72 allowed a remote attacker who had compromised the renderer process to perform privilege escalation via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17929]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17929</link>
-            <guid isPermaLink="false">CVE-2026-17929</guid>
-            <pubDate>Thu, 30 Jul 2026 01:16:57 GMT</pubDate>
-            <description><![CDATA[Insufficient validation of untrusted input in DevTools in Google Chrome prior to 151.0.7922.72 allowed a remote attacker to bypass navigation restrictions via a malicious file. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17928]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17928</link>
-            <guid isPermaLink="false">CVE-2026-17928</guid>
-            <pubDate>Thu, 30 Jul 2026 01:16:57 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in DataTransfer in Google Chrome prior to 151.0.7922.72 allowed a remote attacker to leak cross-origin data via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17927]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17927</link>
-            <guid isPermaLink="false">CVE-2026-17927</guid>
-            <pubDate>Thu, 30 Jul 2026 01:16:56 GMT</pubDate>
-            <description><![CDATA[Insufficient policy enforcement in DevTools in Google Chrome prior to 151.0.7922.72 allowed an attacker who convinced a user to install a malicious extension to leak cross-origin data via a crafted Chrome Extension. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17926]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17926</link>
-            <guid isPermaLink="false">CVE-2026-17926</guid>
-            <pubDate>Thu, 30 Jul 2026 01:16:56 GMT</pubDate>
-            <description><![CDATA[Insufficient validation of untrusted input in DevTools in Google Chrome prior to 151.0.7922.72 allowed a remote attacker who convinced a user to engage in specific UI gestures to bypass navigation restrictions via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17925]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17925</link>
-            <guid isPermaLink="false">CVE-2026-17925</guid>
-            <pubDate>Thu, 30 Jul 2026 01:16:56 GMT</pubDate>
-            <description><![CDATA[Inappropriate implementation in Cast in Google Chrome on Android prior to 151.0.7922.72 allowed a remote attacker to bypass same origin policy via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17924]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17924</link>
-            <guid isPermaLink="false">CVE-2026-17924</guid>
-            <pubDate>Thu, 30 Jul 2026 01:16:56 GMT</pubDate>
-            <description><![CDATA[Use after free in DNS in Google Chrome prior to 151.0.7922.72 allowed a remote attacker who had compromised the renderer process to potentially perform a sandbox escape via a crafted HTML page. (Chromium security severity: Low)]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17923]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17923</link>
-            <guid isPermaLink="false">CVE-2026-17923</guid>
-            <pubDate>Thu, 30 Jul 2026 01:16:56 GMT</pubDate>
-            <description><![CDATA[Policy bypass in Enterprise in Google Chrome prior to 151.0.7922.72 allowed a remote attacker to bypass navigation restrictions via a crafted domain name. (Chromium security severity: Low)]]></description>
+net, bpf: check master for NULL in xdp_master_redirect()
+
+xdp_master_redirect() dereferences the result of
+netdev_master_upper_dev_get_rcu() without a NULL check, but that helper
+returns NULL when the receiving device has no upper-master adjacency.
+
+The reach guard only checks netif_is_bond_slave(). On bond slave release
+bond_upper_dev_unlink() drops the upper-master adjacency before clearing
+IFF_SLAVE, so an XDP_TX reaching xdp_master_redirect() in that window
+still passes netif_is_bond_slave() while master is already NULL, and
+faults on master->flags at offset 0xb0:
+
+  BUG: kernel NULL pointer dereference, address: 00000000000000b0
+  RIP: 0010:xdp_master_redirect (net/core/filter.c:4432)
+  Call Trace:
+   xdp_master_redirect (net/core/filter.c:4432)
+   bpf_prog_run_generic_xdp (include/net/xdp.h:700)
+   do_xdp_generic (net/core/dev.c:5608)
+   __netif_receive_skb_one_core (net/core/dev.c:6204)
+   process_backlog (net/core/dev.c:6319)
+   __napi_poll (net/core/dev.c:7729)
+   net_rx_action (net/core/dev.c:7792)
+   handle_softirqs (kernel/softirq.c:622)
+   __dev_queue_xmit (include/linux/bottom_half.h:33)
+   packet_sendmsg (net/packet/af_packet.c:3082)
+   __sys_sendto (net/socket.c:2252)
+  Kernel panic - not syncing: Fatal exception in interrupt
+
+The missing check dates back to the original code; commit 1921f91298d1
+("net, bpf: fix null-ptr-deref in xdp_master_redirect() for down master")
+later added the master->flags read where the fault now lands but kept the
+unconditional deref. Check master for NULL before use; a NULL master is
+treated the same as one that is not up.
+
+Score: 7.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-64543 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64543</link>
+            <guid isPermaLink="false">CVE-2026-64543</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:58 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+tipc: fix use-after-free of the discoverer in tipc_disc_rcv()
+
+bearer_disable() frees b->disc with tipc_disc_delete()'s plain kfree(),
+but tipc_disc_rcv() still dereferences b->disc in RX softirq under
+rcu_read_lock() (tipc_udp_recv -> tipc_rcv -> tipc_disc_rcv).
+
+L2 bearers are safe thanks to the synchronize_net() in
+tipc_disable_l2_media(), but the UDP bearer defers that call to the
+cleanup_bearer() workqueue, so the discoverer is freed with no grace
+period:
+
+ BUG: KASAN: slab-use-after-free in tipc_disc_rcv (net/tipc/discover.c:149)
+ Read of size 8 at addr ffff88802348b728 by task poc_tipc/184
+ <IRQ>
+  tipc_disc_rcv (net/tipc/discover.c:149)
+  tipc_rcv (net/tipc/node.c:2126)
+  tipc_udp_recv (net/tipc/udp_media.c:391)
+  udp_rcv (net/ipv4/udp.c:2643)
+  ip_local_deliver_finish (net/ipv4/ip_input.c:241)
+ </IRQ>
+ Freed by task 181:
+  kfree (mm/slub.c:6565)
+  bearer_disable (net/tipc/bearer.c:418)
+  tipc_nl_bearer_disable (net/tipc/bearer.c:1001)
+
+The bearer is freed with kfree_rcu(); free the discoverer the same way.
+Add an rcu_head to struct tipc_discoverer and free it and its skb from an
+RCU callback.
+
+Because the RCU callback (tipc_disc_free_rcu) lives in module text, a
+call_rcu() that is still pending when the tipc module is unloaded would
+invoke a freed function. Add an rcu_barrier() to tipc_exit() after the
+bearer subsystem has been torn down, so all pending discoverer callbacks
+have run before the module text goes away.
+
+Reachable from an unprivileged user namespace: the TIPCv2 genl family is
+netnsok and its bearer commands have no GENL_ADMIN_PERM. Needs CONFIG_TIPC
+and CONFIG_TIPC_MEDIA_UDP.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-64541 [CVSS:3.1 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64541</link>
+            <guid isPermaLink="false">CVE-2026-64541</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:57 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+net/smc: fix UAF in smc_cdc_rx_handler() by pinning the socket
+
+smc_cdc_rx_handler() looks up the connection by token under the link
+group's conns_lock, drops the lock, and then dereferences conn and the
+smc_sock derived from it, ending in sock_hold(&smc->sk) inside
+smc_cdc_msg_recv(). No reference is held across the lock release.
+
+The only reference pinning the socket while the connection is
+discoverable in the link group is taken in smc_lgr_register_conn()
+(sock_hold) and dropped in __smc_lgr_unregister_conn() (sock_put), both
+under conns_lock. Once the handler drops conns_lock, a concurrent
+close() -> smc_release() -> smc_conn_free() -> smc_lgr_unregister_conn()
+can drop that reference and free the smc_sock, so the handler's later
+sock_hold() runs on freed memory:
+
+  WARNING: lib/refcount.c:25 at refcount_warn_saturate
+  Workqueue: rxe_wq do_work
+   refcount_warn_saturate (lib/refcount.c:25)
+   smc_cdc_msg_recv (net/smc/smc_cdc.c:430)
+   smc_cdc_rx_handler (net/smc/smc_cdc.c:502)
+   smc_wr_rx_tasklet_fn (net/smc/smc_wr.c:445)
+   tasklet_action_common (kernel/softirq.c:938)
+   handle_softirqs (kernel/softirq.c:622)
+  Kernel panic - not syncing: panic_on_warn set
+
+Only SMC-R is affected. The SMC-D receive tasklet is stopped by
+tasklet_kill(&conn->rx_tsklet) in smc_conn_free() before the connection
+is unregistered, so it cannot run concurrently with the free.
+
+Take the socket reference while still holding conns_lock, so the
+registration reference can no longer be the last one, and drop it once
+the handler is done.
+
+Score: 9.8 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-64540 [CVSS:3.1 8.1 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64540</link>
+            <guid isPermaLink="false">CVE-2026-64540</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:57 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+usbnet: gl620a: fix out-of-bounds read in genelink_rx_fixup()
+
+genelink_rx_fixup() splits an aggregated RX frame into its individual
+packets, using a per-packet length taken from device-supplied data. That
+length is only bounded by GL_MAX_PACKET_LEN (1514); it is never compared
+against how many bytes were actually received.
+
+A malicious GeneLink (GL620A) device can therefore send a short URB whose
+header claims packet_count > 1 and a first packet of up to 1514 bytes.
+
+	skb_put_data(gl_skb, packet->packet_data, size);
+
+then copies past the end of the receive buffer and hands the adjacent slab
+contents up the network stack, an out-of-bounds read that leaks kernel heap.
+No privilege is required: the path runs in the usbnet RX softirq as soon as
+the interface is up.
+
+  BUG: KASAN: slab-out-of-bounds in genelink_rx_fixup (drivers/net/usb/gl620a.c:112)
+  Read of size 1514 at addr ffff888011309708 by task ksoftirqd/0/14
+  Call Trace:
+    ...
+    __asan_memcpy (mm/kasan/shadow.c:105)
+    genelink_rx_fixup (include/linux/skbuff.h:2814 drivers/net/usb/gl620a.c:112)
+    usbnet_bh (drivers/net/usb/usbnet.c:572 drivers/net/usb/usbnet.c:1589)
+    process_one_work (kernel/workqueue.c:3322)
+    bh_worker (kernel/workqueue.c:3405)
+    tasklet_action (kernel/softirq.c:965)
+    handle_softirqs (kernel/softirq.c:622)
+    run_ksoftirqd (kernel/softirq.c:1076)
+    ...
+
+skb_pull() already verifies that the requested length fits the buffer and
+returns NULL otherwise. Move it ahead of the copy and check its result, so
+a packet that overruns the received data is rejected before it is read.
+Well-formed frames, whose packets are fully present, are unaffected.
+
+Score: 8.1 (HIGH)
+Vector: CVSS:3.1/AV:A/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-64539 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64539</link>
+            <guid isPermaLink="false">CVE-2026-64539</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:57 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+Bluetooth: eir: Fix stack OOB write when prepending the Flags AD
+
+eir_create_adv_data() builds the advertising data into a fixed-size
+buffer ("size", 31 for the legacy path). It may prepend a 3-byte "Flags"
+AD structure (LE_AD_NO_BREDR on an LE-only controller) and then copies
+the per-instance data without checking that it still fits:
+
+	memcpy(ptr, adv->adv_data, adv->adv_data_len);
+
+tlv_data_max_len() only reserves those 3 bytes when the user-supplied
+flags carry a managed-flags bit, so an instance added with flags == 0 is
+accepted with adv_data_len up to the full buffer. At advertise time the
+flags are still prepended, and the memcpy() writes 3 + adv_data_len
+bytes into the size-byte buffer:
+
+  BUG: KASAN: stack-out-of-bounds in eir_create_adv_data (net/bluetooth/eir.c:301)
+  Write of size 31 at addr ffff88800a547bdc by task kworker/u9:0/65
+  Workqueue: hci0 hci_cmd_sync_work
+   __asan_memcpy (mm/kasan/shadow.c:106)
+   eir_create_adv_data (net/bluetooth/eir.c:301)
+   hci_update_adv_data_sync (net/bluetooth/hci_sync.c:1310)
+   hci_schedule_adv_instance_sync (net/bluetooth/hci_sync.c:1817)
+   hci_cmd_sync_work (net/bluetooth/hci_sync.c:332)
+  This frame has 1 object:
+   [32, 64) 'cp'
+
+The "Flags" structure is added by the kernel, not requested by
+userspace, so only prepend it when it fits together with the instance
+advertising data; when there is no room for both, drop the flags rather
+than the user-provided data.
+
+Reachable by a local user with CAP_NET_ADMIN owning an LE-only
+controller on the legacy advertising path.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-64536 [CVSS:3.1 8.1 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64536</link>
+            <guid isPermaLink="false">CVE-2026-64536</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:57 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+staging: rtl8723bs: fix OOB reads in is_ap_in_tkip() IE loop
+
+The loop in is_ap_in_tkip() iterates over IEs without verifying that
+enough bytes remain before dereferencing the IE header or its payload:
+
+- pIE->element_id and pIE->length are read without checking that
+  i + sizeof(*pIE) <= ie_length, so a truncated IE at the end of the
+  buffer causes an OOB read.
+
+- For WLAN_EID_VENDOR_SPECIFIC the code compares pIE->data + 12,
+  which requires pIE->length >= 16.  For WLAN_EID_RSN it compares
+  pIE->data + 8, requiring pIE->length >= 12.  Neither requirement
+  is checked.
+
+Add the missing IE header and payload bounds checks and guard each
+data access with an explicit pIE->length minimum, matching the
+pattern established in update_beacon_info().
+
+Score: 8.1 (HIGH)
+Vector: CVSS:3.1/AV:A/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-64535 [CVSS:3.1 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64535</link>
+            <guid isPermaLink="false">CVE-2026-64535</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:57 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+nvmet-tcp: Fix potential UAF when ddgst mismatch
+
+Shivam Kumar found via vulnerability testing:
+When data digest is enabled on an NVMe/TCP connection and a digest
+mismatch occurs on a non-final H2C_DATA PDU during an R2T-based
+data transfer, the digest error handler in nvmet_tcp_try_recv_ddgst()
+calls nvmet_req_uninit() — which performs percpu_ref_put() on the
+submission queue — but does NOT mark the command as completed. It
+does not set cqe->status, does not modify rbytes_done, and does not
+clear any flag. When the subsequent fatal error triggers queue
+teardown, nvmet_tcp_uninit_data_in_cmds() iterates all commands,
+checks nvmet_tcp_need_data_in() for each one, and finds that the
+already-uninited command still appears to need data (because
+rbytes_done < transfer_len and cqe->status == 0). It therefore calls
+nvmet_req_uninit() a second time on the same command — a double
+percpu_ref_put against a single percpu_ref_get.
+
+Score: 9.8 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-64534 [CVSS:3.1 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64534</link>
+            <guid isPermaLink="false">CVE-2026-64534</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:57 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+nvmet-tcp: check INIT_FAILED before nvmet_req_uninit in digest error path
+
+In nvmet_tcp_try_recv_ddgst(), when a data digest mismatch is detected,
+nvmet_req_uninit() is called unconditionally. However, if the command
+arrived via the nvmet_tcp_handle_req_failure() path, nvmet_req_init()
+had returned false and percpu_ref_tryget_live() was never executed. The
+unconditional percpu_ref_put() inside nvmet_req_uninit() then causes a
+refcount underflow, leading to a WARNING in
+percpu_ref_switch_to_atomic_rcu, a use-after-free diagnostic, and
+eventually a permanent workqueue deadlock.
+
+Check cmd->flags & NVMET_TCP_F_INIT_FAILED before calling
+nvmet_req_uninit(), matching the existing pattern in
+nvmet_tcp_execute_request().
+
+Score: 9.8 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-64533 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64533</link>
+            <guid isPermaLink="false">CVE-2026-64533</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:57 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+fs/ntfs3: validate lcns_follow in log_replay conversion
+
+log_replay() converts DIR_PAGE_ENTRY_32 records into DIR_PAGE_ENTRY
+records when replaying version 0 restart tables.
+
+During this conversion, the memmove() length is derived directly from
+the on-disk lcns_follow field:
+
+	memmove(&dp->vcn, &dp0->vcn_low,
+		2 * sizeof(u64) +
+				le32_to_cpu(dp->lcns_follow) * sizeof(u64));
+
+check_rstbl() validates restart table structure, but does not constrain
+per-entry lcns_follow values relative to the entry size. A malformed
+filesystem image can provide an oversized lcns_follow value, causing
+the conversion memmove() to access memory beyond the bounds of the
+allocated restart table buffer.
+
+The same field is later used to bound iteration over page_lcns[],
+so validating lcns_follow during conversion also prevents downstream
+out-of-bounds access from the same malformed metadata.
+
+Compute the maximum valid lcns_follow from the already-validated
+restart table entry size and reject entries that exceed this bound.
+Reuse the existing t16/t32 scratch variables already declared in
+log_replay() to avoid introducing new declarations.
+
+[almaz.alexandrovich@paragon-software.com: fixed the conflicts]
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-64532 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64532</link>
+            <guid isPermaLink="false">CVE-2026-64532</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:57 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+fs/ntfs3: bound NTFS_DE view.data_off in UpdateRecordData{Root,Allocation}
+
+In do_action()'s UpdateRecordDataRoot (fslog.c:3489) and
+UpdateRecordDataAllocation (fslog.c:3697) cases, the memmove
+destination is `Add2Ptr(e, le16_to_cpu(e->view.data_off))`,
+where e->view.data_off comes from an on-disk NTFS_DE inside
+an INDEX_ROOT or INDEX_BUFFER.  Neither case validates
+view.data_off + dlen against e->size; the existing
+check_if_index_root / check_if_alloc_index helpers walk the
+entry chain and validate the entry's offset, but not its
+internal view fields.
+
+The neighbouring read sites (e.g., fs/ntfs3/index.c when
+iterating view entries) check view.data_off + view.data_size
+<= e->size.  Apply the same bound at the two memmove sites.
+
+Reproduced under UML+KASAN on mainline 8d90b09e6741 via
+pr_warn-only probe instrumentation: with view.data_off forced
+to 0xFFFC, the memmove writes 32 bytes past the end of the
+NTFS_DE.
+
+This is similar in shape to Pavitra Jha's 2026-05-02 patch
+"fs/ntfs3: prevent oob in case UpdateRecordDataRoot"
+(<20260502105008.21827-1-jhapavitra98@gmail.com>) which
+proposes calling ntfs3_bad_de_range(); that helper does not
+exist in mainline.  This patch uses inline checks.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-64531 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64531</link>
+            <guid isPermaLink="false">CVE-2026-64531</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:56 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+net: openvswitch: reject oversized nested action attrs
+
+Open vSwitch stores generated flow actions as nlattrs, whose nla_len
+field is u16. Commit a1e64addf3ff ("net: openvswitch: remove
+misbehaving actions length check") allowed the total sw_flow_actions
+stream to grow beyond 64 KiB, which is valid, but also removed the last
+guard preventing a generated nested action attribute from exceeding
+U16_MAX.
+
+An oversized generated container can thus be closed with a truncated
+nla_len. A later dump or teardown then walks a structurally different
+stream than the one that was validated. In particular, an oversized
+nested CLONE/CT action may cause subsequent bytes in the generated
+stream to be interpreted as independent actions.
+
+Keep the larger total-action-stream behavior, but make nested action
+close reject generated containers that do not fit in nla_len, and return
+the error through all callers. For recursive SAMPLE, CLONE, DEC_TTL, and
+CHECK_PKT_LEN builders, trim resource-owning action-list tails in reverse
+construction order before discarding failed wrappers, so resources copied
+into the rejected tails are released before the wrappers are removed.
+
+Most failed outer wrappers are discarded by truncating actions_len after
+child resources have been released. CHECK_PKT_LEN also trims its parent
+after branch resources are gone. SET/TUNNEL close failures unwind their
+known tun_dst ownership directly, and SET_TO_MASKED has no external
+ownership and truncates on close failure.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-59692 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-59692</link>
+            <guid isPermaLink="false">CVE-2026-59692</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:56 GMT</pubDate>
+            <description><![CDATA[A stack buffer overflow vulnerability was found in GStreamer's DTLS plugin. During a DTLS handshake, the peer certificate Subject Distinguished Name is printed into a fixed-size 2048-byte stack buffer without bounds checking. A remote unauthenticated attacker can send a certificate with an oversized Subject DN that exceeds the buffer, causing a stack buffer overflow and process crash, resulting in denial of service.
+
+Score: 7.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-59691 [CVSS:3.1 7.1 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-59691</link>
+            <guid isPermaLink="false">CVE-2026-59691</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:56 GMT</pubDate>
+            <description><![CDATA[A heap buffer overflow vulnerability was found in GStreamer's rfbsrc plugin. When a client connects to a malicious RFB/VNC server that advertises a 16bpp framebuffer and sends Hextile-encoded updates, the Hextile background fill path writes 32-bit pixel values into a buffer allocated for 16-bit pixels. This type mismatch causes an out-of-bounds heap write that can lead to denial of service (process crash) and potential memory corruption.
+
+Score: 7.1 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:L/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-59328 [CVSS:3.1 4.2 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-59328</link>
+            <guid isPermaLink="false">CVE-2026-59328</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:55 GMT</pubDate>
+            <description><![CDATA[Spring Tools for Eclipse renders Spring Boot starter wizard dependency tooltips in a native embedded browser (SWT Browser) with JavaScript enabled. Using untrusted and compromised Initializr endpoints for the Spring Boot starter wizard can result in arbitrary script execution inside the embedded browser when a developer hovers a dependency checkbox in the New Spring Starter Project wizard. Impact is limited to in-IDE UI spoofing and outbound network beaconing rather than full code execution.
+Affected Spring Products and Versions:
+Spring Tools for Eclipse: 5.2.0 and earlier
+
+Score: 4.2 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:L/I:L/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-59327 [CVSS:3.1 4.4 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-59327</link>
+            <guid isPermaLink="false">CVE-2026-59327</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:55 GMT</pubDate>
+            <description><![CDATA[Spring Tools for Eclipse stores the Spring Boot DevTools remote secret (spring.devtools.remote.secret) as a plain string attribute on the "Spring Boot DevTools Client" launch configuration. Eclipse persists launch configuration attributes as cleartext XML, either to workspace metadata or, if the user marks the configuration as a shared file, directly into the project tree where it can be committed to version control. This secret is the sole credential protecting the DevTools remote restart/reload endpoint, which accepts and executes arbitrary class bytes on the target application. Anyone able to read the .launch file (via filesystem access, a workspace backup, or a shared VCS repository) can extract the secret and use it to achieve remote code execution against the associated Spring Boot application.
+Affected Spring Products and Versions:
+Spring Tools for Eclipse: 5.2.0 and earlier
+
+Score: 4.4 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:H/PR:L/UI:R/S:U/C:H/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-59326 [CVSS:3.1 3.3 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-59326</link>
+            <guid isPermaLink="false">CVE-2026-59326</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:55 GMT</pubDate>
+            <description><![CDATA[The Spring Boot language server logs the raw value of the https_proxy/HTTPS_PROXY/http_proxy/HTTP_PROXY environment variable at INFO level whenever it creates an outbound HTTP client and no explicit http.proxy workspace setting is configured. Corporate proxy URLs frequently embed Basic-auth credentials in the form http://user:pass@proxy:8080, and the language server writes this value to its log file without any redaction. Since language server log files are often attached to bug reports or are readable by other local users/processes, this can result in disclosure of proxy credentials.
+Affected Spring Products and Versions:
+Spring Tools for Eclipse: 5.2.0 and earlier
+Spring Tools for VSCode / Cursor / Theia: 2.2.0 and earlier
+
+Score: 3.3 (LOW)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-58066 [CVSS:3.0 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-58066</link>
+            <guid isPermaLink="false">CVE-2026-58066</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:55 GMT</pubDate>
+            <description><![CDATA[Rocket.Chat's SAML SSO before versions 8.7.0, 8.6.1, 8.5.2, 8.4.5, 8.3.7, 8.2.7, 8.1.7, 8.0.8, and 7.10.14 verified XML signatures but did not bind the validated signature to samlp:Response / saml:Assertion. An attacker could submit a wrapped document carrying forged identity attributes alongside any valid signature made by the trusted IdP certificate, and log in as an arbitrary user.
+
+Score: 9.8 (CRITICAL)
+Vector: CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-58046 [CVSS:3.1 9.9 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-58046</link>
+            <guid isPermaLink="false">CVE-2026-58046</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:55 GMT</pubDate>
+            <description><![CDATA[Improper neutralization in the Plesk XML-RPC API allows a remote authenticated low-privileged user to perform SQL injection and read arbitrary data from the Plesk database, leading to full compromise of the panel.
+
+Score: 9.9 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-58043 [CVSS:3.0 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-58043</link>
+            <guid isPermaLink="false">CVE-2026-58043</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:55 GMT</pubDate>
+            <description><![CDATA[A flaw in Node.js Permission Model enforcement can over-grant filesystem access across radix-tree prefix boundaries.
+
+Under `--permission`, an attacker who is granted access to one path can abuse boundary handling to read from or write to paths outside the intended filesystem allowlist.
+
+This vulnerability affects Node.js **main**, **22.x**, **24.x**, and **26.x**.
+
+Score: 7.5 (HIGH)
+Vector: CVSS:3.0/AV:L/AC:H/PR:L/UI:N/S:C/C:H/I:H/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-58040 [CVSS:3.0 6.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-58040</link>
+            <guid isPermaLink="false">CVE-2026-58040</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:55 GMT</pubDate>
+            <description><![CDATA[An incomplete fix has been identified in Node.js: HTTPS Agent TLS session reuse skips hostname verification across identity policies (incomplete fix of CVE-2026-48934).
+
+This vulnerability affects Node.js **22.x**, **24.x**, and **26.x**.
+
+Score: 6.3 (MEDIUM)
+Vector: CVSS:3.0/AV:N/AC:H/PR:L/UI:N/S:C/C:H/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-56850 [CVSS:3.0 4.1 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-56850</link>
+            <guid isPermaLink="false">CVE-2026-56850</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:55 GMT</pubDate>
+            <description><![CDATA[A flaw in Node.js HTTPS Agent connection reuse can cause PFX object-array key collisions, allowing mutual TLS (mTLS) client identities to be reused across requests configured with different client certificates.
+
+This vulnerability affects Node.js **26.x**, **24.x**, and **22.x**.
+
+Score: 4.1 (MEDIUM)
+Vector: CVSS:3.0/AV:L/AC:H/PR:H/UI:N/S:U/C:N/I:H/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-56847 [CVSS:3.0 3.3 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-56847</link>
+            <guid isPermaLink="false">CVE-2026-56847</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:54 GMT</pubDate>
+            <description><![CDATA[A flaw in Node.js Permission Model enforcement allows `trace_events.createTracing().enable()` Writes Trace Logs Outside `--allow-fs-write`.
+
+This can lead to confidentiality impact or bypass of the intended security boundary under affected configurations.
+
+This vulnerability affects Node.js **22.x**, **24.x**, and **26.x**.
+
+Score: 3.3 (LOW)
+Vector: CVSS:3.0/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-55655 [CVSS:3.1 6.1 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-55655</link>
+            <guid isPermaLink="false">CVE-2026-55655</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:54 GMT</pubDate>
+            <description><![CDATA[A flaw was found in OpenSSH. A local unprivileged attacker on a Linux client host can hijack client-side X11 forwarding connections. This is possible by pre-binding the preferred abstract X socket name when X11 forwarding is enabled and a local UNIX-domain X socket is used. A successful attack can compromise the confidentiality of forwarded X11 traffic, including sensitive window contents and input, and may allow some manipulation of the forwarded session.
+
+Score: 6.1 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:L/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-55653 [CVSS:3.1 6.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-55653</link>
+            <guid isPermaLink="false">CVE-2026-55653</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:53 GMT</pubDate>
+            <description><![CDATA[A flaw was found in OpenSSH. A malicious SSH server can exploit a double free vulnerability in the Diffie-Hellman Group Exchange (DH-GEX) client path. This occurs during FIPS (Federal Information Processing Standards) mode known-group validation when the client processes attacker-controlled DH-GEX group parameters. Successful exploitation leads to client-side process termination, resulting in a Denial of Service (DoS).
+
+Score: 6.5 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-52722 [CVSS:3.1 7.1 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-52722</link>
+            <guid isPermaLink="false">CVE-2026-52722</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:53 GMT</pubDate>
+            <description><![CDATA[A signed integer overflow vulnerability was found in GStreamer's VMnc decoder. A crafted VMnc stream with large cursor dimensions can overflow signed integer payload-size arithmetic, bypassing a length check and leading to out-of-bounds reads. A remote attacker could trick a user into opening a specially crafted VMnc file, potentially causing a crash or information disclosure.
+
+Score: 7.1 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-52720 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-52720</link>
+            <guid isPermaLink="false">CVE-2026-52720</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:52 GMT</pubDate>
+            <description><![CDATA[A heap buffer overflow vulnerability was found in GStreamer's librfb (RFB/VNC client). The rectangle bounds check incorrectly validates area rather than individual dimensions, allowing a malicious VNC server to send a rectangle that extends beyond the framebuffer. A remote attacker could set up a malicious VNC server and trick a user into connecting, resulting in an out-of-bounds heap write that could lead to code execution or a crash.
+
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-47882 [CVSS:3.1 8.3 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-47882</link>
+            <guid isPermaLink="false">CVE-2026-47882</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:52 GMT</pubDate>
+            <description><![CDATA[When enabling Spring Boot DevTools support for a remote application target (for example a Docker container or Cloud Foundry app) from the Spring Tools Boot Dashboard, Spring Tools generates a shared secret that authenticates DevTools remote-restart uploads to the deployed application. This secret was generated using a non-cryptographic pseudo-random number generator rather than a cryptographically secure source of randomness.
+Affected Spring Products and Versions:
+Spring Tools for Eclipse: 5.2.0 and earlier
+
+Score: 8.3 (HIGH)
+Vector: CVSS:3.1/AV:A/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-47873 [CVSS:3.1 8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-47873</link>
+            <guid isPermaLink="false">CVE-2026-47873</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:52 GMT</pubDate>
+            <description><![CDATA[The Boot Dashboard Docker integration in Spring Tools publishes container control ports on all of the host's network interfaces (0.0.0.0) rather than restricting them to loopback.
+Affected Spring Products and Versions:
+Spring Tools for Eclipse: 5.2.0 and earlier
+
+Score: 8 (HIGH)
+Vector: CVSS:3.1/AV:A/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-47858 [CVSS:3.1 8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-47858</link>
+            <guid isPermaLink="false">CVE-2026-47858</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:52 GMT</pubDate>
+            <description><![CDATA[Starting Spring Boot applications in the Spring Tools with the live information mode enabled makes the running application vulnerable against JMX-based remote code execution.
+Affected Spring Products and Versions:
+Spring Tools for Eclipse: 5.2.0 and earlier
+Spring Tools for VSCode / Cursor / Theia: 2.2.0 and earlier
+
+Score: 8 (HIGH)
+Vector: CVSS:3.1/AV:A/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-21639 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-21639</link>
+            <guid isPermaLink="false">CVE-2026-21639</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:51 GMT</pubDate>
+            <description><![CDATA[A malicious actor in Wi-Fi range of the affected product could leverage a vulnerability in the airMAX Wireless Protocol to achieve a remote code execution (RCE) within the affected product.
+
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:A/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-1021]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-1021</link>
+            <guid isPermaLink="false">CVE-2026-1021</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:44 GMT</pubDate>
+            <description><![CDATA[Rejected reason: This CVE ID has been rejected or withdrawn by its CVE Numbering Authority.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-1020]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-1020</link>
+            <guid isPermaLink="false">CVE-2026-1020</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:36 GMT</pubDate>
+            <description><![CDATA[Rejected reason: This CVE ID has been rejected or withdrawn by its CVE Numbering Authority.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-1019]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-1019</link>
+            <guid isPermaLink="false">CVE-2026-1019</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:29 GMT</pubDate>
+            <description><![CDATA[Rejected reason: This CVE ID has been rejected or withdrawn by its CVE Numbering Authority.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-1018]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-1018</link>
+            <guid isPermaLink="false">CVE-2026-1018</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:03 GMT</pubDate>
+            <description><![CDATA[Rejected reason: This CVE ID has been rejected or withdrawn by its CVE Numbering Authority.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-16531 [CVSS:3.1 5.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-16531</link>
+            <guid isPermaLink="false">CVE-2026-16531</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:03 GMT</pubDate>
+            <description><![CDATA[An unauthenticated remote attacker can exploit a path traversal vulnerability in the PCP pmproxy logger servlet using a crafted hostname. This allows arbitrary file and directory creation, potentially leading to a denial of service.
+
+Score: 5.3 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-16530 [CVSS:3.1 6.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-16530</link>
+            <guid isPermaLink="false">CVE-2026-16530</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:03 GMT</pubDate>
+            <description><![CDATA[A flaw was found in the PCP (Performance Co-Pilot) `pmproxy` service. A remote attacker can exploit a vulnerability in the `pmLogLoadInDom()` function by sending a specially crafted request. This bypasses a critical bounds check, which can lead to the `pmproxy` service crashing, causing a Denial of Service (DoS). Additionally, this flaw may enable the leakage of sensitive information from the system's memory.
+
+Score: 6.5 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:L]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-16529 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-16529</link>
+            <guid isPermaLink="false">CVE-2026-16529</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:02 GMT</pubDate>
+            <description><![CDATA[A signed integer overflow in the PCP __pmGetPDU() function can be exploited via crafted network packets during PDU processing or SASL negotiation. This permanently blinds the affected daemon, resulting in a total denial of service (DoS) for subsequent packet reads.
+
+Score: 7.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-16527 [CVSS:3.1 7.3 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-16527</link>
+            <guid isPermaLink="false">CVE-2026-16527</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:02 GMT</pubDate>
+            <description><![CDATA[An unauthenticated remote attacker can bypass access controls by sending crafted requests to the PCP pmproxy /store endpoint. This allows the attacker to overwrite any PMDA metric, leading to arbitrary code execution and system takeover.
+
+Score: 7.3 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-16526 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-16526</link>
+            <guid isPermaLink="false">CVE-2026-16526</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:02 GMT</pubDate>
+            <description><![CDATA[A flaw in the PCP linux_sockets module exposes an unsecured internal connection.
+An attacker with initial code execution can exploit this to escalate privileges and execute arbitrary commands as root.
+
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-16524 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-16524</link>
+            <guid isPermaLink="false">CVE-2026-16524</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:02 GMT</pubDate>
+            <description><![CDATA[A command injection flaw in PCP's linux_sockets PMDA allows malicious shell metacharacters via the network.persocket.filter metric.
+This failed validation lets attackers execute arbitrary commands as the PMDA user when metrics refresh.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-15382]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-15382</link>
+            <guid isPermaLink="false">CVE-2026-15382</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:02 GMT</pubDate>
+            <description><![CDATA[The Ultimate Addons for WPBakery Page Builder WordPress plugin before 3.21.4 does not perform a capability or nonce check before deleting a site's custom-uploaded icon font packs, allowing unauthenticated attackers to permanently delete all of a site's custom icon fonts with a single request.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-15257]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-15257</link>
+            <guid isPermaLink="false">CVE-2026-15257</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:02 GMT</pubDate>
+            <description><![CDATA[The RegistrationMagic  WordPress plugin before 6.0.9.4 does not perform authorization, ownership or nonce checks on a front-end submission-editing action, allowing unauthenticated attackers to overwrite other users' form submissions and the profile fields of the associated non-administrator WordPress accounts.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-15255]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-15255</link>
+            <guid isPermaLink="false">CVE-2026-15255</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:02 GMT</pubDate>
+            <description><![CDATA[The RegistrationMagic  WordPress plugin before 6.0.9.4 does not properly validate that a one-time password presented in a cookie belongs to the identity being requested before returning front-end form submissions, allowing unauthenticated attackers to read other users' form submission data, including personal information.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-15252]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-15252</link>
+            <guid isPermaLink="false">CVE-2026-15252</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:01 GMT</pubDate>
+            <description><![CDATA[The Search Atlas SEO  WordPress plugin before 2.6.12 does not perform a capability or nonce check in one of its AJAX handlers, allowing any authenticated user such as a Subscriber to invoke the site's Google Indexing API integration, submitting or removing the site's URLs from Google's index and consuming its indexing quota.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-15250]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-15250</link>
+            <guid isPermaLink="false">CVE-2026-15250</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:01 GMT</pubDate>
+            <description><![CDATA[The Appointment Booking Plugin  WordPress plugin before 5.6.8 does not restrict which booking fields an unauthenticated visitor can set through its public booking funnel, allowing an unauthenticated user to assign a privileged booking field such as the approval status and thereby bypass the site's booking approval workflow.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-15240]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-15240</link>
+            <guid isPermaLink="false">CVE-2026-15240</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:01 GMT</pubDate>
+            <description><![CDATA[The Customer Switching WordPress plugin before 2.1.3 does not securely bind an active user-switching session to the operator who initiated it, allowing a lower-privileged account that an operator is currently switched into to be resolved as that operator and to switch into any permitted account, including an administrator, resulting in full account takeover.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-15235]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-15235</link>
+            <guid isPermaLink="false">CVE-2026-15235</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:01 GMT</pubDate>
+            <description><![CDATA[The MotoPress Hotel Booking WordPress plugin before 6.0.4 does not perform a capability check before returning a booking's full customer details in one of its AJAX actions, allowing any authenticated user with a low-privileged account (Subscriber and above) to read the personal data, including name, email, phone, and address, of any customer.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-15153]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-15153</link>
+            <guid isPermaLink="false">CVE-2026-15153</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:01 GMT</pubDate>
+            <description><![CDATA[The WP Hotel Booking WordPress plugin before 2.3.2 does not sanitise and escape a search parameter on an administrative listing before using it in a SQL query, allowing users holding the WP Hotel Booking WordPress plugin before 2.3.2's booking-management roles to perform SQL injection attacks.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-15054]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-15054</link>
+            <guid isPermaLink="false">CVE-2026-15054</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:01 GMT</pubDate>
+            <description><![CDATA[The Bit Form  WordPress plugin before 3.1.2 does not enforce a form's active/published status on its public form-submission handlers, allowing unauthenticated users to submit entries to, and fire the configured workflows (such as email notifications) of forms the site owner has deactivated or unpublished.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-14923]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-14923</link>
+            <guid isPermaLink="false">CVE-2026-14923</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:01 GMT</pubDate>
+            <description><![CDATA[The Sync Post With Other Site WordPress plugin before 1.9.3 does not correctly enforce the page-editing capability on a REST route that creates and updates posts, because of an operator-precedence flaw in its authorization check. An authenticated user holding only the post-editing capability (such as a Contributor) can create, publish, and overwrite arbitrary Pages, including modifying content authored by higher-privileged users.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-14602]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-14602</link>
+            <guid isPermaLink="false">CVE-2026-14602</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:00 GMT</pubDate>
+            <description><![CDATA[The Remote API WordPress plugin through 0.2 does not authenticate a request before deserializing user-supplied input, allowing unauthenticated attackers to inject arbitrary PHP objects, which can lead to remote code execution when a suitable gadget chain is present through another installed Remote API WordPress plugin through 0.2.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-14592]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-14592</link>
+            <guid isPermaLink="false">CVE-2026-14592</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:00 GMT</pubDate>
+            <description><![CDATA[The WP Real IP-based Access Control WordPress plugin through 1.3.1 does not perform any capability or nonce checks before storing one of its option values, and does not escape that value on output on its settings page, allowing unauthenticated users to store arbitrary JavaScript that executes in the context of any administrator who views the page.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-14318]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-14318</link>
+            <guid isPermaLink="false">CVE-2026-14318</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:00 GMT</pubDate>
+            <description><![CDATA[The GiveWP  WordPress plugin before 4.16.3 does not escape a donation-form template setting before outputting it in an HTML attribute, allowing users with the GiveWP Worker role and above to inject arbitrary web scripts that execute on the public donation form viewed by any visitor.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-14310]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-14310</link>
+            <guid isPermaLink="false">CVE-2026-14310</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:00 GMT</pubDate>
+            <description><![CDATA[The Tutor LMS  WordPress plugin before 4.0.0 does not properly verify that a user has access to the course a Q&A thread belongs to before returning or writing to that thread, allowing authenticated users with subscriber-level access and above who can access any single course to read the Q&A threads of other courses and to inject replies into them.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-14305]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-14305</link>
+            <guid isPermaLink="false">CVE-2026-14305</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:00 GMT</pubDate>
+            <description><![CDATA[The WP Delicious  WordPress plugin before 1.10.2 does not perform an authorization check on one of its AJAX actions, allowing unauthenticated users to modify limited post metadata (a like counter and an associated identifier list) on arbitrary posts, including inflating the counter and growing the stored metadata without bound.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-14239]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-14239</link>
+            <guid isPermaLink="false">CVE-2026-14239</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:00 GMT</pubDate>
+            <description><![CDATA[The tourmaster WordPress plugin before 5.4.8 does not perform a nonce check when storing a custom-filter label taken from a request parameter, and does not escape that label when echoing it on the filter admin page, allowing an unauthenticated attacker to trick a logged-in administrator into storing JavaScript that then executes in the admin area (stored Cross-Site Scripting via CSRF).]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-14231]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-14231</link>
+            <guid isPermaLink="false">CVE-2026-14231</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:00 GMT</pubDate>
+            <description><![CDATA[The LifterLMS  WordPress plugin before 10.0.10 does not perform a capability check in one of its select2 query AJAX handlers, only verifying that the user is logged in, allowing any authenticated user with subscriber-level access to read the titles of internal post types such as coupon codes by supplying the post type.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-14226]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-14226</link>
+            <guid isPermaLink="false">CVE-2026-14226</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:00 GMT</pubDate>
+            <description><![CDATA[The Easy Appointments WordPress plugin through 3.12.26 does not require a sufficient capability on one of its appointment-listing REST endpoints, restricting it only to a capability that every authenticated user holds, allowing users with subscriber-level access to read all bookings on the site, including customer names, schedules, and statuses.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-14223]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-14223</link>
+            <guid isPermaLink="false">CVE-2026-14223</guid>
+            <pubDate>Thu, 30 Jul 2026 06:25:00 GMT</pubDate>
+            <description><![CDATA[The Easy Appointments WordPress plugin through 3.12.26 does not verify ownership or capability when returning stored customer details, allowing users with subscriber-level access to read any customer's personal information by iterating an identifier.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-14222]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-14222</link>
+            <guid isPermaLink="false">CVE-2026-14222</guid>
+            <pubDate>Thu, 30 Jul 2026 06:24:59 GMT</pubDate>
+            <description><![CDATA[The Easy Appointments WordPress plugin through 3.12.26 does not perform any capability or nonce check in one of its connection-deletion actions, allowing users with contributor-level access to delete the booking configuration and disable the booking system.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-14221]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-14221</link>
+            <guid isPermaLink="false">CVE-2026-14221</guid>
+            <pubDate>Thu, 30 Jul 2026 06:24:59 GMT</pubDate>
+            <description><![CDATA[The Easy Appointments WordPress plugin through 3.12.26 does not perform capability checks in several of its appointment-management actions, relying only on a nonce that any authenticated user can obtain, allowing users with contributor-level access to read all customers' appointment details and to create, modify, and delete bookings.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-14207]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-14207</link>
+            <guid isPermaLink="false">CVE-2026-14207</guid>
+            <pubDate>Thu, 30 Jul 2026 06:24:59 GMT</pubDate>
+            <description><![CDATA[The LifterLMS  WordPress plugin before 10.0.10 does not strip event-handler attributes from a course pricing field before storing and rendering it, allowing users with a course-editing role to inject JavaScript that executes in the session of an administrator who views the course.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-14188]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-14188</link>
+            <guid isPermaLink="false">CVE-2026-14188</guid>
+            <pubDate>Thu, 30 Jul 2026 06:24:59 GMT</pubDate>
+            <description><![CDATA[The Easy Appointments WordPress plugin through 3.12.26 does not perform a per-request capability or nonce check on one of its customer-listing handlers, allowing authenticated users with contributor-level access to read every stored customer's personal information.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-13395]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-13395</link>
+            <guid isPermaLink="false">CVE-2026-13395</guid>
+            <pubDate>Thu, 30 Jul 2026 06:24:59 GMT</pubDate>
+            <description><![CDATA[The Online Scheduling and Appointment Booking System  WordPress plugin before 27.8 does not sanitize or properly cast a user-supplied parameter from its unauthenticated front-end booking requests before using it in a SQL query, allowing unauthenticated attackers to perform SQL injection attacks and extract sensitive data such as password hashes from the database.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-13345]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-13345</link>
+            <guid isPermaLink="false">CVE-2026-13345</guid>
+            <pubDate>Thu, 30 Jul 2026 06:24:59 GMT</pubDate>
+            <description><![CDATA[The Essential Addons for Elementor  WordPress plugin before 6.6.10 does not perform authorization, status, or visibility checks when resolving WooCommerce products in its product-comparison feature, allowing unauthenticated users to disclose the title, price, and SKU of draft, pending, and private products that are otherwise withheld from public view.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-13344]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-13344</link>
+            <guid isPermaLink="false">CVE-2026-13344</guid>
+            <pubDate>Thu, 30 Jul 2026 06:24:59 GMT</pubDate>
+            <description><![CDATA[The Essential Addons for Elementor  WordPress plugin before 6.6.10 does not validate the HTML tag name of the Pricing Table widget title before outputting it, allowing users with Contributor-level access and above to inject JavaScript that will be executed (Stored Cross-Site Scripting) when the page is viewed, including in the session of an administrator previewing or visiting the post.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-13330]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-13330</link>
+            <guid isPermaLink="false">CVE-2026-13330</guid>
+            <pubDate>Thu, 30 Jul 2026 06:24:59 GMT</pubDate>
+            <description><![CDATA[The Animation Addons for Elementor  WordPress plugin before 2.7.0 does not sanitise uploaded SVG/SVGZ files, which it adds to the list of allowed upload types, allowing users with the upload_files capability (Author and above) to upload files containing malicious JavaScript, leading to Stored Cross-Site Scripting.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-13178]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-13178</link>
+            <guid isPermaLink="false">CVE-2026-13178</guid>
+            <pubDate>Thu, 30 Jul 2026 06:24:59 GMT</pubDate>
+            <description><![CDATA[The Eventin  WordPress plugin before 4.1.16 does not properly authorize order creation and accepts an attacker-supplied order status, allowing unauthenticated users to create orders marked as paid without completing any payment.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-13145]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-13145</link>
+            <guid isPermaLink="false">CVE-2026-13145</guid>
+            <pubDate>Thu, 30 Jul 2026 06:24:58 GMT</pubDate>
+            <description><![CDATA[The WP Travel  WordPress plugin before 11.8.1 does not verify that the booking requested on its customer account dashboard belongs to the current user, allowing any logged-in user to read another customer's booking details, including billing address information, by supplying an arbitrary booking identifier.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-13143]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-13143</link>
+            <guid isPermaLink="false">CVE-2026-13143</guid>
+            <pubDate>Thu, 30 Jul 2026 06:24:58 GMT</pubDate>
+            <description><![CDATA[The WP Travel  WordPress plugin before 11.8.1 does not verify PayPal Instant Payment Notifications through the PayPal post-back handshake before marking a booking paid, allowing unauthenticated attackers to forge a notification that flips an arbitrary pending booking to a paid and booked state at an attacker-chosen amount.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-12687]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-12687</link>
+            <guid isPermaLink="false">CVE-2026-12687</guid>
+            <pubDate>Thu, 30 Jul 2026 06:24:58 GMT</pubDate>
+            <description><![CDATA[The ProfileGrid  WordPress plugin before 5.9.9.8 does not restrict which group an anonymous visitor may register into through its front-end registration, allowing unauthenticated users to register directly into a privileged group and be granted that group's configured role, up to Administrator when such a group exists, leading to privilege escalation.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-12500]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-12500</link>
+            <guid isPermaLink="false">CVE-2026-12500</guid>
+            <pubDate>Thu, 30 Jul 2026 06:24:58 GMT</pubDate>
+            <description><![CDATA[The WP Travel Engine  WordPress plugin before 6.8.2 does not perform a capability check on an AJAX action that updates a WP Travel Engine  WordPress plugin before 6.8.2 option, allowing unauthenticated users to overwrite a site-wide WP Travel Engine  WordPress plugin before 6.8.2 option (the public nonce that gates the action is served to anonymous visitors).]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-11881]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-11881</link>
+            <guid isPermaLink="false">CVE-2026-11881</guid>
+            <pubDate>Thu, 30 Jul 2026 06:24:58 GMT</pubDate>
+            <description><![CDATA[The Fluent Forms  WordPress plugin before 6.2.6 does not sanitise and escape one of its form field configuration settings before outputting it inside an inline script when a form is rendered, which could allow users with a role as low as Contributor (with delegated form-management permission, and therefore lacking the unfiltered_html capability, e.g. in a multisite setup) to perform Stored Cross-Site Scripting attacks that execute in the browser of any visitor who loads the form, including administrators previewing it.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-11870]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-11870</link>
+            <guid isPermaLink="false">CVE-2026-11870</guid>
+            <pubDate>Thu, 30 Jul 2026 06:24:58 GMT</pubDate>
+            <description><![CDATA[The WP Ghost (Hide My WP Ghost)  WordPress plugin before 7.0.05 does not verify that client IP information comes from a trusted proxy before trusting attacker-controllable HTTP headers, allowing unauthenticated attackers to spoof their IP address to bypass the WP Ghost (Hide My WP Ghost)  WordPress plugin before 7.0.05's own brute-force protection and to downgrade its firewall by matching a hardcoded whitelisted IP range.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-11867]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-11867</link>
+            <guid isPermaLink="false">CVE-2026-11867</guid>
+            <pubDate>Thu, 30 Jul 2026 06:24:58 GMT</pubDate>
+            <description><![CDATA[The Frontend Admin by DynamiApps WordPress plugin before 3.29.7 does not perform capability checks on its taxonomy term creation, modification, and deletion operations, allowing authenticated users with low privileges (such as Subscribers) to create, rename, and delete arbitrary taxonomy terms.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-11782]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-11782</link>
+            <guid isPermaLink="false">CVE-2026-11782</guid>
+            <pubDate>Thu, 30 Jul 2026 06:24:58 GMT</pubDate>
+            <description><![CDATA[The Points and Rewards for WooCommerce WordPress plugin before 2.10.1 does not have authorisation checks in place on a wallet and points update action that is available to unauthenticated users, and does not verify that the requester owns the account being changed, allowing unauthenticated attackers to arbitrarily modify or corrupt (including driving it negative) the stored wallet balance and loyalty points of any user. Modifying the wallet balance additionally requires the companion Wallet System for WooCommerce Points and Rewards for WooCommerce WordPress plugin before 2.10.1 to be active.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-71311 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-71311</link>
+            <guid isPermaLink="false">CVE-2025-71311</guid>
+            <pubDate>Thu, 30 Jul 2026 06:24:57 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+fs/ntfs3: Initialize new folios before use
+
+KMSAN reports an uninitialized value in longest_match_std(), invoked
+from ntfs_compress_write(). When new folios are allocated without being
+marked uptodate and ni_read_frame() is skipped because the caller expects
+the frame to be completely overwritten, some reserved folios may remain
+only partially filled, leaving the rest memory uninitialized.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-71302 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-71302</link>
+            <guid isPermaLink="false">CVE-2025-71302</guid>
+            <pubDate>Thu, 30 Jul 2026 06:24:57 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+drm/panthor: fix for dma-fence safe access rules
+
+Commit 506aa8b02a8d6 ("dma-fence: Add safe access helpers and document
+the rules") details the dma-fence safe access rules. The most common
+culprit is that drm_sched_fence_get_timeline_name may race with
+group_free_queue.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-71300 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-71300</link>
+            <guid isPermaLink="false">CVE-2025-71300</guid>
+            <pubDate>Thu, 30 Jul 2026 06:24:57 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+Revert "arm64: zynqmp: Add an OP-TEE node to the device tree"
+
+This reverts commit 06d22ed6b6635b17551f386b50bb5aaff9b75fbe.
+
+OP-TEE logic in U-Boot automatically injects a reserved-memory
+node along with optee firmware node to kernel device tree.
+The injection logic is dependent on that there is no manually
+defined optee node. Having the node in zynqmp.dtsi effectively
+breaks OP-TEE's insertion of the reserved-memory node, causing
+memory access violations during runtime.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-71292 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-71292</link>
+            <guid isPermaLink="false">CVE-2025-71292</guid>
+            <pubDate>Thu, 30 Jul 2026 06:24:57 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+jfs: nlink overflow in jfs_rename
+
+If nlink is maximal for a directory (-1) and inside that directory you
+perform a rename for some child directory (not moving from the parent),
+then the nlink of the first directory is first incremented and later
+decremented. Normally this is fine, but when nlink = -1 this causes a
+wrap around to 0, and then drop_nlink issues a warning.
+
+After applying the patch syzbot no longer issues any warnings. I also
+ran some basic fs tests to look for any regressions.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-71289 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-71289</link>
+            <guid isPermaLink="false">CVE-2025-71289</guid>
+            <pubDate>Thu, 30 Jul 2026 06:24:57 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+fs/ntfs3: handle attr_set_size() errors when truncating files
+
+If attr_set_size() fails while truncating down, the error is silently
+ignored and the inode may be left in an inconsistent state.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-71286 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-71286</link>
+            <guid isPermaLink="false">CVE-2025-71286</guid>
+            <pubDate>Thu, 30 Jul 2026 06:24:57 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+ASoC: SOF: ipc4-topology: Correct the allocation size for bytes controls
+
+The size of the data behind of scontrol->ipc_control_data for bytes
+controls is:
+[1] sizeof(struct sof_ipc4_control_data) + // kernel only struct
+[2] sizeof(struct sof_abi_hdr)) + payload
+
+The max_size specifies the size of [2] and it is coming from topology.
+
+Change the function to take this into account and allocate adequate amount
+of memory behind scontrol->ipc_control_data.
+
+With the change we will allocate [1] amount more memory to be able to hold
+the full size of data.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-71274 [CVSS:3.1 4.7 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-71274</link>
+            <guid isPermaLink="false">CVE-2025-71274</guid>
+            <pubDate>Thu, 30 Jul 2026 06:24:57 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+rpmsg: core: fix race in driver_override_show() and use core helper
+
+The driver_override_show function reads the driver_override string
+without holding the device_lock. However, the store function modifies
+and frees the string while holding the device_lock. This creates a race
+condition where the string can be freed by the store function while
+being read by the show function, leading to a use-after-free.
+
+To fix this, replace the rpmsg_string_attr macro with explicit show and
+store functions. The new driver_override_store uses the standard
+driver_set_override helper. Since the introduction of
+driver_set_override, the comments in include/linux/rpmsg.h have stated
+that this helper must be used to set or clear driver_override, but the
+implementation was not updated until now.
+
+Because driver_set_override modifies and frees the string while holding
+the device_lock, the new driver_override_show now correctly holds the
+device_lock during the read operation to prevent the race.
+
+Additionally, since rpmsg_string_attr has only ever been used for
+driver_override, removing the macro simplifies the code.
+
+Score: 4.7 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-71269 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-71269</link>
+            <guid isPermaLink="false">CVE-2025-71269</guid>
+            <pubDate>Thu, 30 Jul 2026 06:24:56 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+btrfs: do not free data reservation in fallback from inline due to -ENOSPC
+
+If we fail to create an inline extent due to -ENOSPC, we will attempt to
+go through the normal COW path, reserve an extent, create an ordered
+extent, etc. However we were always freeing the reserved qgroup data,
+which is wrong since we will use data. Fix this by freeing the reserved
+qgroup data in __cow_file_range_inline() only if we are not doing the
+fallback (ret is <= 0).
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-71268 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-71268</link>
+            <guid isPermaLink="false">CVE-2025-71268</guid>
+            <pubDate>Thu, 30 Jul 2026 06:24:56 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+btrfs: fix reservation leak in some error paths when inserting inline extent
+
+If we fail to allocate a path or join a transaction, we return from
+__cow_file_range_inline() without freeing the reserved qgroup data,
+resulting in a leak. Fix this by ensuring we call btrfs_qgroup_free_data()
+in such cases.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-71236 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-71236</link>
+            <guid isPermaLink="false">CVE-2025-71236</guid>
+            <pubDate>Thu, 30 Jul 2026 06:24:56 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+scsi: qla2xxx: Validate sp before freeing associated memory
+
+System crash with the following signature
+[154563.214890] nvme nvme2: NVME-FC{1}: controller connect complete
+[154564.169363] qla2xxx [0000:b0:00.1]-3002:2: nvme: Sched: Set ZIO exchange threshold to 3.
+[154564.169405] qla2xxx [0000:b0:00.1]-ffffff:2: SET ZIO Activity exchange threshold to 5.
+[154565.539974] qla2xxx [0000:b0:00.1]-5013:2: RSCN database changed – 0078 0080 0000.
+[154565.545744] qla2xxx [0000:b0:00.1]-5013:2: RSCN database changed – 0078 00a0 0000.
+[154565.545857] qla2xxx [0000:b0:00.1]-11a2:2: FEC=enabled (data rate).
+[154565.552760] qla2xxx [0000:b0:00.1]-11a2:2: FEC=enabled (data rate).
+[154565.553079] BUG: kernel NULL pointer dereference, address: 00000000000000f8
+[154565.553080] #PF: supervisor read access in kernel mode
+[154565.553082] #PF: error_code(0x0000) - not-present page
+[154565.553084] PGD 80000010488ab067 P4D 80000010488ab067 PUD 104978a067 PMD 0
+[154565.553089] Oops: 0000 1 PREEMPT SMP PTI
+[154565.553092] CPU: 10 PID: 858 Comm: qla2xxx_2_dpc Kdump: loaded Tainted: G           OE     -------  ---  5.14.0-503.11.1.el9_5.x86_64 #1
+[154565.553096] Hardware name: HPE Synergy 660 Gen10/Synergy 660 Gen10 Compute Module, BIOS I43 09/30/2024
+[154565.553097] RIP: 0010:qla_fab_async_scan.part.0+0x40b/0x870 [qla2xxx]
+[154565.553141] Code: 00 00 e8 58 a3 ec d4 49 89 e9 ba 12 20 00 00 4c 89 e6 49 c7 c0 00 ee a8 c0 48 c7 c1 66 c0 a9 c0 bf 00 80 00 10 e8 15 69 00 00 <4c> 8b 8d f8 00 00 00 4d 85 c9 74 35 49 8b 84 24 00 19 00 00 48 8b
+[154565.553143] RSP: 0018:ffffb4dbc8aebdd0 EFLAGS: 00010286
+[154565.553145] RAX: 0000000000000000 RBX: ffff8ec2cf0908d0 RCX: 0000000000000002
+[154565.553147] RDX: 0000000000000000 RSI: ffffffffc0a9c896 RDI: ffffb4dbc8aebd47
+[154565.553148] RBP: 0000000000000000 R08: ffffb4dbc8aebd45 R09: 0000000000ffff0a
+[154565.553150] R10: 0000000000000000 R11: 000000000000000f R12: ffff8ec2cf0908d0
+[154565.553151] R13: ffff8ec2cf090900 R14: 0000000000000102 R15: ffff8ec2cf084000
+[154565.553152] FS:  0000000000000000(0000) GS:ffff8ed27f800000(0000) knlGS:0000000000000000
+[154565.553154] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[154565.553155] CR2: 00000000000000f8 CR3: 000000113ae0a005 CR4: 00000000007706f0
+[154565.553157] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
+[154565.553158] DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400
+[154565.553159] PKRU: 55555554
+[154565.553160] Call Trace:
+[154565.553162]  <TASK>
+[154565.553165]  ? show_trace_log_lvl+0x1c4/0x2df
+[154565.553172]  ? show_trace_log_lvl+0x1c4/0x2df
+[154565.553177]  ? qla_fab_async_scan.part.0+0x40b/0x870 [qla2xxx]
+[154565.553215]  ? __die_body.cold+0x8/0xd
+[154565.553218]  ? page_fault_oops+0x134/0x170
+[154565.553223]  ? snprintf+0x49/0x70
+[154565.553229]  ? exc_page_fault+0x62/0x150
+[154565.553238]  ? asm_exc_page_fault+0x22/0x30
+
+Check for sp being non NULL before freeing any associated memory
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
         </item>
     </channel>
 </rss>
