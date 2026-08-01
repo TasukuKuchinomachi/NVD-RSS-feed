@@ -4,11 +4,98 @@
         <title>NVD CVE Feed</title>
         <link>https://github.com/TasukuKuchinomachi/NVD-RSS-feed</link>
         <description>Latest CVE entries from the National Vulnerability Database. This product uses the NVD API but is not endorsed or certified by the NVD.</description>
-        <lastBuildDate>Sat, 01 Aug 2026 16:16:30 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 01 Aug 2026 19:16:42 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>National Vulnerability Database - NIST</copyright>
+        <item>
+            <title><![CDATA[CVE-2026-55735 [CVSS:4.0 8.2 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-55735</link>
+            <guid isPermaLink="false">CVE-2026-55735</guid>
+            <pubDate>Sat, 01 Aug 2026 19:16:42 GMT</pubDate>
+            <description><![CDATA[Improper Verification of Cryptographic Signature in ueberauth guardian allows an unauthenticated attacker to revoke a victim's session with a forged token.
+
+Guardian.revoke/3 in lib/guardian.ex decodes the supplied token with peek/1, which performs no signature verification (it only base64-decodes the JWT header and payload). The resulting unverified claims are forwarded directly to the configured token module's revoke callback and the implementation's on_revoke callback, a state-mutating sink. The sibling operations refresh/2 and exchange/4 both call decode_and_verify first, so the signature is checked before anything acts on the claims; revoke/3 is the only state-mutating path that acts on claims without verifying the signature.
+
+An attacker who knows or guesses a victim's identifying claim values (jti, sub) can forge a JWT carrying those claims, sign it with an arbitrary key, and submit it to any endpoint that funnels a caller-supplied token into Guardian.revoke/3 (the standard logout / session-revocation pattern). When the token module mutates state keyed by the claims (whitelist deletion or blacklist insertion, for example a GuardianDb-style store), the victim's legitimate session is evicted. This is an unauthenticated session-revocation denial of service; the attacker never needs the signing secret.
+
+This issue affects guardian: from 1.0.0 before 2.4.1.
+
+Score: 8.2 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-55734 [CVSS:4.0 6.9 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-55734</link>
+            <guid isPermaLink="false">CVE-2026-55734</guid>
+            <pubDate>Sat, 01 Aug 2026 19:16:42 GMT</pubDate>
+            <description><![CDATA[Allocation of Resources Without Limits or Throttling vulnerability in ueberauth guardian (Guardian.Permissions module) allows a denial of service via BEAM atom-table exhaustion.
+
+This vulnerability is associated with program file lib/guardian/permissions.ex and program routines 'Elixir.Guardian.Permissions':encode_permissions!/1, 'Elixir.Guardian.Permissions':encode_permissions_into_claims!/2, 'Elixir.Guardian.Permissions':do_encode_permissions!/2.
+
+The Guardian.Permissions mixin installs a public encode_permissions!/1 function on every module that does use Guardian.Permissions. For each key of the supplied map, encode_permissions!/1 calls String.to_atom(to_string(k)) before any validation runs. The integer-value clause of do_encode_permissions!/2 then short-circuits straight to encoding without validating the key against the configured permission set, so a key with an integer value is interned as a fresh atom with no exception raised. Atoms are never garbage collected and the BEAM atom table is a fixed-size resource (default roughly 1,048,576 entries), so each unique attacker-chosen key permanently consumes one slot. An attacker who can influence a permission map that reaches encode_permissions!/1 (for example a permissions map read from a request body and passed into token issuance via encode_permissions_into_claims!/2) can mint an unbounded number of atoms and exhaust the atom table, crashing the entire BEAM node and every service running on it. The sibling decode_permissions/1 is not affected because it skips keys absent from the configured permission set.
+
+This issue affects guardian: from 2.0.0 before 2.4.1.
+
+Score: 6.9 (MEDIUM)
+Vector: CVSS:4.0/AV:L/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:H/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-55733 [CVSS:4.0 6.9 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-55733</link>
+            <guid isPermaLink="false">CVE-2026-55733</guid>
+            <pubDate>Sat, 01 Aug 2026 19:16:42 GMT</pubDate>
+            <description><![CDATA[Allocation of Resources Without Limits or Throttling in ueberauth guardian allows denial of service via unbounded atom creation from attacker-controlled binary input.
+
+Guardian.Permissions.AtomEncoding encodes permission scopes by passing arbitrary binaries to String.to_atom/1. When encode/3 in lib/guardian/permissions/atom_encoding.ex is called with a list, each binary entry is handled by the encode_value/3 binary clause, which calls String.to_atom(value) with no allow-list check. The perm_set argument (the application's small, finite set of legitimate permission names) is discarded, so any external string flows straight into atom creation. This encoder is selected with use Guardian.Permissions, encoding: Guardian.Permissions.AtomEncoding and reached through the imported encode/3 entry point.
+
+String.to_atom/1 creates a brand-new atom for every previously unseen binary, atoms are never garbage collected, and the BEAM atom table is fixed at roughly 1,048,576 entries by default. An application that funnels attacker-influenced permission scopes (from a request body, a JWT claim, or other external input) into encode/3 therefore mints one permanent atom per distinct value. A modest stream of varied, unauthenticated input permanently consumes the atom table and crashes the BEAM node with system_limit, taking down every application running on it.
+
+The default encoder is Guardian.Permissions.BitwiseEncoding, which is not affected.
+
+This issue affects guardian: from 2.0.0 before 2.4.1.
+
+Score: 6.9 (MEDIUM)
+Vector: CVSS:4.0/AV:L/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:H/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-54894 [CVSS:4.0 6.9 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-54894</link>
+            <guid isPermaLink="false">CVE-2026-54894</guid>
+            <pubDate>Sat, 01 Aug 2026 19:16:41 GMT</pubDate>
+            <description><![CDATA[Allocation of Resources Without Limits or Throttling in ueberauth guardian allows denial of service via unbounded atom creation from attacker-influenced binary input.
+
+Guardian.Plug.Keys derives connection and session namespace keys by passing arbitrary binaries to String.to_atom/1. base_key/1 in lib/guardian/plug/keys.ex converts any binary into the atom :"guardian_<input>", and the derived helpers claims_key/1, resource_key/1, and token_key/1 create a second atom on top of that. key_from_other/1 likewise converts a regex-captured binary through String.to_atom/1. The public specs advertise String.t() as a valid argument, so passing a string is documented usage, and higher-level entry points such as Guardian.Plug.current_token(conn, key: key) thread the caller-supplied key straight into these functions.
+
+String.to_atom/1 creates a brand-new atom for every previously unseen binary, atoms are never garbage collected, and the BEAM atom table is fixed at roughly 1,048,576 entries by default. An application that routes attacker-influenced data (a tenant identifier, header, or other request input) into a Guardian key therefore mints one permanent atom per distinct value. A modest stream of varied, unauthenticated input permanently consumes the atom table and crashes the BEAM node, taking down every application running on it.
+
+This issue affects guardian: from 0.1.0 before 2.4.1.
+
+Score: 6.9 (MEDIUM)
+Vector: CVSS:4.0/AV:L/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:H/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-52936 [CVSS:4.0 9.3 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-52936</link>
+            <guid isPermaLink="false">CVE-2025-52936</guid>
+            <pubDate>Sat, 01 Aug 2026 19:16:41 GMT</pubDate>
+            <description><![CDATA[Improper Link Resolution Before File Access ('Link Following') vulnerability in yrutschle sslh.This issue affects sslh: before 2.2.2.
+
+Score: 9.3 (CRITICAL)
+Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:L/SC:H/SI:H/SA:L/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:N/AU:Y/R:U/V:C/RE:M/U:Amber]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2024-10918 [CVSS:3.1 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2024-10918</link>
+            <guid isPermaLink="false">CVE-2024-10918</guid>
+            <pubDate>Sat, 01 Aug 2026 19:16:41 GMT</pubDate>
+            <description><![CDATA[Stack-based Buffer Overflow vulnerability in libmodbus v3.1.10 allows to overflow the buffer allocated for the Modbus response if the function tries to reply to a Modbus request with an
+unexpected length.
+
+Score: 9.8 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
         <item>
             <title><![CDATA[CVE-2026-18536]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-18536</link>
@@ -958,66 +1045,6 @@ Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:L/I:L/A:N]]></description>
 
 Score: 6.4 (MEDIUM)
 Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:L/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-15645 [CVSS:3.1 6.4 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-15645</link>
-            <guid isPermaLink="false">CVE-2026-15645</guid>
-            <pubDate>Sat, 01 Aug 2026 09:16:59 GMT</pubDate>
-            <description><![CDATA[The Powerkit – Supercharge your WordPress Site plugin for WordPress is vulnerable to Stored Cross-Site Scripting via 'nav' Shortcode Attribute in all versions up to, and including, 3.1.0 due to insufficient input sanitization and output escaping. This makes it possible for authenticated attackers, with contributor-level access and above, to inject arbitrary web scripts in pages that will execute whenever a user accesses an injected page.
-
-Score: 6.4 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:L/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-15644 [CVSS:3.1 6.4 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-15644</link>
-            <guid isPermaLink="false">CVE-2026-15644</guid>
-            <pubDate>Sat, 01 Aug 2026 09:16:59 GMT</pubDate>
-            <description><![CDATA[The Powerkit – Supercharge your WordPress Site plugin for WordPress is vulnerable to Stored Cross-Site Scripting via 'style' Shortcode Attribute in all versions up to, and including, 3.1.0 due to insufficient input sanitization and output escaping. This makes it possible for authenticated attackers, with contributor-level access and above, to inject arbitrary web scripts in pages that will execute whenever a user accesses an injected page.
-
-Score: 6.4 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:L/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-15601 [CVSS:3.1 4.9 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-15601</link>
-            <guid isPermaLink="false">CVE-2026-15601</guid>
-            <pubDate>Sat, 01 Aug 2026 09:16:59 GMT</pubDate>
-            <description><![CDATA[The Kirki – Freeform Page Builder, Website Builder & Customizer plugin for WordPress is vulnerable to Path Traversal (Zip Slip) in all versions up to, and including, 6.0.13 via the extract_zip_file function. This makes it possible for authenticated attackers, with custom-level access and above, to write arbitrary files on the server, which can allow for remote code execution. The install_app, update_app, and get_kirki_template_from_zip code paths accept a user-supplied app src value to construct the download URL, and no sanitization is applied to prevent a crafted ZIP from being fetched and extracted with path-traversing entry names that escape the intended destination directory.
-
-Score: 4.9 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-15450 [CVSS:3.1 8.1 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-15450</link>
-            <guid isPermaLink="false">CVE-2026-15450</guid>
-            <pubDate>Sat, 01 Aug 2026 09:16:59 GMT</pubDate>
-            <description><![CDATA[The Nex Forms – Ultimate Form Builder – Lite plugin for WordPress is vulnerable to arbitrary file deletion via path traversal in versions up to, and including, 9.2.3. This is due to the delete_file() AJAX handler retrieving a file path from the database and passing it directly to unlink() with no validation (no realpath(), basename(), or allowlist check), combined with the insert_record() AJAX handler that lets the same authenticated user store an arbitrary value in the target 'location' column (wp_kses() only strips HTML tags and does not neutralize path traversal or absolute paths). This makes it possible for authenticated attackers, with admin-level access and above, to delete arbitrary files on the affected site's server, including wp-config. When the plugin's user-level option is configured to something else, this may be exploitable with lower privileges.
-
-Score: 8.1 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-15052 [CVSS:3.1 7.2 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-15052</link>
-            <guid isPermaLink="false">CVE-2026-15052</guid>
-            <pubDate>Sat, 01 Aug 2026 09:16:58 GMT</pubDate>
-            <description><![CDATA[The MailChimp Subscribe Form, Optin Builder, PopUp Builder, Form Builder plugin for WordPress is vulnerable to Stored Cross-Site Scripting via Form Field Values in all versions up to, and including, 4.3.3 due to insufficient input sanitization and output escaping. This makes it possible for unauthenticated attackers to inject arbitrary web scripts in pages that will execute whenever a user accesses an injected page.
-
-Score: 7.2 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:L/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-15018 [CVSS:3.1 5.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-15018</link>
-            <guid isPermaLink="false">CVE-2026-15018</guid>
-            <pubDate>Sat, 01 Aug 2026 09:16:58 GMT</pubDate>
-            <description><![CDATA[The Database Collation Fix plugin for WordPress is vulnerable to time-based SQL Injection via the 'force-collation-algorithm' parameter in all versions up to, and including, 1.2.10 due to insufficient escaping on the user supplied parameter and lack of sufficient preparation on the existing SQL query. This makes it possible for unauthenticated attackers to append additional SQL queries into already existing queries that can be used to extract sensitive information from the database. Exploitation requires a trigger.txt file to be present in the plugin's directory (/wp-content/plugins/database-collation-fix/trigger.txt), a condition created by DesktopServer integration events such as site creation, copy, import, move, export, or deploy.
-
-Score: 5.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:H/I:N/A:N]]></description>
         </item>
     </channel>
 </rss>
