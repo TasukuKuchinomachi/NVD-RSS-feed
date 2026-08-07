@@ -4,11 +4,148 @@
         <title>NVD CVE Feed</title>
         <link>https://github.com/TasukuKuchinomachi/NVD-RSS-feed</link>
         <description>Latest CVE entries from the National Vulnerability Database. This product uses the NVD API but is not endorsed or certified by the NVD.</description>
-        <lastBuildDate>Fri, 07 Aug 2026 22:16:59 GMT</lastBuildDate>
+        <lastBuildDate>Fri, 07 Aug 2026 23:17:04 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>National Vulnerability Database - NIST</copyright>
+        <item>
+            <title><![CDATA[CVE-2026-52880 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-52880</link>
+            <guid isPermaLink="false">CVE-2026-52880</guid>
+            <pubDate>Fri, 07 Aug 2026 23:17:04 GMT</pubDate>
+            <description><![CDATA[Klever-Go is the Go implementation of the Klever blockchain protocol. Versions from 1.7.14 through 1.7.17 are vulnerable to a remotely triggerable denial of service. Both REST APIs are started with the Gin Engine.Run convenience method, which serves requests through Go's default HTTP server with no ReadHeaderTimeout, ReadTimeout, or MaxHeaderBytes configured. As a result, incoming connections that never complete their request headers are held open indefinitely. When a REST listener is reachable beyond localhost through the documented all-interface bind or a Docker port-publish deployment, a single unauthenticated client can open many slow-header connections and hold them open until server file descriptors are exhausted, preventing the API from accepting new connections. This renders the REST API unavailable to legitimate clients. This issue is fixed in version 1.7.18.
+
+Score: 7.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-52879 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-52879</link>
+            <guid isPermaLink="false">CVE-2026-52879</guid>
+            <pubDate>Fri, 07 Aug 2026 23:17:04 GMT</pubDate>
+            <description><![CDATA[Klever-Go is the Go implementation of the Klever blockchain protocol. In versions 1.7.14 through 1.7.17, the direct-message ingress handler spawns a new goroutine for every incoming direct message before the processor-level antiflood layer makes any admission decision, with no semaphore, throttler, or bound on the number of concurrent in-flight spawns. Because the antiflood check runs inside the spawned goroutine rather than before it, a single connected peer can open a direct-send stream and send a stream of well-formed messages to force unbounded goroutine creation, where each goroutine allocates its own stack and holds a message reference until processing completes, adding scheduler and garbage-collection pressure faster than the runtime can drain it. This lets one peer degrade the node's availability and its ability to process legitimate traffic, resulting in a remotely triggerable denial of service. The issue is fixed in 1.7.18.
+
+Score: 7.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-52878 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-52878</link>
+            <guid isPermaLink="false">CVE-2026-52878</guid>
+            <pubDate>Fri, 07 Aug 2026 23:17:04 GMT</pubDate>
+            <description><![CDATA[Klever-Go is the Go implementation of the Klever blockchain protocol. Versions 1.7.14 through 1.7.17 are vulnerable to a nil-pointer panic triggered by a protobuf Transaction whose embedded RawData sub-message is omitted. This omission causes RawData to decode to nil. Every transaction gossiped on the Klever-Go P2P network is decoded and validated synchronously inside the libp2p pubsub topic-validator callback, where txVersionChecker.CheckTxVersion dereferences tx.RawData.Version with no nil check. Because the libp2p pubsub callback, the underlying go-libp2p-pubsub validation worker, and Klever's own network/p2p layer install no recover(), the panic propagates and crashes the entire node process. The attacker payload is a 3-byte protobuf message; no validator key, stake, funds, or on-chain account is required, and delivery aimed at enough of the BLS validator set can halt block production, resulting in a chain halt. This issue has been fixed in version 1.7.18.
+
+Score: 7.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-49343 [CVSS:3.1 5.9 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-49343</link>
+            <guid isPermaLink="false">CVE-2026-49343</guid>
+            <pubDate>Fri, 07 Aug 2026 23:17:04 GMT</pubDate>
+            <description><![CDATA[Klever-Go is the Go implementation of the Klever blockchain protocol. In versions prior to 1.7.18, the account-data trie syncers are vulnerable to a resource-exhaustion flaw that leaks bounded throttler slots on error paths. In syncDataTrie() (in both userAccountsSyncer.go and kappAccountsSyncer.go), StartProcessing() reserves a slot from the NumGoRoutinesThrottler, but the corresponding EndProcessing() is only called on the success path and on the duplicate-root early return. As a result, any error from trie.NewTrie(), trie.NewTrieSyncer(), or trieSyncer.StartSyncing() (including the network-dependent timeout path) permanently consumes one slot for the lifetime of the throttler. An attacker who can repeatedly cause trie-node sync failures or timeouts during bootstrap can exhaust the bounded throttler, after which further account-data trie syncs stop making progress and SyncAccounts() returns a timeout. Because epoch bootstrap in syncUserAccountsState() and syncKappAccountsState() aborts on any such error, this causes bootstrap to fail, a core availability issue affecting fresh, restarting, or resyncing nodes and validators. This issue is fixed in version 1.7.18.
+
+Score: 5.9 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-48122 [CVSS:4.0 5.4 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-48122</link>
+            <guid isPermaLink="false">CVE-2026-48122</guid>
+            <pubDate>Fri, 07 Aug 2026 23:17:04 GMT</pubDate>
+            <description><![CDATA[Ruby LSP is an implementation of the language server protocol for Ruby. Several workspace-level settings in the Ruby LSP VS Code extension prior to version 0.10.4 could override the path to the Ruby executable, the version manager executables, or the Bundler `Gemfile` used at startup. A malicious repository containing a `.vscode/settings.json` could set these values to attacker-controlled targets. Opening and trusting the repository would then execute code with the privileges of the developer. The Ruby LSP gem and clients of the language server in other editors are not affected. Version 0.10.4 of the Ruby LSP VS Code extension fixes the issue.
+
+Score: 5.4 (MEDIUM)
+Vector: CVSS:4.0/AV:L/AC:L/AT:P/PR:L/UI:A/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-48120 [CVSS:3.1 8.6 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-48120</link>
+            <guid isPermaLink="false">CVE-2026-48120</guid>
+            <pubDate>Fri, 07 Aug 2026 23:17:04 GMT</pubDate>
+            <description><![CDATA[Kakoune is a code editor. Prior to version 2026.05.21, the bundled, enabled by default, `autorestore.kak` script can be exploited by malicious backup files leading to arbitrary kakoune and shell commands being executed by simply opening a file. Kakoune 2026.05.21 fixes the issue. As a workaround, add `autorestore-disable` to the user kakrc will disable the autorestore feature.
+
+Score: 8.6 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:C/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-48047 [CVSS:4.0 5.9 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-48047</link>
+            <guid isPermaLink="false">CVE-2026-48047</guid>
+            <pubDate>Fri, 07 Aug 2026 23:17:03 GMT</pubDate>
+            <description><![CDATA[XWiki Platform WebJars API is a package for XWiki, a generic wiki platform. Starting with version 9.6-rc-1 and prior to versions 16.10.17, 17.4.9, and 17.10.3, a potential path traversal vulnerability allow an attacker who manages to get a malicious WebJar extension installed on the wiki to write arbitrary files. While the consequences could be severe like overriding configuration files and setting the superadmin password, the attack first requires that the attacker already has admin access to at least a subwiki to be able to install a malicious extension. Further, the attacker needs to publish a malicious extension in an extension repository that is configured in the instance. This vulnerability has been patched in XWiki 16.10.17, 17.4.9, 17.10.3, and 18.0.0RC1. XWiki is not aware of any workarounds except for being careful whom developers grant script and admin rights to.
+
+Score: 5.9 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:P/PR:H/UI:N/VC:L/VI:H/VA:L/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-48026 [CVSS:3.1 8.7 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-48026</link>
+            <guid isPermaLink="false">CVE-2026-48026</guid>
+            <pubDate>Fri, 07 Aug 2026 23:17:03 GMT</pubDate>
+            <description><![CDATA[lakeFS is an open-source tool that transforms object storage into a Git-like repositories. Prior to version 1.81.1 of the open source edition and 1.84.0 of the enterprise edition, lakeFS Web UI renders markdown files from repository objects without sanitizing the resulting HTML. A user with write access to any repository branch can commit a `.md` object containing arbitrary HTML/JavaScript. Any other user who opens that object, or who navigates to a repository or directory containing a malicious `README.md`, executes the attacker-supplied script in their own authenticated session. lakeFS fixes the issue in v1.81.1 and lakeFS Enterprise fixes the issue in in v1.84.0. Enterprise customers using older versions can temporarily disable Markdown rendering by adding YAML to their config. No workaround exists for OSS release. Users are advised to upgrade to the latest version for both lakeFS and lakeFS-Enterprise.
+
+Score: 8.7 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:R/S:C/C:H/I:H/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-47249 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-47249</link>
+            <guid isPermaLink="false">CVE-2026-47249</guid>
+            <pubDate>Fri, 07 Aug 2026 23:17:03 GMT</pubDate>
+            <description><![CDATA[Klever-Go is the Go implementation of the Klever blockchain protocol. Prior to 1.7.18, the P2P resolver request handling logic is vulnerable to hash-array amplification. A connected peer can send a compressed RequestDataType_HashArrayType direct request that is only 442 bytes on the wire but expands into 200,000 decoded hash entries inside the resolver path. The resolver's antiflood logic counts only a single logical message and the compressed wire size, and while Batch.Decompress() caps the decompressed byte size, it never limits the number of decoded repeated-field items. As a result, both TxResolver and TrieNodeResolver preallocate and iterate over the entire unchecked set of decoded hashes, causing remote memory and CPU amplification against any node that accepts P2P peer connections. This issue is fixed in version 1.7.18.
+
+Score: 7.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-47243 [CVSS:4.0 9.2 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-47243</link>
+            <guid isPermaLink="false">CVE-2026-47243</guid>
+            <pubDate>Fri, 07 Aug 2026 23:17:03 GMT</pubDate>
+            <description><![CDATA[Kata Containers is an open source project focusing on a standard implementation of lightweight Virtual Machines (VMs) that perform like containers. Prior to 3.31.0, the runtime-rs standalone virtio-fs path is vulnerable to a guest-root to host-root escape. In this configuration, Kata runs the host virtiofsd as root with --sandbox none --seccomp none, so an attacker with root-equivalent access inside the guest can bypass the guest virtio-fs client entirely by taking over the virtio-fs PCI device and building a virtqueue in userspace to submit raw FUSE requests directly to the host virtiofsd. A crafted FUSE_SYMLINK request whose new symlink name is an absolute host path is honored outside the configured shared directory, allowing guest root to create root-owned symlinks in sensitive host locations such as /etc/cron.d. By pointing such a symlink at a guest-controlled crontab payload reachable through a live runtime process's mount namespace, the attacker causes the host cron daemon to execute that payload as host root, crossing the Kata isolation boundary. This issue is fixed in version 3.31.0.
+
+Score: 9.2 (CRITICAL)
+Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:H/UI:N/VC:H/VI:H/VA:N/SC:H/SI:H/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-47127 [CVSS:3.1 6.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-47127</link>
+            <guid isPermaLink="false">CVE-2026-47127</guid>
+            <pubDate>Fri, 07 Aug 2026 23:17:03 GMT</pubDate>
+            <description><![CDATA[Ghostfolio is an open source wealth management software. Prior to version 3.4.0, Ghostfolio's Stripe checkout success-URL handler at `GET /api/v1/subscription/stripe/callback?checkoutSessionId=<id>` retrieves the Stripe Checkout Session by ID and unconditionally grants a Premium subscription to the session's `client_reference_id` — without ever checking `session.payment_status` or `session.status`. There is no separate Stripe webhook endpoint with `stripe-signature` verification; this callback is the sole code path that creates Stripe-driven subscriptions. Any authenticated user can self-grant a 1-year Premium subscription without ever paying. Version 3.4.0 rejects sessions unless `session.payment_status === 'paid'` AND `session.status === 'complete'` (fails closed). Additionally, new unique `stripeCheckoutSessionId` column → a session can't be redeemed twice (race-safe via DB unique constraint).
+
+Score: 6.5 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:H/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-46409 [CVSS:3.1 9.6 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-46409</link>
+            <guid isPermaLink="false">CVE-2026-46409</guid>
+            <pubDate>Fri, 07 Aug 2026 23:17:03 GMT</pubDate>
+            <description><![CDATA[OpenYak is a local-first agent runtime for reliable tool-using models, with a desktop workspace built on top. Prior to version 1.1.3, the OpenYak desktop backend binds an HTTP API to `127.0.0.1:<random port>` (commonly 19141) without server-side Origin validation, loopback authentication, or Content-Type enforcement, and with a wildcard CORS policy. Any webpage a user visits while OpenYak is running can issue cross-origin requests to this local server — the browser acts as a proxy into loopback, bypassing OS-level network isolation. Chained, this lets a malicious page execute arbitrary shell commands on the host (RCE) via the build agent with `permission_presets.bash=true`, shut down the service, and exfiltrate chat history and account PII — with no user interaction beyond opening the page. Version 1.1.3 patches the issue.
+
+Score: 9.6 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-4438]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-4438</link>
+            <guid isPermaLink="false">CVE-2025-4438</guid>
+            <pubDate>Fri, 07 Aug 2026 23:17:03 GMT</pubDate>
+            <description><![CDATA[Rejected reason: This CVE ID has been rejected or withdrawn by its CVE Numbering Authority.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2024-4944 [CVSS:4.0 8.6 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2024-4944</link>
+            <guid isPermaLink="false">CVE-2024-4944</guid>
+            <pubDate>Fri, 07 Aug 2026 23:17:02 GMT</pubDate>
+            <description><![CDATA[A local privilege escalation vlnerability in the WatchGuard Mobile VPN with SSL client on Windows enables a local user to execute arbitrary commands with elevated privileged.
+
+Score: 8.6 (HIGH)
+Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
         <item>
             <title><![CDATA[CVE-2026-71847 [CVSS:4.0 8.7 HIGH]]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-71847</link>
@@ -79,16 +216,6 @@ Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
 
 Score: 7.3 (HIGH)
 Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:L]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-47243 [CVSS:4.0 9.2 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-47243</link>
-            <guid isPermaLink="false">CVE-2026-47243</guid>
-            <pubDate>Fri, 07 Aug 2026 22:16:58 GMT</pubDate>
-            <description><![CDATA[Kata Containers is an open source project focusing on a standard implementation of lightweight Virtual Machines (VMs) that perform like containers. Prior to 3.31.0, the runtime-rs standalone virtio-fs path is vulnerable to a guest-root to host-root escape. In this configuration, Kata runs the host virtiofsd as root with --sandbox none --seccomp none, so an attacker with root-equivalent access inside the guest can bypass the guest virtio-fs client entirely by taking over the virtio-fs PCI device and building a virtqueue in userspace to submit raw FUSE requests directly to the host virtiofsd. A crafted FUSE_SYMLINK request whose new symlink name is an absolute host path is honored outside the configured shared directory, allowing guest root to create root-owned symlinks in sensitive host locations such as /etc/cron.d. By pointing such a symlink at a guest-controlled crontab payload reachable through a live runtime process's mount namespace, the attacker causes the host cron daemon to execute that payload as host root, crossing the Kata isolation boundary. This issue is fixed in version 3.31.0.
-
-Score: 9.2 (CRITICAL)
-Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:H/UI:N/VC:H/VI:H/VA:N/SC:H/SI:H/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
         </item>
         <item>
             <title><![CDATA[CVE-2026-46405 [CVSS:3.1 5.3 MEDIUM]]]></title>
@@ -986,133 +1113,6 @@ Users are recommended to upgrade to version 1.2.0, which fixes the issue.
 
 Score: 7.5 (HIGH)
 Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-12609 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-12609</link>
-            <guid isPermaLink="false">CVE-2026-12609</guid>
-            <pubDate>Fri, 07 Aug 2026 20:23:46 GMT</pubDate>
-            <description><![CDATA[In Eclipse Theia versions 1.66.0 and up until including 1.73.1, the `@theia/plugin-ext` backend exposes the `/hostedPlugin/:pluginId/:path(*)` HTTP endpoint, which resolves the requested file path with `path.resolve(localPath, filePath)` without verifying that the resolved path stays within the plugin's directory. An unauthenticated network attacker can send percent-encoded `../` sequences (`%2e%2e%2f`) that decode into the path parameter and escape the plugin directory, allowing arbitrary files readable by the Theia backend process to be retrieved. Plugin IDs are derived deterministically from a plugin's publisher and name, so built-in plugins serve as reliable anchors that require no prior knowledge of the target system.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-21953 [CVSS:3.1 3.3 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-21953</link>
-            <guid isPermaLink="false">CVE-2026-21953</guid>
-            <pubDate>Fri, 07 Aug 2026 20:19:51 GMT</pubDate>
-            <description><![CDATA[Vulnerability in the Oracle Retail Xstore Point of Service product of Oracle Retail Applications (component: Xstore Mobile).   The supported version that is affected is 21.0.3. Easily exploitable vulnerability allows low privileged attacker with logon to the infrastructure where Oracle Retail Xstore Point of Service executes to compromise Oracle Retail Xstore Point of Service.  Successful attacks of this vulnerability can result in  unauthorized read access to a subset of Oracle Retail Xstore Point of Service accessible data. CVSS 3.1 Base Score 3.3 (Confidentiality impacts).  CVSS Vector: (CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:N).
-
-Score: 3.3 (LOW)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-60345 [CVSS:3.1 7.2 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-60345</link>
-            <guid isPermaLink="false">CVE-2026-60345</guid>
-            <pubDate>Fri, 07 Aug 2026 20:18:59 GMT</pubDate>
-            <description><![CDATA[Vulnerability in the Oracle JDeveloper product of Oracle Fusion Middleware (component: ADF Shared Components).  Supported versions that are affected are 12.2.1.4.0 and  14.1.2.0.0. Easily exploitable vulnerability allows high privileged attacker with network access via HTTP to compromise Oracle JDeveloper.  Successful attacks of this vulnerability can result in takeover of Oracle JDeveloper. CVSS 3.1 Base Score 7.2 (Confidentiality, Integrity and Availability impacts).  CVSS Vector: (CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H).
-
-Score: 7.2 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-46999 [CVSS:3.1 7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-46999</link>
-            <guid isPermaLink="false">CVE-2026-46999</guid>
-            <pubDate>Fri, 07 Aug 2026 20:18:22 GMT</pubDate>
-            <description><![CDATA[Vulnerability in the Oracle Enterprise Manager Base Platform product of Oracle Enterprise Manager (component: Discovery Framework).  Supported versions that are affected are 13.5 and  24.1. Difficult to exploit vulnerability allows unauthenticated attacker with network access via HTTPS to compromise Oracle Enterprise Manager Base Platform.  Successful attacks of this vulnerability can result in  unauthorized creation, deletion or modification access to critical data or all Oracle Enterprise Manager Base Platform accessible data as well as  unauthorized read access to a subset of Oracle Enterprise Manager Base Platform accessible data and unauthorized ability to cause a partial denial of service (partial DOS) of Oracle Enterprise Manager Base Platform. CVSS 3.1 Base Score 7.0 (Confidentiality, Integrity and Availability impacts).  CVSS Vector: (CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:H/A:L).
-
-Score: 7 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:H/A:L]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-71870 [CVSS:4.0 4.8 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-71870</link>
-            <guid isPermaLink="false">CVE-2026-71870</guid>
-            <pubDate>Fri, 07 Aug 2026 20:16:52 GMT</pubDate>
-            <description><![CDATA[pypdf is a free and open-source pure-python PDF library. Prior to 6.15.0, a crafted PDF can cause large memory consumption when pypdf/_cmap.py function parse_bfrange parses unusually large source-code or destination-string tokens in a font /ToUnicode CMap during text extraction. This issue is fixed in 6.15.0.
-
-Score: 4.8 (MEDIUM)
-Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:N/UI:P/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-66151]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-66151</link>
-            <guid isPermaLink="false">CVE-2026-66151</guid>
-            <pubDate>Fri, 07 Aug 2026 20:16:52 GMT</pubDate>
-            <description><![CDATA[SonicWall Global VPN Client version 4.10.8.1108 and earlier is vulnerable to an out-of-bounds kernel memory read in the SWIPsec.sys driver, which could allow a local attacker to cause a system crash.]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-65819 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-65819</link>
-            <guid isPermaLink="false">CVE-2026-65819</guid>
-            <pubDate>Fri, 07 Aug 2026 20:16:52 GMT</pubDate>
-            <description><![CDATA[gopacket provides packet processing capabilities for Go. Through version 1.7.0, multiple layer decoders use attacker-controlled lengths, counts, or offsets before validating them against packet buffers, allowing a crafted packet decoded through DecodingLayerParser or DecodeFromBytes to trigger an unrecovered panic and remotely deny service.  A patch commit is available at 210f25f.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-62296 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62296</link>
-            <guid isPermaLink="false">CVE-2026-62296</guid>
-            <pubDate>Fri, 07 Aug 2026 20:16:52 GMT</pubDate>
-            <description><![CDATA[HAPI FHIR is a complete implementation of the HL7 FHIR standard for healthcare interoperability in Java. Prior to 6.9.11, XhtmlParser.java imposes no maximum element nesting depth, so a deeply nested text.div narrative triggers unbounded recursion between parseElementInner() and parseElement(), raising a StackOverflowError. An attacker who can submit FHIR resources containing such narratives can thus crash a parsing or validation worker thread, affecting validator services and any application that parses attacker-supplied FHIR JSON or XML. This issue is fixed in version 6.9.11.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-62295 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62295</link>
-            <guid isPermaLink="false">CVE-2026-62295</guid>
-            <pubDate>Fri, 07 Aug 2026 20:16:52 GMT</pubDate>
-            <description><![CDATA[HAPI FHIR is a complete implementation of the HL7 FHIR standard for healthcare interoperability in Java. Prior to 6.9.11, the JSON utility parser in org.hl7.fhir.utilities.json.parser.JsonParser enforces no maximum nesting depth for arrays or objects. As a result, a small but deeply nested, syntactically valid FHIR JSON document can trigger unbounded readArray() or readObject() recursion, raising a StackOverflowError before structural validation runs. An attacker who can submit JSON resources for validation can thus crash the request thread, and services that do not isolate StackOverflowError safely may experience worker loss or process instability — a denial-of-service condition. This issue is fixed in version 6.9.11.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-61808 [CVSS:3.1 9.8 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61808</link>
-            <guid isPermaLink="false">CVE-2026-61808</guid>
-            <pubDate>Fri, 07 Aug 2026 20:16:52 GMT</pubDate>
-            <description><![CDATA[LightRAG provides simple and fast retrieval-augmented generation. Through version 1.5.4, the LightRAG API server binds to all network interfaces with authentication disabled by default, allowing an unauthenticated network attacker to read indexed document content, upload or delete documents, modify the knowledge graph, cancel pipelines, clear caches, and consume LLM resources. This issue is mitigated in version 1.5.5rc1.
-
-Score: 9.8 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-48097 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-48097</link>
-            <guid isPermaLink="false">CVE-2026-48097</guid>
-            <pubDate>Fri, 07 Aug 2026 20:16:51 GMT</pubDate>
-            <description><![CDATA[NexTor IP Changer is a command-line tool that leverages the Tor network to periodically rotate a user's IP address. Versions prior to 2.0.0 have a command execution vulnerability due to unsafe use of `shell=True` with commands that rely on executable resolution through the `PATH` environment variable. An attacker controlling the execution environment can place malicious executables such as sudo earlier in the `PATH`, resulting in execution of attacker-controlled code. Version 2.0.0 fixes the issue.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-48039 [CVSS:3.1 9.1 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-48039</link>
-            <guid isPermaLink="false">CVE-2026-48039</guid>
-            <pubDate>Fri, 07 Aug 2026 20:16:51 GMT</pubDate>
-            <description><![CDATA[Meta Ads MCP is a Model Context Protocol (MCP) server that lets AI assistants run Meta Ads. Prior to version 1.0.109, `AuthInjectionMiddleware.dispatch()` at `http_auth_integration.py:272` unconditionally forwards unauthenticated Streamable HTTP requests to downstream MCP tool handlers without issuing a `401` response, allowing any network-reachable caller to invoke MCP tools without authentication. When no per-request credential is present, tool handlers fall back to the `META_ACCESS_TOKEN` environment variable, and when the downstream Meta Graph API call fails, `api.py:263–269` serialises the raw `httpx` request URL—including the operator's `access_token` as a query parameter—into the JSON-RPC response body, delivering the credential to the unauthenticated caller. Version 1.0.109 fixes the issue.
-
-Score: 9.1 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-48007 [CVSS:4.0 8.6 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-48007</link>
-            <guid isPermaLink="false">CVE-2026-48007</guid>
-            <pubDate>Fri, 07 Aug 2026 20:16:51 GMT</pubDate>
-            <description><![CDATA[Element Call is a native Matrix video conferencing application. Versions 0.5.17 through 0.19.3 report analytics data to a PostHog server, when configured to by a `posthog` key in config.json or by the `posthogApiHost` and `posthogApiKey` URL parameters. Several fields of this data (`$initial_person_info`, `$session_entry_url`, and `$current_url`) were found to contain the full URL of the user's visited page, including the fragment. Users of a standalone Element Call ‘SPA’ instance such as https://call.element.io may therefore have reported the full URLs of certain calls, including encryption passwords, to the configured PostHog server, potentially compromising the confidentiality of the calls to actors who could access both the PostHog analytics data and the encrypted media streams. The same issue is present in Element Call's embedded package, but in practice it does not impact applications using this package (including Element Web, Element Desktop, Element X iOS, and Element X Android) because they distribute encryption keys over Matrix rather than encoding a password in the URL. The issue is patched in Element Call 0.19.4. Some workarounds are available. Users may opt out of analytics in the 'Feedback' tab of Element Call's settings and create new links for future calls. Admins who host Element Call as a standalone application may disable PostHog analytics entirely by removing the `posthog` key from their deployment's config.json file.
-
-Score: 8.6 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
         </item>
     </channel>
 </rss>
