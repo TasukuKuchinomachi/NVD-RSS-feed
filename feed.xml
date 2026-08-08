@@ -4,11 +4,95 @@
         <title>NVD CVE Feed</title>
         <link>https://github.com/TasukuKuchinomachi/NVD-RSS-feed</link>
         <description>Latest CVE entries from the National Vulnerability Database. This product uses the NVD API but is not endorsed or certified by the NVD.</description>
-        <lastBuildDate>Sat, 08 Aug 2026 08:16:51 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 08 Aug 2026 10:16:55 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>National Vulnerability Database - NIST</copyright>
+        <item>
+            <title><![CDATA[CVE-2026-68082]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-68082</link>
+            <guid isPermaLink="false">CVE-2026-68082</guid>
+            <pubDate>Sat, 08 Aug 2026 10:16:55 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+libceph: fix two unsafe bare decodes in decode_lockers()
+
+decode_lockers() in cls_lock_client.c contains two bare decode operations
+that allow a malicious or compromised OSD to trigger slab-out-of-bounds
+reads:
+
+1. ceph_decode_32(p) at the num_lockers field has no preceding bounds
+   check. ceph_start_decoding() accepts struct_len=0 as valid -- the
+   internal ceph_decode_need(p, end, 0, bad) always passes -- so when an
+   OSD sends struct_len=0, ceph_start_decoding() returns success with
+   p == end. The immediately following bare ceph_decode_32(p) then reads
+   4 bytes past the validated buffer boundary. The garbage value is
+   passed directly to kzalloc_objs() as the locker count.
+
+   The sibling function decode_watchers() in osd_client.c already uses
+   ceph_decode_32_safe() after its own ceph_start_decoding() call.
+   decode_lockers() was the only site using the bare variant.
+
+2. ceph_decode_8(p) after the decode_locker() loop has no preceding
+   bounds check. If an OSD crafts num_lockers such that the loop
+   advances p exactly to end, the subsequent bare ceph_decode_8(p) reads
+   one byte past the validated buffer boundary. The result is passed
+   directly into *type, which is used as a lock type discriminator by
+   callers, giving an OSD-controlled one-byte OOB read with direct
+   influence over the lock type field.
+
+Fix both by replacing bare operations with their safe variants:
+  ceph_decode_32(p) -> ceph_decode_32_safe(p, end, *num_lockers,
+                                           err_inval)
+  ceph_decode_8(p)  -> ceph_decode_8_safe(p, end, *type,
+                                          err_free_lockers)
+
+The goto targets differ intentionally:
+  err_inval: is a new label returning -EINVAL directly. It is used for
+  the pre-allocation failure path where *lockers is not yet allocated
+  and must not be passed to ceph_free_lockers().
+
+  err_free_lockers: is the existing label. It is used for the
+  post-allocation failure path where *lockers is allocated and must
+  be freed.
+
+ret is set to -EINVAL before ceph_decode_8_safe() so that
+err_free_lockers returns the correct error code on bounds violation.
+Without this, err_free_lockers would return a stale ret value (0 from
+the successful decode_locker() loop), silently swallowing the error.
+
+-EINVAL is correct for both failure paths. The data received from the
+OSD is structurally malformed. -ENOMEM would misrepresent the failure
+class to callers and to stable@ backporters triaging error paths.
+
+Attacker model: a malicious or compromised OSD in a multi-tenant Ceph
+deployment can trigger this against any kernel client that issues the
+lock.get_info class method (e.g. during RBD exclusive lock acquisition).
+
+[ idryomov: trim changelog, formatting ]]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-68081]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-68081</link>
+            <guid isPermaLink="false">CVE-2026-68081</guid>
+            <pubDate>Sat, 08 Aug 2026 10:16:54 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+KVM: nVMX: Put vmcs12 pages if nested VM-Enter fails due to invalid guest state
+
+Put all vmcs12 pages if KVM synthesizes a nested VM-Exit due to invalid
+guest while emulating VMLAUNCH or VMRESUME.  The invalid guest state path
+doesn't use nested_vmx_vmexit() as that API is intended to be used if and
+only if L2 is active, and the open coded equivalent neglects to put the
+vmcs12 pages.  Failure to put the vmcs12 pages leaks any pinned pages
+(and/or mappings) if L1 retries VMLAUNCH/VMRESUME.
+
+Note, the !from_vmenter scenario doesn't suffer the same problem, as
+vmx_get_nested_state_pages() only gets/pins/maps the vmcs12 pages if L2 is
+active, i.e. if a "full" VM-Exit is guaranteed before KVM will retry
+getting vmcs12 pages.]]></description>
+        </item>
         <item>
             <title><![CDATA[CVE-2026-19270 [CVSS:4.0 1.9 LOW]]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19270</link>
@@ -965,29 +1049,6 @@ Impact: The Datadog user UUID and crash data are visible within Firebase Crashly
 
 Score: 6.5 (MEDIUM)
 Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-47363 [CVSS:3.1 6.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-47363</link>
-            <guid isPermaLink="false">CVE-2026-47363</guid>
-            <pubDate>Sat, 08 Aug 2026 02:17:17 GMT</pubDate>
-            <description><![CDATA[In versions of the Datadog Android application prior to v541-5.9.2, the exported launcher activity AppActivity accepts an attacker-supplied session (including OAuth tokens) from Intent extras with no permission guard, and signs the app into that session without validating it against the backend.
-This requires a malicious application co-installed on a device with the Datadog app installed, and an OAuth token the attacker is willing to load into the victim's app.
-Impact: A co-installed application can switch the victim's Datadog app to a session the attacker controls. This is an account-confusion issue; it does not by itself expose the victim's existing session or data.
-
-Score: 6.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:L/A:L]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-47362 [CVSS:3.1 4.6 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-47362</link>
-            <guid isPermaLink="false">CVE-2026-47362</guid>
-            <pubDate>Sat, 08 Aug 2026 02:17:17 GMT</pubDate>
-            <description><![CDATA[In versions of the Datadog Android application prior to v554-5.9.4, two Room-backed SQLite databases store sensitive content in plaintext: LocalNotificationDatabase (notification title, message, recipient, service, tags, and on-call/incident deep links) and SearchRecentDatabase (the user's full in-app search history). 
-Impact: Any actor able to bypass the app sandbox can read these databases in plaintext.
-
-Score: 4.6 (MEDIUM)
-Vector: CVSS:3.1/AV:P/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N]]></description>
         </item>
     </channel>
 </rss>
