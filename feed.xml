@@ -4,11 +4,439 @@
         <title>NVD CVE Feed</title>
         <link>https://github.com/TasukuKuchinomachi/NVD-RSS-feed</link>
         <description>Latest CVE entries from the National Vulnerability Database. This product uses the NVD API but is not endorsed or certified by the NVD.</description>
-        <lastBuildDate>Sun, 09 Aug 2026 18:16:44 GMT</lastBuildDate>
+        <lastBuildDate>Sun, 09 Aug 2026 19:17:02 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>National Vulnerability Database - NIST</copyright>
+        <item>
+            <title><![CDATA[CVE-2026-70395 [CVSS:4.0 2.1 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-70395</link>
+            <guid isPermaLink="false">CVE-2026-70395</guid>
+            <pubDate>Sun, 09 Aug 2026 19:17:02 GMT</pubDate>
+            <description><![CDATA[Improper Neutralization of Special Elements in Data Query Logic vulnerability in ash-project ash allows an attacker to forge a relationship to a record they cannot name, and to recover the secret value used to look it up.
+
+When manage_relationship is used with on_lookup: :relate on a belongs_to relationship, the client-supplied lookup value is passed to Ash.Query.filter/2 without being cast to the attribute type. A nested map submitted where a scalar is expected is therefore interpreted as a filter predicate rather than a literal, so a lookup for a specific record becomes a query for any record matching a condition. The same path omits Ash.Query.limit(1), leaving Ash.read_one/2 able to distinguish no match from one match from several, which turns comparison predicates into an oracle for the lookup value. Authorization is unaffected; the destination read policy still applies.
+
+This issue affects ash: from 1.52.0-rc.11 before 3.31.1.
+
+Score: 2.1 (LOW)
+Vector: CVSS:4.0/AV:L/AC:L/AT:P/PR:N/UI:N/VC:L/VI:L/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-64586 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64586</link>
+            <guid isPermaLink="false">CVE-2026-64586</guid>
+            <pubDate>Sun, 09 Aug 2026 19:17:02 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+wifi: brcmfmac: drain bus_reset work on device removal
+
+brcmf_fw_crashed() and the debugfs "reset" entry both schedule
+drvr->bus_reset, whose callback recovers drvr through container_of()
+and dereferences it.  The removal path frees drvr (brcmf_free ->
+wiphy_free) without draining the work, so a bus_reset callback pending
+or running during removal can outlive drvr.
+
+Cancellation cannot live in brcmf_detach() or brcmf_free(): the work
+callback reaches teardown through the bus .reset op (PCIe
+brcmf_pcie_reset -> brcmf_detach; SDIO brcmf_sdio_bus_reset ->
+brcmf_sdiod_remove -> brcmf_free), so cancelling there would wait for
+the running work and deadlock.
+
+Add a per-bus mutex (bus_reset_lock) and route all arming through
+brcmf_bus_schedule_reset(), which under the lock skips when the bus is
+marked removing.  Each bus remove entry calls
+brcmf_bus_cancel_reset_work(), which under the same lock sets removing
+and cancels the work.  Holding the mutex across cancel_work_sync() makes
+the set-removing + drain step atomic.  Every producer reaches the arming
+path from process context -- the PCIe firmware-halt notification runs in
+the threaded IRQ handler (brcmf_pcie_isr_thread) and the SDIO hostmail
+path runs from the data workqueue -- so the mutex is taken only in
+sleepable contexts.  Where applicable the remove entry first stops the
+firmware-crash producer: on PCIe mask the mailbox and synchronize_irq;
+on SDIO unregister the bus interrupt and cancel the data worker, which
+also reports firmware halts through brcmf_fw_crashed().  The mutex is
+initialized at bus allocation.  The SDIO suspend power-off path frees
+drvr through the same brcmf_sdiod_remove() and takes the same lock;
+resume re-allows the work only on a successful re-probe.
+
+Also guard brcmf_fw_crashed() against a NULL bus_if/drvr: it can fire
+before brcmf_attach() wires up drvr, and it dereferences drvr
+(bphy_err/brcmf_dev_coredump) before reaching the arming gate.
+
+The bus_reset work is shared across buses, so the drain is applied to
+every remove path: PCIe (the .reset op introduced by the Fixes commit),
+SDIO (arms the same work through brcmf_fw_crashed()), and USB (via the
+debugfs "reset" entry).  cancel_work_sync() drains a running or pending
+bus_reset work item before removal frees drvr, and patch 1/2 makes the
+scratch-buffer release safe when reset teardown has already released
+those DMA buffers.
+
+This patch fixes the lifetime of the bus_reset work item itself.  It does
+not attempt to address the separate, pre-existing lifetime of the
+asynchronous firmware completion started by the PCIe reset path.  That
+callback needs its own lifetime/ownership protocol and is being tracked
+separately.
+
+This issue was found by an in-house static analysis tool.
+
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:A/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-64563 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64563</link>
+            <guid isPermaLink="false">CVE-2026-64563</guid>
+            <pubDate>Sun, 09 Aug 2026 19:17:02 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+rhashtable: clear stale iter->p on table restart
+
+rhashtable_walk_start_check() has two restart paths when resuming a walk.
+When iter->walker.tbl is valid, it re-validates iter->p against the table
+and sets iter->p = NULL if the object is gone.  When iter->walker.tbl is
+NULL (table was freed during resize), it resets slot and skip but forgets
+to clear iter->p.
+
+rhashtable_walk_next() then dereferences the stale iter->p, reading
+freed memory.  This is a use-after-free.
+
+Any caller that does multi-fragment rhashtable walks across
+walk_stop/walk_start boundaries is affected.  Concrete cases include
+netlink_diag (__netlink_diag_dump in net/netlink/diag.c) and TIPC
+(tipc_nl_sk_walk in net/tipc/socket.c).
+
+Crash stack (netlink_diag):
+  BUG: KASAN: slab-use-after-free in rhashtable_walk_next+0x365/0x3c0
+  Read of size 8 at addr ffff88801a9d2438 (freed kmalloc-2k, offset 1080)
+  Call Trace:
+   rhashtable_walk_next+0x365/0x3c0 (lib/rhashtable.c:1016)
+   __netlink_diag_dump+0x160/0x760 (net/netlink/diag.c:122)
+   netlink_diag_dump+0xc2/0x240
+   netlink_dump+0x5bc/0x1270
+   netlink_recvmsg+0x7a3/0x980
+   sock_recvmsg+0x1bc/0x200
+   __sys_recvfrom+0x1d4/0x2c0
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-64523 [CVSS:3.1 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64523</link>
+            <guid isPermaLink="false">CVE-2026-64523</guid>
+            <pubDate>Sun, 09 Aug 2026 19:17:02 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+net/handshake: Take a long-lived file reference at submit
+
+handshake_nl_accept_doit() needs the file pointer backing
+req->hr_sk->sk_socket to survive the window between
+handshake_req_next() and the subsequent FD_PREPARE() and get_file().
+The submit-side sock_hold() does not provide that.  sk_refcnt keeps
+struct sock alive, but struct socket is owned by sock->file: when
+the consumer fputs the last file reference, sock_release() tears
+the socket down regardless of any sock_hold.
+
+Add an hr_file pointer to struct handshake_req and acquire an
+explicit reference on sock->file during handshake_req_submit().
+handshake_complete() and handshake_req_cancel() release the
+reference on the completion-bit-winning path.
+
+The submit error path must also release the file reference, but
+after rhashtable insertion a concurrent handshake_req_cancel() can
+discover the request and race the error path.  Gate the error-path
+cleanup -- sk_destruct restoration, fput, and request destruction
+-- with test_and_set_bit(HANDSHAKE_F_REQ_COMPLETED), the same
+serialization handshake_complete() and handshake_req_cancel()
+already use.  When cancel has already claimed ownership, the submit
+error path returns without touching the request; socket teardown
+handles final destruction.
+
+The accept-side dereferences are not yet retargeted; that change
+comes in the next patch.
+
+Score: 9.8 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-64427]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64427</link>
+            <guid isPermaLink="false">CVE-2026-64427</guid>
+            <pubDate>Sun, 09 Aug 2026 19:17:01 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+HID: logitech-dj: Fix maxfield check in DJ short report validation
+
+Commit b6a57912854e ("HID: logitech-dj: Prevent REPORT_ID_DJ_SHORT
+related user initiated OOB write") added validation for the DJ short
+output report, but the error path dereferences rep->field[0] even when
+rep->maxfield is zero.
+
+Commit 8b9a097eb2fc ("HID: logitech-dj: fix wrong detection of bad
+DJ_SHORT output report") made the check conditional on rep being present,
+but a crafted descriptor can still create report ID 0x20 with only padding
+output items. hid-core registers the report, ignores the padding field,
+and leaves rep->maxfield as zero.
+
+In that case the validation enters the rep->maxfield < 1 branch and then
+dereferences rep->field[0]->report_count while printing the error message,
+causing a NULL pointer dereference during probe. This is reproducible with
+uhid by emulating a Logitech receiver with a padding-only DJ short output
+report:
+
+  BUG: KASAN: null-ptr-deref in logi_dj_probe+0xb1/0x754 [hid_logitech_dj]
+  Read of size 4 at addr 0000000000000028 by task kworker/4:1/129
+  ...
+  Call Trace:
+   logi_dj_probe+0xb1/0x754 [hid_logitech_dj]
+   hid_device_probe+0x329/0x3f0 [hid]
+   really_probe+0x162/0x570
+   __device_attach+0x137/0x2c0
+   bus_probe_device+0x38/0xc0
+   device_add+0xa56/0xce0
+   hid_add_device+0x19c/0x280 [hid]
+   uhid_device_add_worker+0x2c/0xb0 [uhid]
+
+Reject the zero-field report before printing the field report_count.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-63979 [CVSS:3.1 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-63979</link>
+            <guid isPermaLink="false">CVE-2026-63979</guid>
+            <pubDate>Sun, 09 Aug 2026 19:17:01 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+net/handshake: hand off the pinned file reference to accept_doit
+
+handshake_req_next() removes the request from the per-net
+pending list and drops hn_lock before handshake_nl_accept_doit()
+reads req->hr_sk->sk_socket and dereferences sock->file (once in
+FD_PREPARE() and again in get_file()).  In that window a
+consumer running tls_handshake_cancel() followed by sockfd_put()
+(svc_sock_free) or __fput_sync() (xs_reset_transport) releases
+sock->file.  sock_release() then runs sock_orphan(), zeroing
+sk_socket, and frees the struct socket.  The accept-side code
+either reads NULL through sk_socket or chases freed memory.
+
+The submit-side sock_hold() does not prevent this.  sk_refcnt
+protects struct sock, but struct socket and sock->file are
+independently refcounted via the file descriptor the consumer
+owns.  Pinning sk leaves sock and sock->file unprotected.
+
+Retarget the accept-side dereferences at req->hr_file, which was
+pinned at submit time, instead of req->hr_sk->sk_socket->file.
+Pinning on its own is not sufficient: a consumer that cancels
+between handshake_req_next() returning and accept_doit reaching
+FD_PREPARE() takes the !remove_pending() branch in
+handshake_req_cancel() and drops hr_file before the accept side
+takes its own reference.  Hand off an additional file reference
+inside handshake_req_next(), under hn_lock, so the accept side
+operates on a reference that no concurrent handshake_req_cancel()
+can revoke.  FD_PREPARE() consumes that handed-off reference,
+either by transferring it to the new fd in fd_publish() or by
+dropping it in the cleanup destructor on error; the explicit
+get_file() that previously balanced FD_PREPARE() is therefore
+redundant and goes away.
+
+Update handshake_req_cancel_test2 and _test3 to simulate the
+FD_PREPARE() consumption with an fput() so the kunit file-count
+assertions stay balanced.
+
+Score: 9.8 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-63978 [CVSS:3.1 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-63978</link>
+            <guid isPermaLink="false">CVE-2026-63978</guid>
+            <pubDate>Sun, 09 Aug 2026 19:17:01 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+net/handshake: Drain pending requests at net namespace exit
+
+The arguments to list_splice_init() in handshake_net_exit() are
+reversed. The call moves the local empty "requests" list onto
+hn->hn_requests, leaving the local list empty, so the subsequent
+drain loop runs zero iterations. Pending handshake requests that
+had not yet been accepted are not torn down when the net namespace
+is destroyed; each one keeps a reference on a socket file and on
+the handshake_req allocation.
+
+Pass the source and destination in the documented order
+(list_splice_init(list, head) moves list onto head) so the pending
+list is transferred to the local scratch list and drained through
+handshake_complete().
+
+Fixing the splice direction exposes a list-corruption race. After
+the splice each req->hr_list still has non-empty link pointers,
+threading the stack-local scratch list rather than hn_requests.
+A concurrent handshake_req_cancel() -- for example, from sunrpc's
+TLS timeout on a kernel socket whose netns reference was not
+taken -- finds the request through the rhashtable, calls
+remove_pending(), and sees !list_empty(&req->hr_list).
+__remove_pending_locked() then list_del_init()s an entry off the
+scratch list while the drain iterates, corrupting it. The same
+call arriving after the drain loop has run list_del() on an
+entry hits LIST_POISON instead.
+
+Have remove_pending() check HANDSHAKE_F_NET_DRAINING under
+hn_lock and report not-found when drain is in progress. The
+drain has already taken ownership; handshake_complete()'s existing
+test_and_set on HANDSHAKE_F_REQ_COMPLETED still arbitrates
+between drain and cancel for who calls the consumer's hp_done. Use
+list_del_init() rather than list_del() in the drain so req->hr_list
+does not carry LIST_POISON after drain releases the entry.
+
+The DRAINING guard in remove_pending() makes cancel return false,
+but cancel still falls through to test_and_set_bit on
+HANDSHAKE_F_REQ_COMPLETED and drops the request's hr_file reference.
+Without another pin, if that is the last reference, sk_destruct frees
+the request while it is still linked on the drain loop's local list.
+Pin each request's hr_file under hn_lock before releasing the list,
+and drop that drain pin after the loop finishes with the request.
+
+Score: 9.8 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-43197 [CVSS:3.1 9.1 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-43197</link>
+            <guid isPermaLink="false">CVE-2026-43197</guid>
+            <pubDate>Sun, 09 Aug 2026 19:17:01 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+netconsole: avoid OOB reads, msg is not nul-terminated
+
+msg passed to netconsole from the console subsystem is not guaranteed
+to be nul-terminated. Before recent
+commit 7eab73b18630 ("netconsole: convert to NBCON console infrastructure")
+the message would be placed in printk_shared_pbufs, a static global
+buffer, so KASAN had harder time catching OOB accesses. Now we see:
+
+    printk: console [netcon_ext0] enabled
+    BUG: KASAN: slab-out-of-bounds in string+0x1f7/0x240
+    Read of size 1 at addr ffff88813b6d4c00 by task pr/netcon_ext0/594
+
+    CPU: 65 UID: 0 PID: 594 Comm: pr/netcon_ext0 Not tainted 6.19.0-11754-g4246fd6547c9
+    Call Trace:
+     kasan_report+0xe4/0x120
+     string+0x1f7/0x240
+     vsnprintf+0x655/0xba0
+     scnprintf+0xba/0x120
+     netconsole_write+0x3fe/0xa10
+     nbcon_emit_next_record+0x46e/0x860
+     nbcon_kthread_func+0x623/0x750
+
+    Allocated by task 1:
+     nbcon_alloc+0x1ea/0x450
+     register_console+0x26b/0xe10
+     init_netconsole+0xbb0/0xda0
+
+    The buggy address belongs to the object at ffff88813b6d4000
+                which belongs to the cache kmalloc-4k of size 4096
+    The buggy address is located 0 bytes to the right of
+                allocated 3072-byte region [ffff88813b6d4000, ffff88813b6d4c00)
+
+Score: 9.1 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-23385 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-23385</link>
+            <guid isPermaLink="false">CVE-2026-23385</guid>
+            <pubDate>Sun, 09 Aug 2026 19:17:01 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+netfilter: nf_tables: clone set on flush only
+
+Syzbot with fault injection triggered a failing memory allocation with
+GFP_KERNEL which results in a WARN splat:
+
+iter.err
+WARNING: net/netfilter/nf_tables_api.c:845 at nft_map_deactivate+0x34e/0x3c0 net/netfilter/nf_tables_api.c:845, CPU#0: syz.0.17/5992
+Modules linked in:
+CPU: 0 UID: 0 PID: 5992 Comm: syz.0.17 Not tainted syzkaller #0 PREEMPT(full)
+Hardware name: Google Google Compute Engine/Google Compute Engine, BIOS Google 02/12/2026
+RIP: 0010:nft_map_deactivate+0x34e/0x3c0 net/netfilter/nf_tables_api.c:845
+Code: 8b 05 86 5a 4e 09 48 3b 84 24 a0 00 00 00 75 62 48 8d 65 d8 5b 41 5c 41 5d 41 5e 41 5f 5d c3 cc cc cc cc cc e8 63 6d fa f7 90 <0f> 0b 90 43
++80 7c 35 00 00 0f 85 23 fe ff ff e9 26 fe ff ff 89 d9
+RSP: 0018:ffffc900045af780 EFLAGS: 00010293
+RAX: ffffffff89ca45bd RBX: 00000000fffffff4 RCX: ffff888028111e40
+RDX: 0000000000000000 RSI: 00000000fffffff4 RDI: 0000000000000000
+RBP: ffffc900045af870 R08: 0000000000400dc0 R09: 00000000ffffffff
+R10: dffffc0000000000 R11: fffffbfff1d141db R12: ffffc900045af7e0
+R13: 1ffff920008b5f24 R14: dffffc0000000000 R15: ffffc900045af920
+FS:  000055557a6a5500(0000) GS:ffff888125496000(0000) knlGS:0000000000000000
+CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+CR2: 00007fb5ea271fc0 CR3: 000000003269e000 CR4: 00000000003526f0
+Call Trace:
+ <TASK>
+ __nft_release_table+0xceb/0x11f0 net/netfilter/nf_tables_api.c:12115
+ nft_rcv_nl_event+0xc25/0xdb0 net/netfilter/nf_tables_api.c:12187
+ notifier_call_chain+0x19d/0x3a0 kernel/notifier.c:85
+ blocking_notifier_call_chain+0x6a/0x90 kernel/notifier.c:380
+ netlink_release+0x123b/0x1ad0 net/netlink/af_netlink.c:761
+ __sock_release net/socket.c:662 [inline]
+ sock_close+0xc3/0x240 net/socket.c:1455
+
+Restrict set clone to the flush set command in the preparation phase.
+Add NFT_ITER_UPDATE_CLONE and use it for this purpose, update the rbtree
+and pipapo backends to only clone the set when this iteration type is
+used.
+
+As for the existing NFT_ITER_UPDATE type, update the pipapo backend to
+use the existing set clone if available, otherwise use the existing set
+representation. After this update, there is no need to clone a set that
+is being deleted, this includes bound anonymous set.
+
+An alternative approach to NFT_ITER_UPDATE_CLONE is to add a .clone
+interface and call it from the flush set path.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-19366 [CVSS:4.0 1.9 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19366</link>
+            <guid isPermaLink="false">CVE-2026-19366</guid>
+            <pubDate>Sun, 09 Aug 2026 19:17:01 GMT</pubDate>
+            <description><![CDATA[A flaw has been found in NocteDefensor LudusMCP up to 1.0.24. Affected is an unknown function of the file src/tools/insertCredsRangeConfig.ts of the component insert_creds_range_config. Executing a manipulation of the argument configPath/outputPath can lead to path traversal. The attack is restricted to local execution. The project was informed of the problem early through an issue report but has not responded yet.
+
+Score: 1.9 (LOW)
+Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-19365 [CVSS:4.0 1.9 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19365</link>
+            <guid isPermaLink="false">CVE-2026-19365</guid>
+            <pubDate>Sun, 09 Aug 2026 19:17:00 GMT</pubDate>
+            <description><![CDATA[A vulnerability was identified in Ichigo3766 image-gen-mcp 0.1.0. The impacted element is an unknown function of the file src/index.ts of the component upscale_images. Such manipulation of the argument output_path leads to path traversal. The attack must be carried out locally. The project was informed of the problem early through an issue report but has not responded yet.
+
+Score: 1.9 (LOW)
+Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-0976 [CVSS:3.1 3.7 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-0976</link>
+            <guid isPermaLink="false">CVE-2026-0976</guid>
+            <pubDate>Sun, 09 Aug 2026 19:17:00 GMT</pubDate>
+            <description><![CDATA[A flaw was found in Keycloak. This improper input validation vulnerability occurs because Keycloak accepts RFC-compliant matrix parameters in URL path segments, while common reverse proxy configurations may ignore or mishandle them. A remote attacker can craft requests to mask path segments, potentially bypassing proxy-level path filtering. This could expose administrative or sensitive endpoints that operators believe are not externally reachable.
+
+Score: 3.7 (LOW)
+Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-12150 [CVSS:3.1 3.1 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-12150</link>
+            <guid isPermaLink="false">CVE-2025-12150</guid>
+            <pubDate>Sun, 09 Aug 2026 19:17:00 GMT</pubDate>
+            <description><![CDATA[A flaw was found in Keycloak’s WebAuthn registration component. This vulnerability allows an attacker to bypass the configured attestation policy and register untrusted or forged authenticators via submission of an attestation object with fmt: "none", even when the realm is configured to require direct attestation. This can lead to weakened authentication integrity and unauthorized authenticator registration.
+
+Score: 3.1 (LOW)
+Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:N/I:L/A:N]]></description>
+        </item>
         <item>
             <title><![CDATA[CVE-2026-9804 [CVSS:3.1 7.7 HIGH]]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-9804</link>
@@ -906,136 +1334,6 @@ Vector: CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N]]></description>
 
 Score: 7.8 (HIGH)
 Vector: CVSS:3.1/AV:L/AC:H/PR:N/UI:N/S:C/C:N/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2025-5914 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-5914</link>
-            <guid isPermaLink="false">CVE-2025-5914</guid>
-            <pubDate>Sun, 09 Aug 2026 04:17:17 GMT</pubDate>
-            <description><![CDATA[A vulnerability has been identified in the libarchive library, specifically within the archive_read_format_rar_seek_data() function. This flaw involves an integer overflow that can ultimately lead to a double-free condition. Exploiting a double-free vulnerability can result in memory corruption, enabling an attacker to execute arbitrary code or cause a denial-of-service condition.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2024-45497 [CVSS:3.1 7.6 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2024-45497</link>
-            <guid isPermaLink="false">CVE-2024-45497</guid>
-            <pubDate>Sun, 09 Aug 2026 04:17:05 GMT</pubDate>
-            <description><![CDATA[A flaw was found in the OpenShift build process, where the docker-build container is configured with a hostPath volume mount that maps the node's /var/lib/kubelet/config.json file into the build pod. This file contains sensitive credentials necessary for pulling images from private repositories. The mount is not read-only, which allows the attacker to overwrite it. By modifying the config.json file, the attacker can cause a denial of service by preventing the node from pulling new images and potentially exfiltrating sensitive secrets. This flaw impacts the availability of services dependent on image pulls and exposes sensitive information to unauthorized parties.
-
-Score: 7.6 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-46579 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-46579</link>
-            <guid isPermaLink="false">CVE-2026-46579</guid>
-            <pubDate>Sun, 09 Aug 2026 03:16:57 GMT</pubDate>
-            <description><![CDATA[A flaw was found in the OpenShift Router. When a Route has `insecureEdgeTerminationPolicy` set to Allow, the HTTP frontend does not remove `X-SSL-Client-*` headers from incoming requests. This allows an unauthenticated attacker to send plain HTTP requests with crafted `X-SSL-Client-*` headers. As a result, backends relying on these headers for mutual TLS (Transport Layer Security) authentication can be bypassed, enabling the attacker to impersonate client certificate identities.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-1784 [CVSS:3.1 8.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-1784</link>
-            <guid isPermaLink="false">CVE-2026-1784</guid>
-            <pubDate>Sun, 09 Aug 2026 03:16:57 GMT</pubDate>
-            <description><![CDATA[The Route OpenShift resource allows to define routes to make pods reachable at a subdomain through HAProxy. It was found that the checks performed on the spec.path YAML stanza in a Route document was insufficient and could allow a controlled injection of the HAProxy configuration.
-
-Score: 8.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-19328 [CVSS:4.0 1.9 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19328</link>
-            <guid isPermaLink="false">CVE-2026-19328</guid>
-            <pubDate>Sun, 09 Aug 2026 03:16:57 GMT</pubDate>
-            <description><![CDATA[A vulnerability has been found in aktsmm skill-ninja-mcp-server 0.1.0. Impacted is the function getInstalledSkills/installSkill/updateAgentsMd/uninstallSkill of the file src/installer.ts. The manipulation of the argument workspacePath leads to path traversal. The attack needs to be performed locally. Upgrading to version 0.1.1 is recommended to address this issue. The identifier of the patch is 855b46739e0f6e8388f17f9d0066ac4298a3965d. Upgrading the affected component is recommended.
-
-Score: 1.9 (LOW)
-Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-19327 [CVSS:4.0 1.9 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19327</link>
-            <guid isPermaLink="false">CVE-2026-19327</guid>
-            <pubDate>Sun, 09 Aug 2026 03:16:57 GMT</pubDate>
-            <description><![CDATA[A flaw has been found in abracadabra50 claude-sesh 1.0.0. This issue affects the function getEnrichedData/enrichSession of the file src/services/enricher.ts. Executing a manipulation of the argument sessionId can lead to path traversal. The attack needs to be launched locally. This patch is called 786c9d74800e6d0858b65778f31beb71b3983a50. Applying a patch is advised to resolve this issue.
-
-Score: 1.9 (LOW)
-Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-19326 [CVSS:4.0 1.9 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19326</link>
-            <guid isPermaLink="false">CVE-2026-19326</guid>
-            <pubDate>Sun, 09 Aug 2026 03:16:56 GMT</pubDate>
-            <description><![CDATA[A vulnerability was detected in Jevon-Zhong Ai-doctor 0.0.1. This vulnerability affects the function deleteImage of the file ai-doctor-server/src/filemanagement/filemanagement.service.ts. Performing a manipulation of the argument imagePath results in path traversal. The attack must be initiated from a local position. The project was informed of the problem early through an issue report but has not responded yet.
-
-Score: 1.9 (LOW)
-Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:N/VC:N/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-19325 [CVSS:4.0 1.9 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19325</link>
-            <guid isPermaLink="false">CVE-2026-19325</guid>
-            <pubDate>Sun, 09 Aug 2026 03:16:56 GMT</pubDate>
-            <description><![CDATA[A security vulnerability has been detected in IncomeStreamSurfer roo-code-memory-bank-mcp-server up to 9dcb2fb5e6b65a35ac1983885a6d4e5621a0081e. This affects the function readMemoryBankFile/appendMemoryBankEntry of the file src/index.ts of the component read_memory_bank_file/append_memory_bank_entry. Such manipulation of the argument file_name leads to path traversal. The attack must be carried out locally. This product utilizes a rolling release system for continuous delivery, and as such, version information for affected or updated releases is not disclosed. The project was informed of the problem early through an issue report but has not responded yet.
-
-Score: 1.9 (LOW)
-Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-19324 [CVSS:4.0 1.9 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19324</link>
-            <guid isPermaLink="false">CVE-2026-19324</guid>
-            <pubDate>Sun, 09 Aug 2026 03:16:56 GMT</pubDate>
-            <description><![CDATA[A weakness has been identified in HelloGGX shadcn-vue-mcp up to e170e277b94235cde627803277fc8c41103a4d38. Affected by this issue is the function fs.promises.readFile of the file src/server/callback-server.ts. This manipulation of the argument filepath causes path traversal. The attack is restricted to local execution. This product adopts a rolling release strategy to maintain continuous delivery. Therefore, version details for affected or updated releases cannot be specified. The project was informed of the problem early through an issue report but has not responded yet.
-
-Score: 1.9 (LOW)
-Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-71993 [CVSS:4.0 9.3 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-71993</link>
-            <guid isPermaLink="false">CVE-2026-71993</guid>
-            <pubDate>Sun, 09 Aug 2026 00:16:48 GMT</pubDate>
-            <description><![CDATA[MSI Radix AXE6600 router firmware version v781521 contains a command injection vulnerability in the openvpn function that allows remote attackers to execute arbitrary commands on the affected device. Attackers can exploit the macfilter function to inject malicious commands and obtain root privileges on the underlying system.
-
-Score: 9.3 (CRITICAL)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-71992 [CVSS:4.0 9.3 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-71992</link>
-            <guid isPermaLink="false">CVE-2026-71992</guid>
-            <pubDate>Sun, 09 Aug 2026 00:16:48 GMT</pubDate>
-            <description><![CDATA[MSI Radix AXE6600 router firmware version v781521 contains a command injection vulnerability in the macfilter function that allows remote attackers to execute arbitrary commands on the affected device. Attackers can exploit the macfilter function to inject malicious commands and obtain root privileges on the underlying system.
-
-Score: 9.3 (CRITICAL)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-71991 [CVSS:4.0 9.3 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-71991</link>
-            <guid isPermaLink="false">CVE-2026-71991</guid>
-            <pubDate>Sun, 09 Aug 2026 00:16:48 GMT</pubDate>
-            <description><![CDATA[MSI Radix AXE6600 router firmware version v781521 contains a command injection vulnerability in the TelnetSSH function used for Telnet configuration that allows remote attackers to execute arbitrary commands on the affected device. Attackers can exploit this vulnerability through the Telnet configuration interface to inject malicious commands and obtain root privileges on the underlying system.
-
-Score: 9.3 (CRITICAL)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-71990 [CVSS:4.0 9.3 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-71990</link>
-            <guid isPermaLink="false">CVE-2026-71990</guid>
-            <pubDate>Sun, 09 Aug 2026 00:16:48 GMT</pubDate>
-            <description><![CDATA[MSI Radix AXE6600 router firmware version v781521 contains a command injection vulnerability in the TelnetSSH function used for SSH configuration that allows remote attackers to execute arbitrary commands on the affected device. Attackers can exploit this vulnerability through the SSH configuration interface to inject malicious commands and obtain root privileges on the underlying system.
-
-Score: 9.3 (CRITICAL)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
         </item>
     </channel>
 </rss>
