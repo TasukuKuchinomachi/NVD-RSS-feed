@@ -4,21 +4,247 @@
         <title>NVD CVE Feed</title>
         <link>https://github.com/TasukuKuchinomachi/NVD-RSS-feed</link>
         <description>Latest CVE entries from the National Vulnerability Database. This product uses the NVD API but is not endorsed or certified by the NVD.</description>
-        <lastBuildDate>Sun, 09 Aug 2026 02:16:34 GMT</lastBuildDate>
+        <lastBuildDate>Sun, 09 Aug 2026 04:17:43 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>National Vulnerability Database - NIST</copyright>
         <item>
+            <title><![CDATA[CVE-2026-68480]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-68480</link>
+            <guid isPermaLink="false">CVE-2026-68480</guid>
+            <pubDate>Sun, 09 Aug 2026 04:17:43 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+x86/bugs: Make Safe-RET robust against interrupt injection
+
+An attacker injecting interrupts while the Safe-RET mitigation executes
+on machines affected by SRSO can neutralize the safe return sequence,
+potentially leading to data leakage through speculative execution.
+
+Fixup register state as if the Safe-RET sequence executed successfully
+by "emulating" it, in a manner of speaking, and avoid executing a RET
+instruction after returning from the interrupt.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-64564 [CVSS:3.1 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64564</link>
+            <guid isPermaLink="false">CVE-2026-64564</guid>
+            <pubDate>Sun, 09 Aug 2026 04:17:43 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+sctp: don't free the ASCONF's own transport in DEL-IP processing
+
+sctp_process_asconf() caches the transport the ASCONF chunk is processed
+against in asconf->transport (== chunk->transport, set once in sctp_rcv()).
+For an ASCONF located through its Address Parameter by
+__sctp_rcv_asconf_lookup(), that cached transport corresponds to the
+Address Parameter, which need not be the packet's source address.
+
+sctp_process_asconf_param() rejects a DEL-IP for the packet source address
+(ADDIP D8, SCTP_ERROR_DEL_SRC_IP), but nothing protects asconf->transport.
+A single ASCONF can therefore carry, in order:
+
+    [Address Parameter L] [DEL-IP L] [DEL-IP 0.0.0.0]
+
+where L differs from the source. The DEL-IP for L passes the D8 check and
+calls sctp_assoc_rm_peer() on the transport that asconf->transport still
+points at, freeing it (RCU-deferred). The following wildcard DEL-IP then
+reuses the now-dangling asconf->transport in sctp_assoc_set_primary() and
+sctp_assoc_del_nonprimary_peers(): set_primary() dereferences the freed
+transport (->ipaddr, ->state) and plants the dangling pointer into
+asoc->peer.primary_path / active_path, and del_nonprimary_peers(), keeping
+only the pointer that is no longer on the list, removes every real
+transport, leaving the association with a transport_count of 0 and
+primary_path/active_path pointing at freed memory.
+
+Reject a DEL-IP that targets the transport the ASCONF is being processed
+against, mirroring the existing source-address guard, so the wildcard
+branch can never reuse a freed transport.
+
+Score: 9.8 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-64561 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64561</link>
+            <guid isPermaLink="false">CVE-2026-64561</guid>
+            <pubDate>Sun, 09 Aug 2026 04:17:43 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+KVM: x86: Check for invalid/obsolete root *after* making MMU pages available
+
+Check for a "stale" page fault, i.e. for an invalid and/or obsolete root,
+after making MMU pages available for the shadow MMU.  If reclaiming shadow
+pages zaps an in-use root, i.e. marks it invalid, then KVM will attempt to
+map memory into an invalid root.  On its own, populating an invalid root is
+"fine", but because child shadow pages inherit their parent's role, any
+children created during the map/fetch will be created as invalid pages,
+thus violating KVM's invariant that invalid pages are never on the list of
+active MMU pages.
+
+Note, the underlying flaw has existed since KVM first started tracking
+invalid roots in 2008 (commit 2e53d63acba7, "KVM: MMU: ignore zapped root
+pagetables"), but the true badness only came along in 2020 (Linux 5.9)
+with the invariant that invalid shadow pages can't be on the list of
+active pages.
+
+Note #2, inheriting role.invalid when creating child shadow pages is also
+far from ideal; that flaw will be addressed separately.
+
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-19330 [CVSS:4.0 1.9 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19330</link>
+            <guid isPermaLink="false">CVE-2026-19330</guid>
+            <pubDate>Sun, 09 Aug 2026 04:17:42 GMT</pubDate>
+            <description><![CDATA[A vulnerability was determined in angrysky56 advanced-reasoning-mcp 1.0.0. The impacted element is the function create_system_json/create_library to get_system_json/switch_memory_library of the file src/index.ts. This manipulation causes path traversal. The attack requires local access. The project was informed of the problem early through an issue report but has not responded yet.
+
+Score: 1.9 (LOW)
+Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-19329 [CVSS:4.0 1.9 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19329</link>
+            <guid isPermaLink="false">CVE-2026-19329</guid>
+            <pubDate>Sun, 09 Aug 2026 04:17:37 GMT</pubDate>
+            <description><![CDATA[A vulnerability was found in andreahaku codex_mcp up to 1ff521cc6cc57cfe56ddef946c644b8534771390. The affected element is an unknown function of the file src/codex-process-simple.ts of the component ask MCP Tool. The manipulation of the argument model results in command injection. The attack requires a local approach. This product does not use versioning. This is why information about affected and unaffected releases are unavailable. The project was informed of the problem early through an issue report but has not responded yet.
+
+Score: 1.9 (LOW)
+Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
             <title><![CDATA[CVE-2026-17510]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17510</link>
             <guid isPermaLink="false">CVE-2026-17510</guid>
-            <pubDate>Sun, 09 Aug 2026 02:16:34 GMT</pubDate>
+            <pubDate>Sun, 09 Aug 2026 04:17:35 GMT</pubDate>
             <description><![CDATA[Crypt::OpenSSL::PKCS12 versions before 1.98 for Perl allow a NULL pointer dereference in print_attribute via a zero length BMPSTRING attribute.
 
 print_attribute() sizes the destination buffer for a BMPSTRING attribute from its declared byte length with `Renew(*attribute, length, char)`. A zero length attribute makes that a zero size reallocation, which Perl implements as a free returning NULL, so the buffer pointer becomes NULL, the following `strncpy` copies nothing, and the caller dereferences NULL in the `strlen()` it passes to `newSVpvn()`. A zero length BMPSTRING is even length, so the ASN.1 decoder accepts it and the value reaches this code. The UTF8STRING, OCTET STRING and BIT STRING arms size on `length + 1` or `length * 4 + 1` and are unaffected.
 
 Any caller that passes an untrusted PKCS#12 file to info_as_hash() can crash the process. info() prints attribute values directly without sizing a buffer and is unaffected.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-10595 [CVSS:3.0 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-10595</link>
+            <guid isPermaLink="false">CVE-2026-10595</guid>
+            <pubDate>Sun, 09 Aug 2026 04:17:29 GMT</pubDate>
+            <description><![CDATA[A path traversal vulnerability exists in parisneo/lollms version 2.1.0, specifically in the SPA catch-all route implemented in `backend/routers/ui.py`. The vulnerability arises from the improper handling of user-controlled path input, which is directly joined into a filesystem path without sanitization or containment checks. URL-encoded dot-dot sequences (`%2e%2e`) bypass Starlette's built-in path normalization and are resolved by Python's `pathlib`, allowing an unauthenticated attacker to read arbitrary files on the server. This issue has been resolved in version 3.
+
+Score: 7.5 (HIGH)
+Vector: CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-7425 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-7425</link>
+            <guid isPermaLink="false">CVE-2025-7425</guid>
+            <pubDate>Sun, 09 Aug 2026 04:17:24 GMT</pubDate>
+            <description><![CDATA[A flaw was found in libxslt where the attribute type, atype, flags are modified in a way that corrupts internal memory management. When XSLT functions, such as the key() process, result in tree fragments, this corruption prevents the proper cleanup of ID attributes. As a result, the system may access freed memory, causing crashes or enabling attackers to trigger heap corruption.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:H/PR:N/UI:N/S:C/C:N/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-5914 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-5914</link>
+            <guid isPermaLink="false">CVE-2025-5914</guid>
+            <pubDate>Sun, 09 Aug 2026 04:17:17 GMT</pubDate>
+            <description><![CDATA[A vulnerability has been identified in the libarchive library, specifically within the archive_read_format_rar_seek_data() function. This flaw involves an integer overflow that can ultimately lead to a double-free condition. Exploiting a double-free vulnerability can result in memory corruption, enabling an attacker to execute arbitrary code or cause a denial-of-service condition.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2024-45497 [CVSS:3.1 7.6 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2024-45497</link>
+            <guid isPermaLink="false">CVE-2024-45497</guid>
+            <pubDate>Sun, 09 Aug 2026 04:17:05 GMT</pubDate>
+            <description><![CDATA[A flaw was found in the OpenShift build process, where the docker-build container is configured with a hostPath volume mount that maps the node's /var/lib/kubelet/config.json file into the build pod. This file contains sensitive credentials necessary for pulling images from private repositories. The mount is not read-only, which allows the attacker to overwrite it. By modifying the config.json file, the attacker can cause a denial of service by preventing the node from pulling new images and potentially exfiltrating sensitive secrets. This flaw impacts the availability of services dependent on image pulls and exposes sensitive information to unauthorized parties.
+
+Score: 7.6 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-46579 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-46579</link>
+            <guid isPermaLink="false">CVE-2026-46579</guid>
+            <pubDate>Sun, 09 Aug 2026 03:16:57 GMT</pubDate>
+            <description><![CDATA[A flaw was found in the OpenShift Router. When a Route has `insecureEdgeTerminationPolicy` set to Allow, the HTTP frontend does not remove `X-SSL-Client-*` headers from incoming requests. This allows an unauthenticated attacker to send plain HTTP requests with crafted `X-SSL-Client-*` headers. As a result, backends relying on these headers for mutual TLS (Transport Layer Security) authentication can be bypassed, enabling the attacker to impersonate client certificate identities.
+
+Score: 7.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-1784 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-1784</link>
+            <guid isPermaLink="false">CVE-2026-1784</guid>
+            <pubDate>Sun, 09 Aug 2026 03:16:57 GMT</pubDate>
+            <description><![CDATA[The Route OpenShift resource allows to define routes to make pods reachable at a subdomain through HAProxy. It was found that the checks performed on the spec.path YAML stanza in a Route document was insufficient and could allow a controlled injection of the HAProxy configuration.
+
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-19328 [CVSS:4.0 1.9 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19328</link>
+            <guid isPermaLink="false">CVE-2026-19328</guid>
+            <pubDate>Sun, 09 Aug 2026 03:16:57 GMT</pubDate>
+            <description><![CDATA[A vulnerability has been found in aktsmm skill-ninja-mcp-server 0.1.0. Impacted is the function getInstalledSkills/installSkill/updateAgentsMd/uninstallSkill of the file src/installer.ts. The manipulation of the argument workspacePath leads to path traversal. The attack needs to be performed locally. Upgrading to version 0.1.1 is recommended to address this issue. The identifier of the patch is 855b46739e0f6e8388f17f9d0066ac4298a3965d. Upgrading the affected component is recommended.
+
+Score: 1.9 (LOW)
+Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-19327 [CVSS:4.0 1.9 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19327</link>
+            <guid isPermaLink="false">CVE-2026-19327</guid>
+            <pubDate>Sun, 09 Aug 2026 03:16:57 GMT</pubDate>
+            <description><![CDATA[A flaw has been found in abracadabra50 claude-sesh 1.0.0. This issue affects the function getEnrichedData/enrichSession of the file src/services/enricher.ts. Executing a manipulation of the argument sessionId can lead to path traversal. The attack needs to be launched locally. This patch is called 786c9d74800e6d0858b65778f31beb71b3983a50. Applying a patch is advised to resolve this issue.
+
+Score: 1.9 (LOW)
+Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-19326 [CVSS:4.0 1.9 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19326</link>
+            <guid isPermaLink="false">CVE-2026-19326</guid>
+            <pubDate>Sun, 09 Aug 2026 03:16:56 GMT</pubDate>
+            <description><![CDATA[A vulnerability was detected in Jevon-Zhong Ai-doctor 0.0.1. This vulnerability affects the function deleteImage of the file ai-doctor-server/src/filemanagement/filemanagement.service.ts. Performing a manipulation of the argument imagePath results in path traversal. The attack must be initiated from a local position. The project was informed of the problem early through an issue report but has not responded yet.
+
+Score: 1.9 (LOW)
+Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:N/VC:N/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-19325 [CVSS:4.0 1.9 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19325</link>
+            <guid isPermaLink="false">CVE-2026-19325</guid>
+            <pubDate>Sun, 09 Aug 2026 03:16:56 GMT</pubDate>
+            <description><![CDATA[A security vulnerability has been detected in IncomeStreamSurfer roo-code-memory-bank-mcp-server up to 9dcb2fb5e6b65a35ac1983885a6d4e5621a0081e. This affects the function readMemoryBankFile/appendMemoryBankEntry of the file src/index.ts of the component read_memory_bank_file/append_memory_bank_entry. Such manipulation of the argument file_name leads to path traversal. The attack must be carried out locally. This product utilizes a rolling release system for continuous delivery, and as such, version information for affected or updated releases is not disclosed. The project was informed of the problem early through an issue report but has not responded yet.
+
+Score: 1.9 (LOW)
+Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-19324 [CVSS:4.0 1.9 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19324</link>
+            <guid isPermaLink="false">CVE-2026-19324</guid>
+            <pubDate>Sun, 09 Aug 2026 03:16:56 GMT</pubDate>
+            <description><![CDATA[A weakness has been identified in HelloGGX shadcn-vue-mcp up to e170e277b94235cde627803277fc8c41103a4d38. Affected by this issue is the function fs.promises.readFile of the file src/server/callback-server.ts. This manipulation of the argument filepath causes path traversal. The attack is restricted to local execution. This product adopts a rolling release strategy to maintain continuous delivery. Therefore, version details for affected or updated releases cannot be specified. The project was informed of the problem early through an issue report but has not responded yet.
+
+Score: 1.9 (LOW)
+Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-16242 [CVSS:3.1 9.4 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-16242</link>
+            <guid isPermaLink="false">CVE-2026-16242</guid>
+            <pubDate>Sun, 09 Aug 2026 03:16:55 GMT</pubDate>
+            <description><![CDATA[A flaw was found in the Konnectivity proxy-server configuration for hosted control planes. The agent-facing listener was started without --cluster-ca-cert (and without token-based agent authentication), so client certificates were not validated. A remote attacker who can reach the Konnectivity cluster endpoint could connect as an unauthenticated agent, join the routing pool, and potentially proxy, inspect, modify, or drop control-plane-to-node traffic.
+
+Score: 9.4 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:L]]></description>
         </item>
         <item>
             <title><![CDATA[CVE-2026-71993 [CVSS:4.0 9.3 CRITICAL]]]></title>
@@ -139,16 +365,6 @@ Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X
 
 Score: 9.3 (CRITICAL)
 Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-16242 [CVSS:3.1 9.4 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-16242</link>
-            <guid isPermaLink="false">CVE-2026-16242</guid>
-            <pubDate>Sat, 08 Aug 2026 23:16:56 GMT</pubDate>
-            <description><![CDATA[A flaw was found in the Konnectivity proxy-server configuration for hosted control planes. The agent-facing listener was started without --cluster-ca-cert (and without token-based agent authentication), so client certificates were not validated. A remote attacker who can reach the Konnectivity cluster endpoint could connect as an unauthenticated agent, join the routing pool, and potentially proxy, inspect, modify, or drop control-plane-to-node traffic.
-
-Score: 9.4 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:L]]></description>
         </item>
         <item>
             <title><![CDATA[CVE-2026-11612]]></title>
@@ -395,26 +611,6 @@ Vector: CVSS:3.1/AV:A/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N]]></description>
 
 Score: 9.3 (CRITICAL)
 Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2025-7425 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-7425</link>
-            <guid isPermaLink="false">CVE-2025-7425</guid>
-            <pubDate>Sat, 08 Aug 2026 17:16:47 GMT</pubDate>
-            <description><![CDATA[A flaw was found in libxslt where the attribute type, atype, flags are modified in a way that corrupts internal memory management. When XSLT functions, such as the key() process, result in tree fragments, this corruption prevents the proper cleanup of ID attributes. As a result, the system may access freed memory, causing crashes or enabling attackers to trigger heap corruption.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:H/PR:N/UI:N/S:C/C:N/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2025-5914 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-5914</link>
-            <guid isPermaLink="false">CVE-2025-5914</guid>
-            <pubDate>Sat, 08 Aug 2026 17:16:46 GMT</pubDate>
-            <description><![CDATA[A vulnerability has been identified in the libarchive library, specifically within the archive_read_format_rar_seek_data() function. This flaw involves an integer overflow that can ultimately lead to a double-free condition. Exploiting a double-free vulnerability can result in memory corruption, enabling an attacker to execute arbitrary code or cause a denial-of-service condition.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
             <title><![CDATA[CVE-2025-49796 [CVSS:3.1 9.1 CRITICAL]]]></title>
@@ -1432,45 +1628,6 @@ Score: 9.8 (CRITICAL)
 Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-64564 [CVSS:3.1 9.8 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64564</link>
-            <guid isPermaLink="false">CVE-2026-64564</guid>
-            <pubDate>Sat, 08 Aug 2026 15:16:31 GMT</pubDate>
-            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
-
-sctp: don't free the ASCONF's own transport in DEL-IP processing
-
-sctp_process_asconf() caches the transport the ASCONF chunk is processed
-against in asconf->transport (== chunk->transport, set once in sctp_rcv()).
-For an ASCONF located through its Address Parameter by
-__sctp_rcv_asconf_lookup(), that cached transport corresponds to the
-Address Parameter, which need not be the packet's source address.
-
-sctp_process_asconf_param() rejects a DEL-IP for the packet source address
-(ADDIP D8, SCTP_ERROR_DEL_SRC_IP), but nothing protects asconf->transport.
-A single ASCONF can therefore carry, in order:
-
-    [Address Parameter L] [DEL-IP L] [DEL-IP 0.0.0.0]
-
-where L differs from the source. The DEL-IP for L passes the D8 check and
-calls sctp_assoc_rm_peer() on the transport that asconf->transport still
-points at, freeing it (RCU-deferred). The following wildcard DEL-IP then
-reuses the now-dangling asconf->transport in sctp_assoc_set_primary() and
-sctp_assoc_del_nonprimary_peers(): set_primary() dereferences the freed
-transport (->ipaddr, ->state) and plants the dangling pointer into
-asoc->peer.primary_path / active_path, and del_nonprimary_peers(), keeping
-only the pointer that is no longer on the list, removes every real
-transport, leaving the association with a transport_count of 0 and
-primary_path/active_path pointing at freed memory.
-
-Reject a DEL-IP that targets the transport the ASCONF is being processed
-against, mirroring the existing source-address guard, so the wildcard
-branch can never reuse a freed transport.
-
-Score: 9.8 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
             <title><![CDATA[CVE-2026-64563 [CVSS:3.1 7.8 HIGH]]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64563</link>
             <guid isPermaLink="false">CVE-2026-64563</guid>
@@ -1524,36 +1681,6 @@ may then execute VMCLEAR.
 
 The VMCS needs to stay attached until its explicit VMCLEAR completes, but
 then it can be hidden and the page safely freed.
-
-Score: 8.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-64561 [CVSS:3.1 8.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64561</link>
-            <guid isPermaLink="false">CVE-2026-64561</guid>
-            <pubDate>Sat, 08 Aug 2026 15:16:31 GMT</pubDate>
-            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
-
-KVM: x86: Check for invalid/obsolete root *after* making MMU pages available
-
-Check for a "stale" page fault, i.e. for an invalid and/or obsolete root,
-after making MMU pages available for the shadow MMU.  If reclaiming shadow
-pages zaps an in-use root, i.e. marks it invalid, then KVM will attempt to
-map memory into an invalid root.  On its own, populating an invalid root is
-"fine", but because child shadow pages inherit their parent's role, any
-children created during the map/fetch will be created as invalid pages,
-thus violating KVM's invariant that invalid pages are never on the list of
-active MMU pages.
-
-Note, the underlying flaw has existed since KVM first started tracking
-invalid roots in 2008 (commit 2e53d63acba7, "KVM: MMU: ignore zapped root
-pagetables"), but the true badness only came along in 2020 (Linux 5.9)
-with the invariant that invalid shadow pages can't be on the list of
-active pages.
-
-Note #2, inheriting role.invalid when creating child shadow pages is also
-far from ideal; that flaw will be addressed separately.
 
 Score: 8.8 (HIGH)
 Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H]]></description>
@@ -1790,93 +1917,6 @@ Vector: CVSS:4.0/AV:A/AC:L/AT:N/PR:L/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:X/CR:X
 
 Score: 6.9 (MEDIUM)
 Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-19259 [CVSS:4.0 1.9 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19259</link>
-            <guid isPermaLink="false">CVE-2026-19259</guid>
-            <pubDate>Sat, 08 Aug 2026 07:17:11 GMT</pubDate>
-            <description><![CDATA[A vulnerability has been found in MZ Automation libiec61850 up to 1.6.1. The affected element is the function MmsMapping_varAccessSpecToObjectReference of the file src/iec61850/common/iec61850_common.c of the component MMS Protocol Workflow. Such manipulation of the argument GetNamedVariableListAttributesResponse.itemId leads to heap-based buffer overflow. The attack must be carried out locally. The exploit has been disclosed to the public and may be used. The project was informed of the problem early through an issue report but has not responded yet.
-
-Score: 1.9 (LOW)
-Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-16955]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-16955</link>
-            <guid isPermaLink="false">CVE-2026-16955</guid>
-            <pubDate>Sat, 08 Aug 2026 07:17:11 GMT</pubDate>
-            <description><![CDATA[The AI Engine  WordPress plugin before 3.6.6 does not confine a caller-supplied file path before reading it and forwarding the contents to an external service, allowing users with a subscriber-level account to read arbitrary files from the server and exfiltrate them off-host. Reaching the issue at subscriber level requires a non-default public API feature to be enabled; otherwise the same issue is reachable by an administrator, which on multisite allows a non-super subsite administrator to read the network-shared configuration and its secrets.]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-16953]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-16953</link>
-            <guid isPermaLink="false">CVE-2026-16953</guid>
-            <pubDate>Sat, 08 Aug 2026 07:17:11 GMT</pubDate>
-            <description><![CDATA[The AI Engine  WordPress plugin before 3.6.4 does not verify ownership of a guest's uploaded chatbot files before deletion, authorising the action solely by a client-supplied session cookie value, so an unauthenticated attacker who obtains a victim's session identifier and file reference can delete that victim's uploaded files.]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-16948]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-16948</link>
-            <guid isPermaLink="false">CVE-2026-16948</guid>
-            <pubDate>Sat, 08 Aug 2026 07:17:11 GMT</pubDate>
-            <description><![CDATA[The Solace Extra WordPress plugin before 1.6.1 does not perform capability checks in several of its AJAX actions and exposes the nonce that protects them on admin pages reachable by low-privileged users, allowing users with a role as low as Subscriber to modify site-wide presentation settings and delete imported site-builder content.]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-16608]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-16608</link>
-            <guid isPermaLink="false">CVE-2026-16608</guid>
-            <pubDate>Sat, 08 Aug 2026 07:17:11 GMT</pubDate>
-            <description><![CDATA[The Download Monitor WordPress plugin before 5.2.6 does not perform authorization checks on one of its download-logging AJAX actions, and exposes the nonce protecting it to unauthenticated visitors, allowing unauthenticated users to inject arbitrary download log entries and inflate a site's download statistics.]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-16595]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-16595</link>
-            <guid isPermaLink="false">CVE-2026-16595</guid>
-            <pubDate>Sat, 08 Aug 2026 07:17:11 GMT</pubDate>
-            <description><![CDATA[The WP Directory Kit WordPress plugin before 1.5.5 does not perform authorization or nonce checks on one of its authenticated AJAX actions, allowing any authenticated user such as a Subscriber to disclose the site's user list and unpublished listings belonging to other users.]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-16594]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-16594</link>
-            <guid isPermaLink="false">CVE-2026-16594</guid>
-            <pubDate>Sat, 08 Aug 2026 07:17:10 GMT</pubDate>
-            <description><![CDATA[The WP Directory Kit WordPress plugin before 1.5.5 does not perform authorization or nonce checks on one of its authenticated AJAX actions, allowing any authenticated user such as a Subscriber to disclose the WP Directory Kit WordPress plugin before 1.5.5 settings including sensitive API keys and secrets.]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-16590]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-16590</link>
-            <guid isPermaLink="false">CVE-2026-16590</guid>
-            <pubDate>Sat, 08 Aug 2026 07:17:10 GMT</pubDate>
-            <description><![CDATA[The WP Directory Kit WordPress plugin before 1.5.5 does not perform authorization or nonce checks on one of its authenticated AJAX actions, allowing any authenticated user such as a Subscriber to retrieve stored contact messages and associated user data belonging to other users.]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-16589]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-16589</link>
-            <guid isPermaLink="false">CVE-2026-16589</guid>
-            <pubDate>Sat, 08 Aug 2026 07:17:10 GMT</pubDate>
-            <description><![CDATA[The WP Directory Kit WordPress plugin before 1.5.5 does not sanitize and escape a parameter before using it in a SQL statement through one of its authenticated AJAX actions, which lacks authorization and nonce checks, allowing any authenticated user such as a Subscriber to perform SQL injection attacks.]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-16578]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-16578</link>
-            <guid isPermaLink="false">CVE-2026-16578</guid>
-            <pubDate>Sat, 08 Aug 2026 07:17:10 GMT</pubDate>
-            <description><![CDATA[The Admin Safety Guard — Login Security, Limit Logins, 2FA & Brute Force Protection WordPress plugin before 1.4.0 does not perform any capability check on one of its REST API endpoints, allowing unauthenticated attackers to retrieve the full list of registered users including their usernames, email addresses, roles, and two-factor authentication enrollment status.]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-16574]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-16574</link>
-            <guid isPermaLink="false">CVE-2026-16574</guid>
-            <pubDate>Sat, 08 Aug 2026 07:17:10 GMT</pubDate>
-            <description><![CDATA[The Dokan: AI Powered WooCommerce Multivendor Marketplace Solution  WordPress plugin before 5.0.11 does not verify that a downloadable product belongs to the requesting vendor before granting download permissions through one of its order REST endpoints, allowing an authenticated vendor to grant their own customer free download access to another vendor's paid downloadable files.]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-16562]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-16562</link>
-            <guid isPermaLink="false">CVE-2026-16562</guid>
-            <pubDate>Sat, 08 Aug 2026 07:17:10 GMT</pubDate>
-            <description><![CDATA[The WP Statistics  WordPress plugin before 14.16.10 does not perform a capability check on a set of dashboard analytics AJAX handlers, relying only on a nonce that every authenticated user holds, allowing users with Subscriber-level access and above to disclose the site's visitor analytics data.]]></description>
         </item>
     </channel>
 </rss>
