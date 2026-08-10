@@ -4,11 +4,178 @@
         <title>NVD CVE Feed</title>
         <link>https://github.com/TasukuKuchinomachi/NVD-RSS-feed</link>
         <description>Latest CVE entries from the National Vulnerability Database. This product uses the NVD API but is not endorsed or certified by the NVD.</description>
-        <lastBuildDate>Mon, 10 Aug 2026 22:17:10 GMT</lastBuildDate>
+        <lastBuildDate>Mon, 10 Aug 2026 23:16:51 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>National Vulnerability Database - NIST</copyright>
+        <item>
+            <title><![CDATA[CVE-2026-8718 [CVSS:3.1 8.4 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-8718</link>
+            <guid isPermaLink="false">CVE-2026-8718</guid>
+            <pubDate>Mon, 10 Aug 2026 23:16:51 GMT</pubDate>
+            <description><![CDATA[tls_opt_dtls_peer_connection_id_value_get() in subsys/net/lib/sockets/sockets_tls.c, which handles getsockopt(SOL_TLS, TLS_DTLS_PEER_CID_VALUE), passed the caller-supplied optval directly to mbedtls_ssl_get_peer_cid() without verifying the buffer was at least MBEDTLS_SSL_CID_OUT_LEN_MAX (default 32) bytes. mbedtls_ssl_get_peer_cid() copies the peer-negotiated DTLS Connection ID (length 1..MBEDTLS_SSL_CID_OUT_LEN_MAX) into that buffer without a destination-size parameter, so a caller-supplied optlen smaller than the CID causes a write of up to 31 bytes past the buffer end.
+
+In CONFIG_USERSPACE builds the getsockopt syscall verifier (z_vrfy_zsock_getsockopt) bounce-buffers the user's optval into a kernel allocation of exactly optlen bytes (k_usermode_alloc_from_copy -> z_thread_malloc), so an unprivileged user thread that passes a small optlen on a connected DTLS socket with Connection ID enabled induces a kernel-heap buffer overflow, with the overflowing content being the remote peer's CID.
+
+The defect requires CONFIG_MBEDTLS_SSL_DTLS_CONNECTION_ID, an established DTLS session with a negotiated peer CID, and (for the kernel-crossing case) CONFIG_USERSPACE. Introduced when the TLS_DTLS_CID option was added (v3.5.0).
+
+The fix rejects callers whose optlen is below MBEDTLS_SSL_CID_OUT_LEN_MAX with -EINVAL.
+
+Score: 8.4 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:C/C:N/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-48161 [CVSS:4.0 9.3 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-48161</link>
+            <guid isPermaLink="false">CVE-2026-48161</guid>
+            <pubDate>Mon, 10 Aug 2026 23:16:51 GMT</pubDate>
+            <description><![CDATA[react18-use is a React 19 use hook shim. Between 2026-05-19 01:07:01 and 2026-05-19 15:20:43, the default branch contained malicious commits 7b79148d1495a2505f9277da295a98cf176f4496 through 7b79148d1495a2505f9277da295a98cf176f4496 that executed remote attacker-controlled code on developer machines during `npm install`. The commits were removed by force-push, but local clones, forks, and direct-SHA URLs may still contain them, and `npm install` against an affected checkout will still execute the code today. The package was not published to npm. `src/install.js` was added and wired into the `postinstall` script. It fetched a JavaScript payload from an attacker-controlled HTTPS endpoint (configurable via an environment variable), disabled TLS verification, and evaluated the response as code with `require` available. Execution was deliberately skipped on CI and cloud/serverless environments, targeting developer workstations. The second-stage payload was attacker-hosted and cannot be reconstructed. Assume full compromise of anything reachable from a Node process with the user's permissions. Those who ran `npm install` against an affected checkout on a developer machine on or after 2026-05-19 01:07:01 should treat the machine as compromised, rotate every credential the machine could reach, audit account activity since 2026-05-19 01:07:01, and clean local clones.
+
+Score: 9.3 (CRITICAL)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-11812 [CVSS:3.1 2.5 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-11812</link>
+            <guid isPermaLink="false">CVE-2026-11812</guid>
+            <pubDate>Mon, 10 Aug 2026 23:16:51 GMT</pubDate>
+            <description><![CDATA[The UpdateHub management subsystem (subsys/mgmt/updatehub/updatehub.c) drives every update operation through a single file-scope ctx structure that holds the CoAP block context, payload buffer, status code, socket, and a one-element poll-fd array fds[1]. Access to ctx was not serialized, and prepare_fds() wrote ctx.fds[ctx.nfds] and incremented ctx.nfds with no bounds check.
+
+Two independent paths mutate ctx concurrently: the background autohandler running on the system workqueue, and user-triggered operations reached through the updatehub run shell command, direct API calls, or — since the operations are exposed as syscalls — userspace threads. When a second flow enters prepare_fds() while ctx.nfds is already 1, the write lands one element past the array; by struct layout it overlaps the adjacent ctx.sock/ctx.nfds members. More broadly, the unsynchronized sharing lets two flows interleave connection setup and teardown, double-closing a socket descriptor or scribbling the shared buffers.
+
+The result is corruption of the update subsystem's internal state and denial of service of the firmware-update path; the out-of-bounds write is contained within the ctx structure and there is no demonstrated path to memory outside it or to code execution. Triggering requires a local actor able to invoke update operations (or, with CONFIG_USERSPACE, an unprivileged userspace thread) and to win a timing race against the background handler; remote peers cannot control the race timing. The fix serializes the entry points with a mutex and adds a bounds check to prepare_fds().
+
+Score: 2.5 (LOW)
+Vector: CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:N/I:N/A:L]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-11811 [CVSS:3.1 3.7 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-11811</link>
+            <guid isPermaLink="false">CVE-2026-11811</guid>
+            <pubDate>Mon, 10 Aug 2026 23:16:50 GMT</pubDate>
+            <description><![CDATA[The UpdateHub over-the-air update client's start_coap_client() in subsys/mgmt/updatehub/updatehub.c leaks the CoAP/DTLS socket descriptor on its connection-setup failure paths. The shared error: cleanup gated socket closing on a ret > 0 flag, but ret was set to -1 immediately after the socket was created, so when zsock_setsockopt() (DTLS) or zsock_connect() subsequently failed the gate was false and cleanup_connection() was never called. The open descriptor in the global ctx.sock was then overwritten by the next attempt, permanently leaking it from the socket / net_context pool until reboot.
+
+The failing setup path is reached every time the OTA client tries to contact the UpdateHub server and the connection cannot be established — driven automatically by the periodic autohandler() poll (and on demand via the updatehub_probe()/updatehub_update() API or the updatehub run shell command). The DTLS handshake/connect outcome is influenceable by a network or on-path attacker who drops, resets, or otherwise disrupts traffic to the server, and also fails naturally whenever the server is unreachable.
+
+Each failed attempt permanently leaks one descriptor; once the shared socket pool is exhausted, networking degrades device-wide until the device is rebooted, a denial-of-service condition. Severity is low because the leak rate is bounded by the configured OTA poll interval (default once per 24 hours), the effect is gradual and recovered by reboot, and only builds with the UpdateHub client enabled are affected. There is no memory-corruption, information-disclosure, or authentication impact.
+
+Score: 3.7 (LOW)
+Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:L]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-30241 [CVSS:4.0 8.6 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-30241</link>
+            <guid isPermaLink="false">CVE-2025-30241</guid>
+            <pubDate>Mon, 10 Aug 2026 23:16:50 GMT</pubDate>
+            <description><![CDATA[Certain web
+interface components in affected TP-Link Aginet devices do not validate and sanitize user-supplied input properly before
+passing it to system-level command execution functions.  An authenticated adjacent attacker may inject
+specially crafted input to execute arbitrary operation system commands with
+elevated privileges.
+
+
+
+
+
+
+
+
+
+Successful
+exploitation may allow execution of arbitrary system commands, potentially
+leading to full device compromise.
+
+Score: 8.6 (HIGH)
+Vector: CVSS:4.0/AV:A/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-30240 [CVSS:4.0 5.1 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-30240</link>
+            <guid isPermaLink="false">CVE-2025-30240</guid>
+            <pubDate>Mon, 10 Aug 2026 23:16:50 GMT</pubDate>
+            <description><![CDATA[The affected TP-Link Aginet devices do not properly validate symbolic links created on external USB storage
+devices. By placing a crafted symbolic link on supported storage media, an
+attacker may cause the system to resolve the link.
+
+
+
+
+
+
+
+
+
+Successful
+exploitation may allow unauthorized read access to sensitive files within the
+device filesystem.
+
+Score: 5.1 (MEDIUM)
+Vector: CVSS:4.0/AV:P/AC:L/AT:N/PR:N/UI:N/VC:H/VI:N/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-30239 [CVSS:4.0 8.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-30239</link>
+            <guid isPermaLink="false">CVE-2025-30239</guid>
+            <pubDate>Mon, 10 Aug 2026 23:16:50 GMT</pubDate>
+            <description><![CDATA[In affected TP-Link Aginet devices, use of
+hardcoded cryptographic keys embedded in the firmware to protect sensitive
+configuration data may allow an attacker who has access to device storage to
+recover the keys and decrypt stored data.
+
+
+
+
+
+Successful
+exploitation may allow access to decrypted sensitive configuration data,
+including credentials and service-related information.
+
+Score: 8.5 (HIGH)
+Vector: CVSS:4.0/AV:A/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-30238 [CVSS:4.0 8.6 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-30238</link>
+            <guid isPermaLink="false">CVE-2025-30238</guid>
+            <pubDate>Mon, 10 Aug 2026 23:16:49 GMT</pubDate>
+            <description><![CDATA[In affected TP-Link Aginet devices, insufficient
+authorization validation allows authenticated low-privileged users to execute higher-privileged
+operations.
+
+
+
+
+
+An attacker
+may perform administrative actions such as creating privileged accounts or
+modifying critical configuration settings.
+
+Score: 8.6 (HIGH)
+Vector: CVSS:4.0/AV:A/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-30237 [CVSS:4.0 8.7 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-30237</link>
+            <guid isPermaLink="false">CVE-2025-30237</guid>
+            <pubDate>Mon, 10 Aug 2026 23:16:48 GMT</pubDate>
+            <description><![CDATA[The affected TP-Link Aginet devices contain a flaw in the web management interface where authentication
+checks are not consistently enforced on certain endpoints. An attacker can send
+specially crafted requests to bypass authentication and directly invoke
+privileged functionality without valid credentials. This issue arises from
+improper enforcement of access control mechanisms on sensitive operations.
+
+
+
+
+
+Successful
+exploitation may allow an unauthenticated attacker to execute privileged
+operations and gain full control of the device.
+
+Score: 8.7 (HIGH)
+Vector: CVSS:4.0/AV:A/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
         <item>
             <title><![CDATA[CVE-2026-72919 [CVSS:3.1 4.3 MEDIUM]]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72919</link>
@@ -989,103 +1156,6 @@ Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:H/A:L]]></description>
 
 Score: 7.8 (HIGH)
 Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2021-36948 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2021-36948</link>
-            <guid isPermaLink="false">CVE-2021-36948</guid>
-            <pubDate>Mon, 10 Aug 2026 20:19:08 GMT</pubDate>
-            <description><![CDATA[Windows Update Medic Service Elevation of Privilege Vulnerability
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2021-36942 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2021-36942</link>
-            <guid isPermaLink="false">CVE-2021-36942</guid>
-            <pubDate>Mon, 10 Aug 2026 20:19:03 GMT</pubDate>
-            <description><![CDATA[Windows LSA Spoofing Vulnerability
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2021-36934 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2021-36934</link>
-            <guid isPermaLink="false">CVE-2021-36934</guid>
-            <pubDate>Mon, 10 Aug 2026 20:19:00 GMT</pubDate>
-            <description><![CDATA[An elevation of privilege vulnerability exists because of overly permissive Access Control Lists (ACLs) on multiple system files, including the Security Accounts Manager (SAM) database. An attacker who successfully exploited this vulnerability could run arbitrary code with SYSTEM privileges. An attacker could then install programs; view, change, or delete data; or create new accounts with full user rights.
-An attacker must have the ability to execute code on a victim system to exploit this vulnerability.
-After installing this security update, you must manually delete all shadow copies of system files, including the SAM database, to fully mitigate this vulnerabilty. Simply installing this security update will not fully mitigate this vulnerability. See KB5005357- Delete Volume Shadow Copies.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2021-38645 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2021-38645</link>
-            <guid isPermaLink="false">CVE-2021-38645</guid>
-            <pubDate>Mon, 10 Aug 2026 20:18:58 GMT</pubDate>
-            <description><![CDATA[Open Management Infrastructure Elevation of Privilege Vulnerability
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2021-38647 [CVSS:3.1 9.8 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2021-38647</link>
-            <guid isPermaLink="false">CVE-2021-38647</guid>
-            <pubDate>Mon, 10 Aug 2026 20:18:56 GMT</pubDate>
-            <description><![CDATA[Open Management Infrastructure (OMI) Remote Code Execution Vulnerability
-
-Score: 9.8 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-8247 [CVSS:4.0 7.7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-8247</link>
-            <guid isPermaLink="false">CVE-2026-8247</guid>
-            <pubDate>Mon, 10 Aug 2026 20:17:35 GMT</pubDate>
-            <description><![CDATA[An Out-of-bounds Write vulnerability in WatchGuard Fireware OS may allow an unauthenticated attacker on the same local network segment to execute arbitrary code.
-
-
-
-
-This vulnerability affects Fireware OS 11.0 up to and including 11.12.4_Update1, 12.0 up to and including 12.12 and 2025.1 up to and including 2026.2.
-
-Score: 7.7 (HIGH)
-Vector: CVSS:4.0/AV:A/AC:L/AT:P/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-72902 [CVSS:3.1 9.9 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72902</link>
-            <guid isPermaLink="false">CVE-2026-72902</guid>
-            <pubDate>Mon, 10 Aug 2026 20:17:35 GMT</pubDate>
-            <description><![CDATA[Dokploy is a free, self-hostable Platform as a Service (PaaS). Prior to 0.29.13, Dokploy allows an authenticated user to execute arbitrary commands on a local or SSH-connected target server because registry.testRegistry and registry.testRegistryById in apps/dokploy/server/api/routers/registry.ts interpolate the password field into an execAsyncRemote shell command instead of using safeDockerLoginCommand. This issue is fixed in version 0.29.13.
-
-Score: 9.9 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-72901 [CVSS:3.1 9.9 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72901</link>
-            <guid isPermaLink="false">CVE-2026-72901</guid>
-            <pubDate>Mon, 10 Aug 2026 20:17:35 GMT</pubDate>
-            <description><![CDATA[Dokploy is a free, self-hostable Platform as a Service (PaaS). Prior to 0.29.13, Dokploy allows an authenticated low-privilege member to execute arbitrary commands on the control-plane host because the volumeName field accepted by volumeBackup.create and volumeBackup.runManually is interpolated without quoting in packages/server/src/utils/volume-backups/backup.ts and executed through child_process.exec, with Docker socket access making execution host/root-equivalent. This issue is fixed in version 0.29.13.
-
-Score: 9.9 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-72886 [CVSS:3.1 9.9 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72886</link>
-            <guid isPermaLink="false">CVE-2026-72886</guid>
-            <pubDate>Mon, 10 Aug 2026 20:17:35 GMT</pubDate>
-            <description><![CDATA[Dokploy is a free, self-hostable Platform as a Service (PaaS). From 0.29.2 until 0.29.13, schedule.create and schedule.update in apps/dokploy/server/api/routers/schedule.ts derive serviceId from applicationId or composeId and execute the owner/admin host-schedule gate only in the alternative branch, allowing a member with access to one application to attach its applicationId to a dokploy-server schedule and run a supplied script as root through schedule.runManually. This issue is fixed in version 0.29.13.
-
-Score: 9.9 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H]]></description>
         </item>
     </channel>
 </rss>
