@@ -4,1219 +4,1012 @@
         <title>NVD CVE Feed</title>
         <link>https://github.com/TasukuKuchinomachi/NVD-RSS-feed</link>
         <description>Latest CVE entries from the National Vulnerability Database. This product uses the NVD API but is not endorsed or certified by the NVD.</description>
-        <lastBuildDate>Tue, 11 Aug 2026 19:08:45 GMT</lastBuildDate>
+        <lastBuildDate>Tue, 11 Aug 2026 20:54:56 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>National Vulnerability Database - NIST</copyright>
         <item>
-            <title><![CDATA[CVE-2026-64188 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64188</link>
-            <guid isPermaLink="false">CVE-2026-64188</guid>
-            <pubDate>Tue, 11 Aug 2026 19:08:45 GMT</pubDate>
-            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
-
-net: qualcomm: rmnet: fix endpoint use-after-free in rmnet_dellink()
-
-rmnet_dellink() removes the endpoint from the hash table with
-hlist_del_init_rcu() and then immediately frees it with kfree(). However,
-RCU readers on the receive path (rmnet_rx_handler ->
-__rmnet_map_ingress_handler) may still hold a reference to the endpoint and
-dereference ep->egress_dev after the memory has been freed. The endpoint is
-a kmalloc-32 object, and the stale read at offset 8 corresponds to the
-egress_dev pointer.
-
-  BUG: unable to handle page fault for address: ffffffffde942eef
-  Oops: 0002 [#1] SMP NOPTI
-  CPU: 1 UID: 0 PID: 137 Comm: poc_write Not tainted 7.0.0+ #4 PREEMPTLAZY
-  RIP: 0010:rmnet_vnd_rx_fixup (rmnet_vnd.c:27)
-  Call Trace:
-   <TASK>
-   __rmnet_map_ingress_handler (rmnet_handlers.c:48 rmnet_handlers.c:101)
-   rmnet_rx_handler (rmnet_handlers.c:129 rmnet_handlers.c:235)
-   __netif_receive_skb_core.constprop.0 (net/core/dev.c:6096)
-   __netif_receive_skb_one_core (net/core/dev.c:6208)
-   netif_receive_skb (net/core/dev.c:6467)
-   tun_get_user (drivers/net/tun.c:1955)
-   tun_chr_write_iter (drivers/net/tun.c:2003)
-   vfs_write (fs/read_write.c:688)
-   ksys_write (fs/read_write.c:740)
-   </TASK>
-
-Add an rcu_head field to struct rmnet_endpoint and replace kfree() with
-kfree_rcu() so the endpoint memory remains valid through the RCU grace
-period. Also remove the rmnet_vnd_dellink() call and inline only the
-nr_rmnet_devs decrement, since rmnet_vnd_dellink() would set
-ep->egress_dev to NULL during the grace period, creating a data race
-with lockless readers.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-64189 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64189</link>
-            <guid isPermaLink="false">CVE-2026-64189</guid>
-            <pubDate>Tue, 11 Aug 2026 19:08:04 GMT</pubDate>
-            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
-
-netfilter: ipset: fix race between dump and ip_set_list resize
-
-The release path of ip_set_dump_do() and ip_set_dump_done() read
-inst->ip_set_list via ip_set_ref_netlink(), a plain rcu_dereference_raw()
-of the array pointer. These run from netlink_recvmsg() without the nfnl
-mutex and without an RCU read-side critical section.
-
-A concurrent ip_set_create() can grow the array: it publishes the new
-array, calls synchronize_net() and then kvfree()s the old one. Since the
-dump paths read the array outside any RCU reader, synchronize_net() does
-not wait for them and the old array can be freed while they still index
-into it, causing a use-after-free.
-
-The dumped set itself stays pinned via set->ref_netlink, so only the
-array load needs protecting. Take rcu_read_lock() around it, matching
-ip_set_get_byname() and __ip_set_put_byindex().
-
-  BUG: KASAN: slab-use-after-free in ip_set_dump_do (net/netfilter/ipset/ip_set_core.c:1697)
-  Read of size 8 at addr ffff88800b5c4018 by task exploit/150
-  Call Trace:
-   ...
-   kasan_report (mm/kasan/report.c:595)
-   ip_set_dump_do (net/netfilter/ipset/ip_set_core.c:1697)
-   netlink_dump (net/netlink/af_netlink.c:2325)
-   netlink_recvmsg (net/netlink/af_netlink.c:1976)
-   sock_recvmsg (net/socket.c:1159)
-   __sys_recvfrom (net/socket.c:2315)
-   ...
-  Oops: general protection fault, probably for non-canonical address ... KASAN NOPTI
-  KASAN: maybe wild-memory-access in range [0x02d6...d0-0x02d6...d7]
-  RIP: 0010:ip_set_dump_do (net/netfilter/ipset/ip_set_core.c:1698)
-  Kernel panic - not syncing: Fatal exception
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-16243 [CVSS:4.0 5.7 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-16243</link>
-            <guid isPermaLink="false">CVE-2026-16243</guid>
-            <pubDate>Tue, 11 Aug 2026 19:06:59 GMT</pubDate>
-            <description><![CDATA[In Eclipse OMR versions up to 0.11, the arraycmp SIMD implementation for Z and P does not check if the number of bytes to compare is zero.
-
-Score: 5.7 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:H/AT:P/PR:L/UI:A/VC:N/VI:N/VA:H/SC:N/SI:N/SA:L/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-64190 [CVSS:3.1 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64190</link>
-            <guid isPermaLink="false">CVE-2026-64190</guid>
-            <pubDate>Tue, 11 Aug 2026 19:06:38 GMT</pubDate>
-            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
-
-net: team: fix NULL pointer dereference in team_xmit during mode change
-
-__team_change_mode() clears team->ops with memset() before restoring
-safe dummy handlers via team_adjust_ops(). A concurrent team_xmit()
-running under RCU on another CPU can read team->ops.transmit during
-this window and call a NULL function pointer, crashing the kernel.
-
-The race requires a mode change (CAP_NET_ADMIN) concurrent with
-transmit on the team device.
-
- BUG: kernel NULL pointer dereference, address: 0000000000000000
- Oops: 0010 [#1] SMP KASAN NOPTI
- RIP: 0010:0x0
- Call Trace:
-  team_xmit (drivers/net/team/team_core.c:1853)
-  dev_hard_start_xmit (net/core/dev.c:3904)
-  __dev_queue_xmit (net/core/dev.c:4871)
-  packet_sendmsg (net/packet/af_packet.c:3109)
-  __sys_sendto (net/socket.c:2265)
-
-The original code assumed that no ports means no traffic, so mode
-changes could freely memset()/memcpy() the ops.  AF_PACKET with
-forced carrier breaks that assumption.
-
-Prevent the race instead of making it safe: replace memset()/memcpy()
-with per-field updates that never touch transmit or receive.  Those
-two handlers are managed solely by team_adjust_ops(), which already
-installs dummies when tx_en_port_count == 0 (always true during mode
-change since no ports are present).  WRITE_ONCE/READ_ONCE prevent
-store/load tearing on the handler pointers.
-
-synchronize_net() before exit_op() drains in-flight readers that may
-still reference old mode state from before port removal switched the
-handlers to dummies.
-
-Score: 5.5 (MEDIUM)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-64191 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64191</link>
-            <guid isPermaLink="false">CVE-2026-64191</guid>
-            <pubDate>Tue, 11 Aug 2026 19:05:37 GMT</pubDate>
-            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
-
-i2c: stub: Reject I2C block transfers with invalid length
-
-The I2C_SMBUS_I2C_BLOCK_DATA case in stub_xfer() uses data->block[0]
-as the transfer length. The existing check only clamps it to avoid
-overrunning the chip->words[256] register array, but does not validate
-it against I2C_SMBUS_BLOCK_MAX (32), which is the limit of the union
-i2c_smbus_data.block buffer (34 bytes total). The driver is a
-development/test tool (CONFIG_I2C_STUB=m, not built by default)
-that must be loaded with a chip_addr= parameter.
-
-A local user with access to /dev/i2c-* can issue an I2C_SMBUS ioctl
-with I2C_SMBUS_I2C_BLOCK_DATA and data->block[0] > 32, causing
-stub_xfer() to read or write past the end of the union
-i2c_smbus_data.block buffer:
-
- BUG: KASAN: stack-out-of-bounds in stub_xfer (drivers/i2c/i2c-stub.c:223)
- Read of size 1 at addr ffff88800abcfd92 by task exploit/81
- Call Trace:
-  <TASK>
-  stub_xfer (drivers/i2c/i2c-stub.c:223)
-  __i2c_smbus_xfer (drivers/i2c/i2c-core-smbus.c:593)
-  i2c_smbus_xfer (drivers/i2c/i2c-core-smbus.c:536)
-  i2cdev_ioctl_smbus (drivers/i2c/i2c-dev.c:391)
-  i2cdev_ioctl (drivers/i2c/i2c-dev.c:478)
-  __x64_sys_ioctl (fs/ioctl.c:583)
-  do_syscall_64 (arch/x86/entry/syscall_64.c:94)
-  entry_SYSCALL_64_after_hwframe (arch/x86/entry/entry_64.S:130)
-  </TASK>
-
-The bug exists because i2c-stub implements .smbus_xfer directly,
-bypassing the I2C_SMBUS_BLOCK_MAX validation in
-i2c_smbus_xfer_emulated(). The I2C_SMBUS_BLOCK_DATA case in the same
-function correctly validates against I2C_SMBUS_BLOCK_MAX, but the
-I2C_SMBUS_I2C_BLOCK_DATA case does not.
-
-Fix by rejecting transfers with data->block[0] == 0 or
-data->block[0] > I2C_SMBUS_BLOCK_MAX with -EINVAL, consistent with
-both the I2C_SMBUS_BLOCK_DATA case in the same function and the
-I2C_SMBUS_I2C_BLOCK_DATA validation in i2c_smbus_xfer_emulated().
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-16454 [CVSS:3.1 4.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-16454</link>
-            <guid isPermaLink="false">CVE-2026-16454</guid>
-            <pubDate>Tue, 11 Aug 2026 19:04:55 GMT</pubDate>
-            <description><![CDATA[In Eclipse hawkBit versions 1.0.3 and prior, a privilege escalation vulnerability (CWE-284 / CWE-862) has been identified in the Direct Device Integration (DDI) Controller.
-
-
-
-This vulnerability allows an authenticated device to escalate its permissions and bypass the strict boundaries of its assigned updates. Under normal operation, a device should be restricted strictly to the specific firmware artifacts explicitly assigned to it. However, this flaw enables any authenticated device to bypass this restriction and download any firmware artifact within the same tenant.
-
-
-
-This is not an authentication bypass; the requesting device must possess valid credentials for its respective tenant. Instead, the issue stems from a flaw in object-level authorization validation.
-
-
-
-A related, lower-severity helper issue exists in the listing software modules artifacts metadata endpoint. This endpoint does not enforce assignment checks, enabling an authenticated device to list and enumerate available firmware artifacts, which can facilitate targeted exfiltration using the main download authorization bypass.
-
-Score: 4.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-64192 [CVSS:3.1 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64192</link>
-            <guid isPermaLink="false">CVE-2026-64192</guid>
-            <pubDate>Tue, 11 Aug 2026 19:04:23 GMT</pubDate>
-            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
-
-bpf: Reject BPF_MAP_TYPE_INODE_STORAGE creation if BPF LSM is uninitialized
-
-When CONFIG_BPF_LSM=y is set, BPF inode storage maps
-(BPF_MAP_TYPE_INODE_STORAGE) are compiled into the kernel. However,
-if the BPF LSM is not explicitly enabled at boot time (e.g. omitted
-from the "lsm=" boot parameter), lsm_prepare() is never executed for
-the BPF LSM.
-
-Consequently, the BPF inode security blob offset
-(bpf_lsm_blob_sizes.lbs_inode) is never initialized and remains at
-its default compiled size of 8 bytes instead of being updated to a
-valid offset past the reserved struct rcu_head (typically 16 bytes
-or more).
-
-When a privileged user creates and updates a BPF_MAP_TYPE_INODE_STORAGE
-map, bpf_inode() evaluates inode->i_security + 8. This erroneously
-aliases the struct rcu_head.func callback pointer at the beginning
-of the inode->i_security blob. During subsequent map element cleanup
-or inode destruction, writing NULL to owner_storage clears the queued
-RCU callback pointer. When rcu_do_batch() later executes the queued
-callback, it attempts an instruction fetch at address 0x0, triggering
-an immediate kernel panic.
-
-Fix this by introducing a global bpf_lsm_initialized boolean flag
-marked with __ro_after_init. Set this flag to true inside bpf_lsm_init()
-when the LSM framework successfully registers the BPF LSM. Gate map
-allocation in inode_storage_map_alloc() on this flag, returning
--EOPNOTSUPP if the BPF LSM is in turn uninitialized.
-
-This fail-fast approach prevents userspace from allocating inode
-storage maps when the supporting BPF LSM infrastructure is absent,
-avoiding zombie map states.
-
-Score: 5.5 (MEDIUM)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-64608 [CVSS:3.1 9.8 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64608</link>
-            <guid isPermaLink="false">CVE-2026-64608</guid>
-            <pubDate>Tue, 11 Aug 2026 18:58:04 GMT</pubDate>
-            <description><![CDATA[Heap type confusion and out-of-bounds read/write in the Apache Fory C++ implementation. When deserializing data in compatible mode, the field-skip paths do not correctly validate the declared field types against the actual data, so input with an inconsistent schema can cause type confusion and out-of-bounds memory access. Only the C++ implementation is affected; other language implementations of Apache Fory are not.
-
-This issue affects Apache Fory C++: from 0.14.0 before 1.4.0.
-
-Users are recommended to upgrade to version 1.4.0, which fixes the issue.
-
-Score: 9.8 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-48389 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-48389</link>
-            <guid isPermaLink="false">CVE-2026-48389</guid>
-            <pubDate>Tue, 11 Aug 2026 18:57:22 GMT</pubDate>
-            <description><![CDATA[DNG SDK versions 1.7.1 2536 and earlier are affected by a Stack-based Buffer Overflow vulnerability that could result in arbitrary code execution in the context of the current user. Exploitation of this issue requires user interaction in that a victim must open a malicious file.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-20017 [CVSS:3.1 6 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-20017</link>
-            <guid isPermaLink="false">CVE-2026-20017</guid>
-            <pubDate>Tue, 11 Aug 2026 18:55:17 GMT</pubDate>
-            <description><![CDATA[A vulnerability in the CLI of Cisco Secure FTD Software could allow an authenticated, local attacker to execute arbitrary commands on the underlying operating system as root. To exploit this vulnerability, the attacker must have valid administrative credentials on an affected device.
-
-This vulnerability is due to insufficient input validation of user-supplied command arguments. An attacker could exploit this vulnerability by submitting crafted input for a specific CLI command. A successful exploit could allow the attacker to execute commands on the underlying operating system as&nbsp;root.
-
-Score: 6 (MEDIUM)
-Vector: CVSS:3.1/AV:L/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-20337 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-20337</link>
-            <guid isPermaLink="false">CVE-2026-20337</guid>
-            <pubDate>Tue, 11 Aug 2026 18:54:19 GMT</pubDate>
-            <description><![CDATA[A vulnerability in the zip archive parser of ClamAV could allow an unauthenticated, remote attacker to cause a DoS condition on an affected device.
-
-This vulnerability is due to improper boundary checks for content in zip files during scanning, which may result in an out-of-bounds write condition. An attacker could exploit this vulnerability by submitting a crafted zip file for scanning. A successful exploit could allow the attacker to cause the ClamAV scanning process to terminate, resulting in a DoS condition on the affected software.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-20338 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-20338</link>
-            <guid isPermaLink="false">CVE-2026-20338</guid>
-            <pubDate>Tue, 11 Aug 2026 18:54:19 GMT</pubDate>
-            <description><![CDATA[A vulnerability in the zip archive parser of ClamAV could allow an unauthenticated, remote attacker to cause a DoS condition on an affected device.
-
-This vulnerability is due to improper memory handling when processing content in zip files during scanning. An attacker could exploit this vulnerability by submitting a crafted zip file for scanning. A successful exploit could allow the attacker to cause the ClamAV scanning process to terminate as a result of a memory double-free, resulting in a DoS condition on the affected software.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-20339 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-20339</link>
-            <guid isPermaLink="false">CVE-2026-20339</guid>
-            <pubDate>Tue, 11 Aug 2026 18:54:19 GMT</pubDate>
-            <description><![CDATA[A vulnerability in the PESpin file format parser of ClamAV could allow an unauthenticated, remote attacker to cause a DoS condition or possibly other expanded impacts as a result of&nbsp;memory corruption on an affected device.
-
-This vulnerability is due to improper boundary checks for content in PESpin files during scanning, which may result in an integer overflow. An attacker could exploit this vulnerability by submitting a crafted file that contains PESpin content to be scanned by ClamAV on an affected device. A successful exploit could allow the attacker to cause the ClamAV scanning process to terminate, resulting in a DoS condition on the affected software.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-20345 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-20345</link>
-            <guid isPermaLink="false">CVE-2026-20345</guid>
-            <pubDate>Tue, 11 Aug 2026 18:54:19 GMT</pubDate>
-            <description><![CDATA[A vulnerability in the GPT file format parser of ClamAV could allow an unauthenticated, remote attacker to cause a DoS condition or possibly other expanded impacts as a result of&nbsp;memory corruption on an affected device.
-
-This vulnerability is due to improper handling of an endian conversion operation, which may result in an out-of-bounds buffer write. An attacker could exploit this vulnerability by submitting a crafted GPT file to be scanned by ClamAV on an affected device. A successful exploit could allow the attacker to cause the ClamAV scanning process to terminate, resulting in a DoS condition on the affected software.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-20346 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-20346</link>
-            <guid isPermaLink="false">CVE-2026-20346</guid>
-            <pubDate>Tue, 11 Aug 2026 18:54:19 GMT</pubDate>
-            <description><![CDATA[A vulnerability in the PDF file format parser of ClamAV could allow an unauthenticated, remote attacker to cause a DoS condition or possibly other expanded impacts as a result of&nbsp;memory corruption on an affected device.
-
-This vulnerability is due to improper boundary checks for content in PDF files during scanning, which may result in an out-of-bounds buffer read. An attacker could exploit this vulnerability by submitting a crafted PDF file to be scanned by ClamAV on an affected device. A successful exploit could allow the attacker to cause the ClamAV scanning process to terminate, resulting in a DoS condition on the affected software.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-20347 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-20347</link>
-            <guid isPermaLink="false">CVE-2026-20347</guid>
-            <pubDate>Tue, 11 Aug 2026 18:54:19 GMT</pubDate>
-            <description><![CDATA[A vulnerability in the Mach-O file format parser of ClamAV could allow an unauthenticated, remote attacker to cause a DoS condition or possibly other expanded impacts as a result of&nbsp;memory corruption on an affected device.
-
-This vulnerability is due to improper boundary checks for content in Mach-O files during scanning, which may result in an out-of-bounds buffer read. An attacker could exploit this vulnerability by submitting a crafted Mach-O file to be scanned by ClamAV on an affected device. A successful exploit could allow the attacker to cause the ClamAV scanning process to terminate, resulting in a DoS condition on the affected software.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-20348 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-20348</link>
-            <guid isPermaLink="false">CVE-2026-20348</guid>
-            <pubDate>Tue, 11 Aug 2026 18:54:19 GMT</pubDate>
-            <description><![CDATA[A vulnerability in the XAR file format parser of ClamAV could allow an unauthenticated, remote attacker to cause a DoS condition or possibly other expanded impacts as a result of&nbsp;memory corruption on an affected device.
-
-This vulnerability is due to improper boundary checks for content in XAR files during scanning. An attacker could exploit this vulnerability by submitting a crafted file that contains XAR content to be scanned by ClamAV on an affected device. A successful exploit could allow the attacker to cause the ClamAV scanning process to terminate, resulting in a DoS condition on the affected software.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-20349 [CVSS:3.1 8.6 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-20349</link>
-            <guid isPermaLink="false">CVE-2026-20349</guid>
-            <pubDate>Tue, 11 Aug 2026 18:54:19 GMT</pubDate>
-            <description><![CDATA[A vulnerability in the Remote Access SSL VPN service for Cisco Secure Firewall Adaptive Security Appliance (ASA) Software and Cisco Secure Firewall Threat Defense (FTD) Software could allow an unauthenticated, remote attacker to cause the device to reload unexpectedly, resulting in a denial of service (DoS) condition.&nbsp;
-
-This vulnerability is due to insufficient error checking when processing HTTP requests. An attacker could exploit this vulnerability by sending a crafted HTTP request to the Remote Access SSL VPN service on an affected device. A successful exploit could allow the attacker to cause the affected device to reload, resulting in a DoS condition.
-
-Score: 8.6 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:N/I:N/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-40375 [CVSS:3.1 6.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-40375</link>
-            <guid isPermaLink="false">CVE-2026-40375</guid>
-            <pubDate>Tue, 11 Aug 2026 18:54:03 GMT</pubDate>
-            <description><![CDATA[Missing authorization in Dynamics Business Central allows an authorized attacker to disclose information over a network.
-
-Score: 6.5 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-42976 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-42976</link>
-            <guid isPermaLink="false">CVE-2026-42976</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Missing authentication for critical function in Windows RPC API allows an authorized attacker to elevate privileges locally.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-47285 [CVSS:3.1 6.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-47285</link>
-            <guid isPermaLink="false">CVE-2026-47285</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Improper neutralization of special elements used in a command ('command injection') in Visual Studio Code allows an unauthorized attacker to disclose information over a network.
-
-Score: 6.5 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-47299 [CVSS:3.1 7.2 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-47299</link>
-            <guid isPermaLink="false">CVE-2026-47299</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Improper neutralization of special elements used in a command ('command injection') in Azure Monitor Agent allows an authorized attacker to elevate privileges over a network.
-
-Score: 7.2 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-49179 [CVSS:3.1 8.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-49179</link>
-            <guid isPermaLink="false">CVE-2026-49179</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Improper neutralization of special elements used in a command ('command injection') in Windows Active Directory allows an unauthorized attacker to execute code over a network.
-
-Score: 8.8 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-50472 [CVSS:3.1 7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-50472</link>
-            <guid isPermaLink="false">CVE-2026-50472</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Heap-based buffer overflow in Windows LUAFV allows an authorized attacker to elevate privileges locally.
-
-Score: 7 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-50516 [CVSS:3.1 9.4 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-50516</link>
-            <guid isPermaLink="false">CVE-2026-50516</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Missing authentication for critical function in Microsoft Azure Kubernetes Service allows an unauthorized attacker to elevate privileges over a network.
-
-Score: 9.4 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:L]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-54113 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-54113</link>
-            <guid isPermaLink="false">CVE-2026-54113</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Allocation of resources without limits or throttling in Windows Kernel allows an unauthorized attacker to deny service over a network.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-54123 [CVSS:3.1 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-54123</link>
-            <guid isPermaLink="false">CVE-2026-54123</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Exposure of sensitive information to an unauthorized actor in Microsoft Defender for Endpoint allows an authorized attacker to disclose information locally.
-
-Score: 5.5 (MEDIUM)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-54981 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-54981</link>
-            <guid isPermaLink="false">CVE-2026-54981</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Inclusion of functionality from untrusted control sphere in Visual Studio Code - Python extension allows an unauthorized attacker to bypass a security feature locally.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-54984 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-54984</link>
-            <guid isPermaLink="false">CVE-2026-54984</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Heap-based buffer overflow in Windows Imaging Component allows an unauthorized attacker to execute code locally.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-56174 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-56174</link>
-            <guid isPermaLink="false">CVE-2026-56174</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Untrusted search path in Windows Narrator Braille allows an authorized attacker to elevate privileges locally.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-56179 [CVSS:3.1 8.3 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-56179</link>
-            <guid isPermaLink="false">CVE-2026-56179</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Origin validation error in Windows Network Address Translation (NAT) allows an unauthorized attacker to perform spoofing over an adjacent network.
-
-Score: 8.3 (HIGH)
-Vector: CVSS:3.1/AV:A/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-57104 [CVSS:3.1 8.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-57104</link>
-            <guid isPermaLink="false">CVE-2026-57104</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Improper neutralization of input during web page generation ('cross-site scripting') in Azure Storage Explorer allows an unauthorized attacker to elevate privileges over a network.
-
-Score: 8.8 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-57105 [CVSS:3.1 8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-57105</link>
-            <guid isPermaLink="false">CVE-2026-57105</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Improper neutralization of input during web page generation ('cross-site scripting') in Microsoft Office SharePoint allows an authorized attacker to perform spoofing over a network.
-
-Score: 8 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:R/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-58612 [CVSS:3.1 7.4 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-58612</link>
-            <guid isPermaLink="false">CVE-2026-58612</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Server-side request forgery (ssrf) in Microsoft PowerShell Core allows an unauthorized attacker to disclose information over a network.
-
-Score: 7.4 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-58639 [CVSS:3.1 6.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-58639</link>
-            <guid isPermaLink="false">CVE-2026-58639</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Server-side request forgery (ssrf) in Microsoft Office SharePoint allows an authorized attacker to perform spoofing over a network.
-
-Score: 6.5 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-58641 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-58641</link>
-            <guid isPermaLink="false">CVE-2026-58641</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Integer overflow or wraparound in .NET allows an unauthorized attacker to elevate privileges locally.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-58650 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-58650</link>
-            <guid isPermaLink="false">CVE-2026-58650</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Authorization bypass through user-controlled key in Visual Studio Code allows an unauthorized attacker to bypass a security feature locally.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-58651 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-58651</link>
-            <guid isPermaLink="false">CVE-2026-58651</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Heap-based buffer overflow in Microsoft Office Word allows an unauthorized attacker to execute code locally.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-59113 [CVSS:3.1 8.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-59113</link>
-            <guid isPermaLink="false">CVE-2026-59113</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Missing authorization in Visual Studio Code allows an unauthorized attacker to execute code over a network.
-
-Score: 8.8 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-59119 [CVSS:3.1 7.3 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-59119</link>
-            <guid isPermaLink="false">CVE-2026-59119</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Incorrect default permissions in Microsoft PowerShell allows an authorized attacker to elevate privileges locally.
-
-Score: 7.3 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:R/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-59122 [CVSS:3.1 7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-59122</link>
-            <guid isPermaLink="false">CVE-2026-59122</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Concurrent execution using shared resource with improper synchronization ('race condition') in Windows Telephony Service allows an authorized attacker to elevate privileges locally.
-
-Score: 7 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-59124 [CVSS:3.1 9.8 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-59124</link>
-            <guid isPermaLink="false">CVE-2026-59124</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Deserialization of untrusted data in Microsoft High Performance Computing (HPC) Pack allows an unauthorized attacker to execute code over a network.
-
-Score: 9.8 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-59125 [CVSS:3.1 7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-59125</link>
-            <guid isPermaLink="false">CVE-2026-59125</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Use after free in Virtual Hard Disk (VHD) Miniport Driver allows an authorized attacker to elevate privileges locally.
-
-Score: 7 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-59126 [CVSS:3.1 7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-59126</link>
-            <guid isPermaLink="false">CVE-2026-59126</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Concurrent execution using shared resource with improper synchronization ('race condition') in Windows Event Logging Service allows an authorized attacker to elevate privileges locally.
-
-Score: 7 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-59127 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-59127</link>
-            <guid isPermaLink="false">CVE-2026-59127</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Integer overflow or wraparound in Windows Installer allows an authorized attacker to elevate privileges locally.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-59128 [CVSS:3.1 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-59128</link>
-            <guid isPermaLink="false">CVE-2026-59128</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Out-of-bounds read in Windows Encrypting File System (EFS) allows an authorized attacker to disclose information locally.
-
-Score: 5.5 (MEDIUM)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-59130 [CVSS:3.1 5.6 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-59130</link>
-            <guid isPermaLink="false">CVE-2026-59130</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[No cwe for this issue in AMD Zen allows an authorized attacker to disclose information locally.
-
-Score: 5.6 (MEDIUM)
-Vector: CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:C/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-59131 [CVSS:3.1 5.6 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-59131</link>
-            <guid isPermaLink="false">CVE-2026-59131</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[No cwe for this issue in AMD Zen allows an authorized attacker to disclose information locally.
-
-Score: 5.6 (MEDIUM)
-Vector: CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:C/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-59132 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-59132</link>
-            <guid isPermaLink="false">CVE-2026-59132</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Null pointer dereference in Windows TCP/IP allows an unauthorized attacker to deny service over a network.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-59133 [CVSS:3.1 8.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-59133</link>
-            <guid isPermaLink="false">CVE-2026-59133</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Execution with unnecessary privileges in Microsoft High Performance Computing (HPC) Pack allows an authorized attacker to elevate privileges over a network.
+            <title><![CDATA[CVE-2026-64901 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64901</link>
+            <guid isPermaLink="false">CVE-2026-64901</guid>
+            <pubDate>Tue, 11 Aug 2026 20:54:56 GMT</pubDate>
+            <description><![CDATA[Deserialization of untrusted data in Microsoft Office SharePoint allows an authorized attacker to execute code over a network.
 
 Score: 8.8 (HIGH)
 Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-59134 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-59134</link>
-            <guid isPermaLink="false">CVE-2026-59134</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Heap-based buffer overflow in Remote Desktop Client allows an unauthorized attacker to execute code over a network.
+            <title><![CDATA[CVE-2026-64902 [CVSS:3.1 5.4 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64902</link>
+            <guid isPermaLink="false">CVE-2026-64902</guid>
+            <pubDate>Tue, 11 Aug 2026 20:54:29 GMT</pubDate>
+            <description><![CDATA[Improper neutralization of input during web page generation ('cross-site scripting') in Microsoft Office SharePoint allows an authorized attacker to perform spoofing over a network.
+
+Score: 5.4 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:R/S:C/C:L/I:L/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-62827 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62827</link>
+            <guid isPermaLink="false">CVE-2026-62827</guid>
+            <pubDate>Tue, 11 Aug 2026 20:53:07 GMT</pubDate>
+            <description><![CDATA[Improper authentication in Microsoft Office SharePoint allows an authorized attacker to elevate privileges over a network.
+
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-62829 [CVSS:3.1 5.4 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62829</link>
+            <guid isPermaLink="false">CVE-2026-62829</guid>
+            <pubDate>Tue, 11 Aug 2026 20:52:38 GMT</pubDate>
+            <description><![CDATA[Improper neutralization of input during web page generation ('cross-site scripting') in Microsoft Office SharePoint allows an authorized attacker to perform spoofing over a network.
+
+Score: 5.4 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:R/S:C/C:L/I:L/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-62837 [CVSS:3.1 6.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62837</link>
+            <guid isPermaLink="false">CVE-2026-62837</guid>
+            <pubDate>Tue, 11 Aug 2026 20:51:46 GMT</pubDate>
+            <description><![CDATA[Relative path traversal in Microsoft Office SharePoint allows an authorized attacker to disclose information over a network.
+
+Score: 6.5 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-62839 [CVSS:3.1 6.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62839</link>
+            <guid isPermaLink="false">CVE-2026-62839</guid>
+            <pubDate>Tue, 11 Aug 2026 20:50:08 GMT</pubDate>
+            <description><![CDATA[Insufficiently protected credentials in Microsoft Office SharePoint allows an authorized attacker to perform spoofing over a network.
+
+Score: 6.5 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-19142 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19142</link>
+            <guid isPermaLink="false">CVE-2026-19142</guid>
+            <pubDate>Tue, 11 Aug 2026 20:47:11 GMT</pubDate>
+            <description><![CDATA[Use after free in Views in Google Chrome prior to 151.0.7922.109 allowed a remote attacker who convinced a user to engage in specific UI gestures to potentially exploit heap corruption via a crafted HTML page. (Chromium security severity: High)
 
 Score: 7.5 (HIGH)
 Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-59135 [CVSS:3.1 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-59135</link>
-            <guid isPermaLink="false">CVE-2026-59135</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Weak authentication in Microsoft Windows Search Component allows an authorized attacker to disclose information locally.
+            <title><![CDATA[CVE-2026-19144 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19144</link>
+            <guid isPermaLink="false">CVE-2026-19144</guid>
+            <pubDate>Tue, 11 Aug 2026 20:46:51 GMT</pubDate>
+            <description><![CDATA[Use after free in HTML in Google Chrome prior to 151.0.7922.109 allowed a remote attacker to potentially exploit heap corruption via a crafted HTML page. (Chromium security severity: High)
 
-Score: 5.5 (MEDIUM)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N]]></description>
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-59136 [CVSS:3.1 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-59136</link>
-            <guid isPermaLink="false">CVE-2026-59136</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Use of uninitialized resource in Microsoft COM for Windows allows an authorized attacker to disclose information locally.
+            <title><![CDATA[CVE-2026-19147 [CVSS:3.1 8.3 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19147</link>
+            <guid isPermaLink="false">CVE-2026-19147</guid>
+            <pubDate>Tue, 11 Aug 2026 20:46:30 GMT</pubDate>
+            <description><![CDATA[Use after free in Aura in Google Chrome on Linux prior to 151.0.7922.109 allowed a remote attacker who had compromised the renderer process to potentially perform a sandbox escape via a crafted HTML page. (Chromium security severity: High)
 
-Score: 5.5 (MEDIUM)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N]]></description>
+Score: 8.3 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:C/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-59137 [CVSS:3.1 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-59137</link>
-            <guid isPermaLink="false">CVE-2026-59137</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Use of uninitialized resource in Windows Event Logging Service allows an authorized attacker to disclose information locally.
+            <title><![CDATA[CVE-2026-73283 [CVSS:3.1 2.5 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-73283</link>
+            <guid isPermaLink="false">CVE-2026-73283</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:49 GMT</pubDate>
+            <description><![CDATA[In sshd in OpenSSH before 10.5, the restrict keyword (in authorized_keys) was supposed to be applicable to tunnel forwarding but was not.
 
-Score: 5.5 (MEDIUM)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N]]></description>
+Score: 2.5 (LOW)
+Vector: CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:N/I:L/A:N]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-59138 [CVSS:3.1 6.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-59138</link>
-            <guid isPermaLink="false">CVE-2026-59138</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Null pointer dereference in Microsoft Remote Registry Service allows an authorized attacker to deny service over a network.
+            <title><![CDATA[CVE-2026-73282 [CVSS:3.1 4.8 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-73282</link>
+            <guid isPermaLink="false">CVE-2026-73282</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:49 GMT</pubDate>
+            <description><![CDATA[In ssh in OpenSSH before 10.5, a use-after-free for realloc data can occur if a certain pair of remote-forwarding operations are concurrent.
+
+Score: 4.8 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-73281 [CVSS:3.1 3.5 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-73281</link>
+            <guid isPermaLink="false">CVE-2026-73281</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:49 GMT</pubDate>
+            <description><![CDATA[In ssh-agent in OpenSSH before 10.5, some operations can occur remotely but were intended to occur only locally, including operations that add tokens or use keys. This is caused by misinteraction between agent locking and the session-bind@openssh.com extension.
+
+Score: 3.5 (LOW)
+Vector: CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:C/C:N/I:L/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-73244 [CVSS:3.1 5.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-73244</link>
+            <guid isPermaLink="false">CVE-2026-73244</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:49 GMT</pubDate>
+            <description><![CDATA[kkFileView is a universal file online preview project based on Spring Boot. Prior to 5.0.1, the unauthenticated POST /listFiles endpoint in server/src/main/java/cn/keking/web/controller/FileController.java passes the user-controlled path parameter from FileController#getFiles to Files.newDirectoryStream without confinement to the demo directory, allowing directory enumeration outside the intended root. This issue is fixed in version 5.0.1.
+
+Score: 5.3 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-73243 [CVSS:3.1 5.8 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-73243</link>
+            <guid isPermaLink="false">CVE-2026-73243</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:49 GMT</pubDate>
+            <description><![CDATA[kkFileView is a universal file online preview project based on Spring Boot. Prior to 5.0.1, the unauthenticated GET /addTask endpoint in kkFileView is omitted from TrustHostFilter and TrustDirFilter in server/src/main/java/cn/keking/config/WebConfig.java, allowing FileConvertQueueTask to fetch an attacker-selected URL after FileHandlerService#getFileAttribute uses the fullfilename parameter to force an OFFICE, COMPRESS, or CAD type. This issue is fixed in version 5.0.1.
+
+Score: 5.8 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:L/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-73242 [CVSS:4.0 8.3 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-73242</link>
+            <guid isPermaLink="false">CVE-2026-73242</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:49 GMT</pubDate>
+            <description><![CDATA[FreeRDP is a free implementation of the Remote Desktop Protocol. Prior to 3.30.0, FreeRDP's winpr/libwinpr/sspi/Kerberos/kerberos.c kerberos_DecryptMessage function fails to bound the peer-controlled GSS Wrap-token EC field before using it with RRC in IOV pointer offsets, allowing a malicious RDP peer to trigger out-of-bounds reads and in-place writes during CredSSP/NLA Kerberos decryption. This issue is fixed in version 3.30.0.
+
+Score: 8.3 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:H/AT:P/PR:N/UI:N/VC:L/VI:L/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-73241 [CVSS:4.0 8.3 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-73241</link>
+            <guid isPermaLink="false">CVE-2026-73241</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:49 GMT</pubDate>
+            <description><![CDATA[FreeRDP is a free implementation of the Remote Desktop Protocol. Prior to 3.30.0, FreeRDP server-side RDSTLS in libfreerdp/core/rdstls.c accepts an attacker-supplied RDSTLS_TYPE_CAPABILITIES PDU while rdstls_server_authenticate is waiting for RDSTLS_TYPE_AUTHREQ, leaving resultCode at RDSTLS_RESULT_SUCCESS and allowing a remote unauthenticated client to bypass the RedirectionGuid, username, domain, or password checks. This issue is fixed in version 3.30.0.
+
+Score: 8.3 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:H/VI:L/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-73235 [CVSS:3.1 6.1 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-73235</link>
+            <guid isPermaLink="false">CVE-2026-73235</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:48 GMT</pubDate>
+            <description><![CDATA[FreeCAD is a free and open-source multiplatform 3D parametric modeler. Prior to 1.1.2, the Xerces SAX2 XMLReader constructed in src/Base/Reader.cpp by Base::XMLReader::XMLReader() parses attacker-controlled Document.xml from a crafted .FCStd archive without disabling default external entity resolution or external DTD loading. When Document::restore() opens the document, external entities can read local files through the file URI scheme or initiate server-side requests through the http URI scheme, and resolved content can flow through the characters() callback. This issue is fixed in version 1.1.2.
+
+Score: 6.1 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:L/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-73234 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-73234</link>
+            <guid isPermaLink="false">CVE-2026-73234</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:48 GMT</pubDate>
+            <description><![CDATA[FreeCAD is a free and open-source multiplatform 3D parametric modeler. Prior to 1.1.2, PropertyFileIncluded::Restore() in src/App/PropertyFile.cpp concatenates an attacker-controlled file or data attribute from Document.xml with the document transient path without rejecting directory components, absolute paths, or parent traversal. A crafted .FCStd archive with a matching FileIncluded XML attribute and ZIP entry can therefore write attacker-controlled content to arbitrary locations accessible to the FreeCAD user, potentially enabling persistence, credential compromise, configuration replacement, or code execution. This issue is fixed in version 1.1.2.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-73233 [CVSS:4.0 8.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-73233</link>
+            <guid isPermaLink="false">CVE-2026-73233</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:48 GMT</pubDate>
+            <description><![CDATA[FreeCAD is a free and open-source multiplatform 3D parametric modeler. Prior to 1.1.2, the FEM Displacement Constraint task dialog in src/Mod/Fem/Gui/TaskFemConstraintDisplacement.cpp passes the xDisplacementFormula, yDisplacementFormula, and zDisplacementFormula fields of a Fem::ConstraintDisplacement object through TaskDlgFemConstraintDisplacement::accept() into Gui::Command::doCommand. The escaping helper neutralizes quotation marks but not backslashes, allowing crafted formula text to terminate the generated Python string and execute arbitrary Python code with the FreeCAD process's privileges when a victim accepts the dialog. This issue is fixed in version 1.1.2.
+
+Score: 8.5 (HIGH)
+Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:N/UI:P/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-73232 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-73232</link>
+            <guid isPermaLink="false">CVE-2026-73232</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:48 GMT</pubDate>
+            <description><![CDATA[ffuf is a fast web fuzzer written in Go. Prior to 2.2.0, ffuf allows a malicious target server to cause an out-of-memory denial of service because the response size guard in pkg/runner/simple.go checks only the compressed Content-Length while io.ReadAll reads gzip, brotli, deflate, transparently decompressed, or chunked response bodies without a decompressed-size bound. This issue is fixed in version 2.2.0.
+
+Score: 7.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-73231 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-73231</link>
+            <guid isPermaLink="false">CVE-2026-73231</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:48 GMT</pubDate>
+            <description><![CDATA[Faker generates massive amounts of fake data in the browser and Node.js. Prior to 10.5.0, the faker.helpers.fake method in src/modules/helpers/eval.ts allows attacker-controlled fake templates to access the Function constructor through fakeEval.resolveProperty when a function returns another function, enabling arbitrary JavaScript code execution. This issue is fixed in version 10.5.0.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-73230 [CVSS:4.0 5.9 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-73230</link>
+            <guid isPermaLink="false">CVE-2026-73230</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:48 GMT</pubDate>
+            <description><![CDATA[Ente provides end-to-end encrypted cloud services and security tools. Prior to 2026.07.28, Ente 2of3 card format version 1 stored the secret byte length and 32-bit FNV-1a checksum in cleartext on every card, allowing someone with one card to test candidate secrets offline and recover low-entropy or predictable secrets. This issue is fixed in version 2026.07.28.
+
+Score: 5.9 (MEDIUM)
+Vector: CVSS:4.0/AV:L/AC:H/AT:N/PR:N/UI:N/VC:H/VI:N/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-73229 [CVSS:3.1 4.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-73229</link>
+            <guid isPermaLink="false">CVE-2026-73229</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:48 GMT</pubDate>
+            <description><![CDATA[Django REST framework is a powerful and flexible toolkit for building Web APIs. Prior to 3.17.2, Django REST Framework's rest_framework/renderers.py AdminRenderer.render() uses override_method() to simulate GET and directly invokes view.get() without view.check_permissions() while rendering an invalid write request, allowing a 400 Bad Request HTML response to disclose data from a GET representation that the requester is not permitted to access. This issue is fixed in version 3.17.2.
+
+Score: 4.3 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-73226 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-73226</link>
+            <guid isPermaLink="false">CVE-2026-73226</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:48 GMT</pubDate>
+            <description><![CDATA[electerm is an open-sourced terminal/ssh/sftp/telnet/serialport/RDP/VNC/Spice/ftp client. Prior to 3.15.186, electerm allows an authenticated WebSocket client to invoke unintended internal functions through client-controlled func values in upgrade-func in src/app/server/dispatch-center.js and handleFs in src/app/server/fs.js, exposing Upgrade and fsExport methods that can execute commands, open files, mutate the filesystem, or terminate the process. This issue is fixed in version 3.15.186.
+
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-73225 [CVSS:3.1 8.1 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-73225</link>
+            <guid isPermaLink="false">CVE-2026-73225</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:47 GMT</pubDate>
+            <description><![CDATA[electerm is an open-sourced terminal/ssh/sftp/telnet/serialport/RDP/VNC/Spice/ftp client. Prior to 3.15.120, electerm allows a malicious FTP or SFTP server to write attacker-controlled content outside the selected download directory because recursive transfers in src/client/components/file-transfer/transfer.jsx pass server-supplied file.name and folder.name values to resolve without sanitization. This issue is fixed in version 3.15.120.
+
+Score: 8.1 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-73221 [CVSS:4.0 5.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-73221</link>
+            <guid isPermaLink="false">CVE-2026-73221</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:47 GMT</pubDate>
+            <description><![CDATA[CVAT is an open source interactive video and image annotation tool for computer vision. From 2.17.0 until 2.72.0, a user with the Worker role can use predictable task-based request IDs with the lambda request retrieve and destroy endpoints to view automatic annotation requests for tasks or jobs the user cannot access and cancel requests initiated by other users. This issue is fixed in version 2.72.0.
+
+Score: 5.3 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:L/VI:L/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-73217 [CVSS:4.0 7.7 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-73217</link>
+            <guid isPermaLink="false">CVE-2026-73217</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:47 GMT</pubDate>
+            <description><![CDATA[Cursor is a code editor built for programming with AI. Prior to 3.1.2, Cursor IDE for macOS allows an agent running in Auto-Run Sandbox mode to replace a virtual environment's Python executable with a malicious wrapper that the Microsoft Python extension invokes outside the sandbox, allowing arbitrary host commands with the user's privileges, including modifying files outside the workspace and launching applications. This issue is fixed in version 3.1.2.
+
+Score: 7.7 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:P/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-73216 [CVSS:3.1 6.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-73216</link>
+            <guid isPermaLink="false">CVE-2026-73216</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:47 GMT</pubDate>
+            <description><![CDATA[Coturn is a free open source implementation of TURN and STUN Server. Prior to 4.17.0, shutdown_client_connection() in src/server/ns_turn_server.c prematurely calls dec_quota() and releases bandwidth accounting during the first-stage close of a mobility-enabled allocation while preserving the allocation, relay socket, session, and mobility ticket, allowing an authenticated client to bypass --user-quota and --total-quota and exhaust relay ports. This issue is fixed in version 4.17.0.
 
 Score: 6.5 (MEDIUM)
 Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-61345 [CVSS:3.1 6.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61345</link>
-            <guid isPermaLink="false">CVE-2026-61345</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Null pointer dereference in Microsoft Remote Registry Service allows an authorized attacker to deny service over a network.
+            <title><![CDATA[CVE-2026-73211 [CVSS:3.1 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-73211</link>
+            <guid isPermaLink="false">CVE-2026-73211</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:47 GMT</pubDate>
+            <description><![CDATA[PeerTube is an ActivityPub-federated video streaming platform. Prior to 8.1.6, ActorFollowModel.updateScore() interpolates the attacker-controlled ActivityPub actor inboxUrl into an SQL query, allowing an unauthenticated remote server to read and write PeerTube database tables, including oAuthToken.accessToken, and take over administrator accounts. This issue is fixed in version 8.1.6.
 
-Score: 6.5 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+Score: 9.8 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-61346 [CVSS:3.1 7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61346</link>
-            <guid isPermaLink="false">CVE-2026-61346</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Use after free in Windows Graphics Kernel allows an authorized attacker to elevate privileges locally.
+            <title><![CDATA[CVE-2026-73087 [CVSS:4.0 2.3 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-73087</link>
+            <guid isPermaLink="false">CVE-2026-73087</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:47 GMT</pubDate>
+            <description><![CDATA[Dozzle is a realtime log viewer for docker containers. From 10.5.2 until 10.6.15, the isBlockedIP SSRF guard in internal/notification/dispatcher/webhook.go, used by safeDialContext for webhook notification URLs, does not inspect IPv4 addresses embedded in 6to4, NAT64, Teredo, or IPv4-compatible IPv6 addresses, allowing an authenticated user to reach loopback or link-local targets that the guard intends to block. This issue is fixed in version 10.6.15.
 
-Score: 7 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+Score: 2.3 (LOW)
+Vector: CVSS:4.0/AV:N/AC:L/AT:P/PR:L/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-61347 [CVSS:3.1 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61347</link>
-            <guid isPermaLink="false">CVE-2026-61347</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Buffer over-read in Windows Event Logging Service allows an authorized attacker to disclose information locally.
+            <title><![CDATA[CVE-2026-73036 [CVSS:4.0 4.6 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-73036</link>
+            <guid isPermaLink="false">CVE-2026-73036</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:46 GMT</pubDate>
+            <description><![CDATA[Bash-it 3.2.0 contains a terminal escape sequence injection vulnerability in the barbuk theme's Python virtualenv prompt segment that allows local attackers to inject arbitrary terminal control sequences by embedding escape sequences in the requires-python field of a pyproject.toml file. When a user navigates into a directory containing a maliciously crafted pyproject.toml, the unfiltered field value is read via awk and concatenated directly into PS1 through __prompt-command without stripping control characters, causing injected OSC or CSI sequences to be written to and interpreted by the terminal emulator on every prompt render.
+
+Score: 4.6 (MEDIUM)
+Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:N/UI:A/VC:L/VI:L/VA:N/SC:L/SI:L/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-73034 [CVSS:4.0 9.3 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-73034</link>
+            <guid isPermaLink="false">CVE-2026-73034</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:46 GMT</pubDate>
+            <description><![CDATA[DB-GPT v0.8.1 contains an unauthenticated path traversal vulnerability that allows remote attackers to write arbitrary files to any location on the server by injecting directory traversal sequences into the user_id HTTP header of the Python file-upload endpoint. Attackers can send a crafted multipart upload request with a traversal-poisoned user_id header to escape the intended upload directory and write attacker-controlled content to locations such as Python startup hooks, cron directories, or agent scripts, resulting in remote code execution.
+
+Score: 9.3 (CRITICAL)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-73032 [CVSS:4.0 9.4 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-73032</link>
+            <guid isPermaLink="false">CVE-2026-73032</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:46 GMT</pubDate>
+            <description><![CDATA[PapersGPT for Zotero 0.6.1 contains a remote code execution vulnerability that allows attackers to execute arbitrary JavaScript by returning malicious code from an LLM endpoint that is passed unsanitized to window.eval() in views.ts. Attackers can exploit this through prompt injection in PDFs, MITM interception of API requests, or a malicious custom LLM endpoint to execute arbitrary code in Zotero's chrome-privileged context, enabling file read/write, process execution, and access to all Zotero data.
+
+Score: 9.4 (CRITICAL)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:A/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-73031 [CVSS:4.0 8.2 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-73031</link>
+            <guid isPermaLink="false">CVE-2026-73031</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:46 GMT</pubDate>
+            <description><![CDATA[telegram-search contains a stored cross-site scripting vulnerability that allows remote attackers to execute arbitrary JavaScript in victims' browsers by sending crafted messages containing unsanitized HTML to a shared Telegram group. The highlightKeyword function in MessageList.vue passes raw message content directly to v-html without HTML escaping or sanitization, enabling stored, cross-user, zero-click execution of injected payloads such as image onerror handlers when victims browse or search messages.
+
+Score: 8.2 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:A/VC:H/VI:N/VA:N/SC:H/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-72971 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72971</link>
+            <guid isPermaLink="false">CVE-2026-72971</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:46 GMT</pubDate>
+            <description><![CDATA[Improper link resolution before file access ('link following') in Windows Container Isolation FS Filter Driver (unionfs.sys) allows an authorized attacker to perform tampering locally.
 
 Score: 5.5 (MEDIUM)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N]]></description>
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:H/A:N]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-61348 [CVSS:3.1 7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61348</link>
-            <guid isPermaLink="false">CVE-2026-61348</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
+            <title><![CDATA[CVE-2026-72898 [CVSS:4.0 10 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72898</link>
+            <guid isPermaLink="false">CVE-2026-72898</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:45 GMT</pubDate>
+            <description><![CDATA[Metabase allows a remote, unauthenticated attacker to inject arbitrary SQL via the '/reset_password' database endpoint and gain administrator access to the connected Metabase instance.
+
+Score: 10 (CRITICAL)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-71845 [CVSS:3.1 6.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-71845</link>
+            <guid isPermaLink="false">CVE-2026-71845</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:45 GMT</pubDate>
+            <description><![CDATA[A flaw was found in insights-client. The setDefault() function logs the value of every environment variable it processes, including CCX_TOKEN, a bearer credential used in disconnected cluster deployments. When glog verbosity is set to level 2 or higher, the token is written in clear text to the pod log on every startup. An attacker with access to pod logs or centralized logging could obtain the credential, leading to unauthorized access to the CCX API.
+
+Score: 6.3 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:C/C:H/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-71475 [CVSS:3.1 5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-71475</link>
+            <guid isPermaLink="false">CVE-2026-71475</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:45 GMT</pubDate>
+            <description><![CDATA[A flaw was found in insights-client. A compromised managed cluster, referred to as a 'spoke', can inject unencoded data into the Insights API URL path. This occurs because the ClusterID, which is controlled by the spoke, is used directly in the request path without proper validation or URL encoding. This vulnerability allows a malicious spoke to redirect authenticated requests to unintended API endpoints, potentially leading to information disclosure or unauthorized access.
+
+Score: 5 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:L/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-71474 [CVSS:3.1 6.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-71474</link>
+            <guid isPermaLink="false">CVE-2026-71474</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:45 GMT</pubDate>
+            <description><![CDATA[A flaw was found in insights-client. When the application receives a non-200 response, it logs the request headers, which can include the cloud.openshift.com pull-secret token. A local user with access to pod logs on the hub could read this long-lived credential. This information disclosure could grant unauthorized access to Red Hat cloud services.
+
+Score: 6.3 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:C/C:H/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-71468 [CVSS:3.1 5.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-71468</link>
+            <guid isPermaLink="false">CVE-2026-71468</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:45 GMT</pubDate>
+            <description><![CDATA[A flaw was found in acm-search-v2-api-rhel9. When the `getFederationConfig` function refreshes its cache, it improperly reuses a user's bearer token for all subsequent federated requests until the cache expires. This allows other authenticated users to gain unauthorized access to remote managed hub search results, leading to information disclosure.
+
+Score: 5.3 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:H/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-71467 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-71467</link>
+            <guid isPermaLink="false">CVE-2026-71467</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:45 GMT</pubDate>
+            <description><![CDATA[A flaw was found in search-v2-api. The authentication middleware in the affected component unconditionally skips authentication when a request includes an `Upgrade: websocket` header. An unauthenticated attacker can exploit this by sending a specially crafted HTTP POST request to the `/federated` endpoint with the `Upgrade: websocket` header. This allows the attacker to bypass authentication and access federated search results across all configured remote managed hubs, leading to information disclosure.
+
+Score: 7.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-70347 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-70347</link>
+            <guid isPermaLink="false">CVE-2026-70347</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:44 GMT</pubDate>
+            <description><![CDATA[Heap-based buffer overflow in Windows Installer allows an authorized attacker to elevate privileges locally.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-70339 [CVSS:3.1 5.4 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-70339</link>
+            <guid isPermaLink="false">CVE-2026-70339</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:44 GMT</pubDate>
+            <description><![CDATA[Access of resource using incompatible type ('type confusion') in Microsoft Edge (Chromium-based) allows an unauthorized attacker to execute code over a network.
+
+Score: 5.4 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:L/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-70329 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-70329</link>
+            <guid isPermaLink="false">CVE-2026-70329</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:43 GMT</pubDate>
+            <description><![CDATA[Integer overflow or wraparound in Microsoft Office Outlook allows an unauthorized attacker to execute code over a network.
+
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-70324 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-70324</link>
+            <guid isPermaLink="false">CVE-2026-70324</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:43 GMT</pubDate>
+            <description><![CDATA[Server-side request forgery (ssrf) in Microsoft Office SharePoint allows an authorized attacker to elevate privileges over a network.
+
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-70319 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-70319</link>
+            <guid isPermaLink="false">CVE-2026-70319</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:42 GMT</pubDate>
+            <description><![CDATA[Improper input validation in Microsoft Office Word allows an unauthorized attacker to disclose information locally.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-70314 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-70314</link>
+            <guid isPermaLink="false">CVE-2026-70314</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:42 GMT</pubDate>
+            <description><![CDATA[Improper input validation in Microsoft Office allows an unauthorized attacker to disclose information locally.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-70307 [CVSS:3.1 7 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-70307</link>
+            <guid isPermaLink="false">CVE-2026-70307</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:42 GMT</pubDate>
             <description><![CDATA[Use after free in Windows Ancillary Function Driver for WinSock allows an authorized attacker to elevate privileges locally.
 
 Score: 7 (HIGH)
 Vector: CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-61349 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61349</link>
-            <guid isPermaLink="false">CVE-2026-61349</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Use after free in Windows Work Folder Service allows an authorized attacker to elevate privileges locally.
+            <title><![CDATA[CVE-2026-69306 [CVSS:3.1 8.2 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-69306</link>
+            <guid isPermaLink="false">CVE-2026-69306</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:41 GMT</pubDate>
+            <description><![CDATA[Not failing securely ('failing open') in Visual Studio Code allows an unauthorized attacker to bypass a security feature over a network.
+
+Score: 8.2 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:H/I:L/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-69119 [CVSS:4.0 7.2 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-69119</link>
+            <guid isPermaLink="false">CVE-2026-69119</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:41 GMT</pubDate>
+            <description><![CDATA[Taubyte Tau v1.1.10 contains a missing authorization vulnerability in the services/auth HTTP service that allows any authenticated user to read or permanently delete another tenant's project by supplying an arbitrary project ID to the GET and DELETE /projects/{id} endpoints. The GitHubTokenHTTPAuth middleware only validates that a caller presents a valid GitHub OAuth token without verifying ownership or access rights to the target project, enabling attackers with any valid GitHub token to invoke bare KV-store operations such as projects.Fetch and project.Delete against any project ID to achieve cross-tenant project takeover.
+
+Score: 7.2 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:L/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-69115 [CVSS:4.0 7.1 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-69115</link>
+            <guid isPermaLink="false">CVE-2026-69115</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:41 GMT</pubDate>
+            <description><![CDATA[OpenIM Server v3.8.3 contains a missing authorization vulnerability that allows any authenticated user to access admin-only management API endpoints by submitting POST requests with a regular user bearer token to /user/get_users, /user/get_all_users_uid, and /group/get_groups. Attackers can exploit the absent authverify.CheckAdmin() call in the GetPaginationUsers, GetAllUserID, and GetGroups handlers to enumerate all platform user accounts including userIDs, nicknames, and manager level flags, as well as all groups including private groups the user has never joined, exposing group names, owner IDs, and member counts.
+
+Score: 7.1 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:N/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-68820 [CVSS:3.1 7 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-68820</link>
+            <guid isPermaLink="false">CVE-2026-68820</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:40 GMT</pubDate>
+            <description><![CDATA[Use after free in Windows Ancillary Function Driver for WinSock allows an authorized attacker to elevate privileges locally.
+
+Score: 7 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-68807 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-68807</link>
+            <guid isPermaLink="false">CVE-2026-68807</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:40 GMT</pubDate>
+            <description><![CDATA[Heap-based buffer overflow in Microsoft Office Excel allows an unauthorized attacker to execute code locally.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-68802 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-68802</link>
+            <guid isPermaLink="false">CVE-2026-68802</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:39 GMT</pubDate>
+            <description><![CDATA[Out-of-bounds read in Microsoft Office Excel allows an unauthorized attacker to disclose information locally.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-68793 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-68793</link>
+            <guid isPermaLink="false">CVE-2026-68793</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:38 GMT</pubDate>
+            <description><![CDATA[Out-of-bounds read in Microsoft Office Excel allows an unauthorized attacker to execute code locally.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-66799 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-66799</link>
+            <guid isPermaLink="false">CVE-2026-66799</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:38 GMT</pubDate>
+            <description><![CDATA[Heap-based buffer overflow in Windows Key Guard allows an authorized attacker to elevate privileges locally.
 
 Score: 7.8 (HIGH)
 Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-61350 [CVSS:3.1 4.6 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61350</link>
-            <guid isPermaLink="false">CVE-2026-61350</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Buffer over-read in Windows NTFS allows an unauthorized attacker to disclose information with a physical attack.
+            <title><![CDATA[CVE-2026-66151 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-66151</link>
+            <guid isPermaLink="false">CVE-2026-66151</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:37 GMT</pubDate>
+            <description><![CDATA[SonicWall Global VPN Client version 4.10.8.1108 and earlier is vulnerable to an out-of-bounds kernel memory read in the SWIPsec.sys driver, which could allow a local attacker to cause a system crash.
 
-Score: 4.6 (MEDIUM)
-Vector: CVSS:3.1/AV:P/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N]]></description>
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-61352 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61352</link>
-            <guid isPermaLink="false">CVE-2026-61352</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Concurrent execution using shared resource with improper synchronization ('race condition') in Remote Desktop Client allows an unauthorized attacker to execute code over a network.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
+            <title><![CDATA[CVE-2026-66146]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-66146</link>
+            <guid isPermaLink="false">CVE-2026-66146</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:37 GMT</pubDate>
+            <description><![CDATA[Multiple Cross-Site Scripting (XSS) vulnerabilities were identified in GMS 9.5.1 (Build 9510.1044) and earlier versions that allow a remote attacker to execute javascript script in a user's browser.]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-61353 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61353</link>
-            <guid isPermaLink="false">CVE-2026-61353</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Heap-based buffer overflow in Windows Telephony Service allows an authorized attacker to elevate privileges locally.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+            <title><![CDATA[CVE-2026-66145]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-66145</link>
+            <guid isPermaLink="false">CVE-2026-66145</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:37 GMT</pubDate>
+            <description><![CDATA[An unauthenticated remote code execution vulnerability was identified in GMS 9.5.1 (Build 9510.1044) and earlier versions which allows remote attacker to read sensitive data and perform arbitrary file write via zipslip.]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-61355 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61355</link>
-            <guid isPermaLink="false">CVE-2026-61355</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Heap-based buffer overflow in Windows Sensor Data Service allows an authorized attacker to elevate privileges locally.
+            <title><![CDATA[CVE-2026-65811 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-65811</link>
+            <guid isPermaLink="false">CVE-2026-65811</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:37 GMT</pubDate>
+            <description><![CDATA[Improper input validation in Power BI allows an authorized attacker to execute code over a network.
 
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-61356 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61356</link>
-            <guid isPermaLink="false">CVE-2026-61356</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Missing authentication for critical function in Windows Remote Desktop Services allows an authorized attacker to elevate privileges locally.
+            <title><![CDATA[CVE-2026-65786 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-65786</link>
+            <guid isPermaLink="false">CVE-2026-65786</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:35 GMT</pubDate>
+            <description><![CDATA[Heap-based buffer overflow in Desktop Window Manager allows an authorized attacker to elevate privileges locally.
 
 Score: 7.8 (HIGH)
 Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-61357 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61357</link>
-            <guid isPermaLink="false">CVE-2026-61357</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Use after free in Application Information Services allows an authorized attacker to elevate privileges locally.
+            <title><![CDATA[CVE-2026-65673 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-65673</link>
+            <guid isPermaLink="false">CVE-2026-65673</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:33 GMT</pubDate>
+            <description><![CDATA[Entra Connect Elevation of Privilege Vulnerability
 
 Score: 7.8 (HIGH)
 Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-61358 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61358</link>
-            <guid isPermaLink="false">CVE-2026-61358</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Improper link resolution before file access ('link following') in Windows Accessibility Infrastructure (ATBroker.exe) allows an authorized attacker to elevate privileges locally.
+            <title><![CDATA[CVE-2026-65663 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-65663</link>
+            <guid isPermaLink="false">CVE-2026-65663</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:32 GMT</pubDate>
+            <description><![CDATA[Deserialization of untrusted data in Microsoft Office SharePoint allows an authorized attacker to execute code over a network.
+
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-65657 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-65657</link>
+            <guid isPermaLink="false">CVE-2026-65657</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:31 GMT</pubDate>
+            <description><![CDATA[Use after free in Microsoft Office allows an unauthorized attacker to execute code locally.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-65655 [CVSS:4.0 2.3 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-65655</link>
+            <guid isPermaLink="false">CVE-2026-65655</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:31 GMT</pubDate>
+            <description><![CDATA[When OAuth authentication is enabled and browser-facing TLS terminates at a reverse proxy that forwards the callback to Temporal UI Server over HTTP, affected versions derive authentication-cookie Secure attributes from the proxy-to-server connection. Temporal UI Server can therefore issue access-token cookies, and refresh-token cookies when provided by the identity provider, without Secure even though the browser completed login over HTTPS.
+
+
+
+A victim who visits attacker-controlled content while a credential remains live may expose that credential only if the attacker can also steer traffic for the UI hostname, prevent the browser's HTTPS connection from succeeding, serve the hostname over HTTP, and read a later same-site plaintext request. A malicious website alone cannot read the cookie, and passive observation of a successful TLS connection is insufficient. Effective HSTS, a blocking HTTPS-only warning, or TLS re-encryption between the proxy and Temporal UI Server prevents the demonstrated disclosure path.
+
+
+
+A recovered credential may be replayed within the victim's assigned permissions. Refresh-token replay additionally depends on the identity provider's issuance, expiry, rotation, and reuse-detection behavior.
+
+Score: 2.3 (LOW)
+Vector: CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:P/VC:L/VI:L/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-63533 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-63533</link>
+            <guid isPermaLink="false">CVE-2026-63533</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:28 GMT</pubDate>
+            <description><![CDATA[Heap-based buffer overflow in Microsoft Office allows an unauthorized attacker to execute code locally.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-63529 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-63529</link>
+            <guid isPermaLink="false">CVE-2026-63529</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:28 GMT</pubDate>
+            <description><![CDATA[Out-of-bounds read in Microsoft Office allows an unauthorized attacker to disclose information locally.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-63528 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-63528</link>
+            <guid isPermaLink="false">CVE-2026-63528</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:27 GMT</pubDate>
+            <description><![CDATA[Out-of-bounds read in Microsoft Office Word allows an unauthorized attacker to disclose information locally.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-63524 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-63524</link>
+            <guid isPermaLink="false">CVE-2026-63524</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:27 GMT</pubDate>
+            <description><![CDATA[Out-of-bounds read in Microsoft Office allows an unauthorized attacker to disclose information locally.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-63518 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-63518</link>
+            <guid isPermaLink="false">CVE-2026-63518</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:26 GMT</pubDate>
+            <description><![CDATA[Heap-based buffer overflow in Microsoft Office Word allows an unauthorized attacker to execute code locally.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-63513 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-63513</link>
+            <guid isPermaLink="false">CVE-2026-63513</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:25 GMT</pubDate>
+            <description><![CDATA[Heap-based buffer overflow in Microsoft Office allows an unauthorized attacker to execute code locally.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-62913 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62913</link>
+            <guid isPermaLink="false">CVE-2026-62913</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:24 GMT</pubDate>
+            <description><![CDATA[Heap-based buffer overflow in Microsoft Exchange Server allows an authorized attacker to execute code over a network.
+
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-62908 [CVSS:3.1 7 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62908</link>
+            <guid isPermaLink="false">CVE-2026-62908</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:23 GMT</pubDate>
+            <description><![CDATA[Concurrent execution using shared resource with improper synchronization ('race condition') in Windows Backup Engine allows an authorized attacker to elevate privileges locally.
+
+Score: 7 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-62890 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62890</link>
+            <guid isPermaLink="false">CVE-2026-62890</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:22 GMT</pubDate>
+            <description><![CDATA[Heap-based buffer overflow in Windows GDI+ allows an authorized attacker to execute code locally.
 
 Score: 7.8 (HIGH)
 Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-61359 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61359</link>
-            <guid isPermaLink="false">CVE-2026-61359</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Heap-based buffer overflow in Windows Storage allows an authorized attacker to elevate privileges locally.
+            <title><![CDATA[CVE-2026-62885 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62885</link>
+            <guid isPermaLink="false">CVE-2026-62885</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:21 GMT</pubDate>
+            <description><![CDATA[Heap-based buffer overflow in Windows Win32K allows an authorized attacker to elevate privileges locally.
 
 Score: 7.8 (HIGH)
 Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-61360 [CVSS:3.1 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61360</link>
-            <guid isPermaLink="false">CVE-2026-61360</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Untrusted pointer dereference in Windows GDI allows an authorized attacker to disclose information locally.
+            <title><![CDATA[CVE-2026-62883 [CVSS:3.1 6.7 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62883</link>
+            <guid isPermaLink="false">CVE-2026-62883</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:21 GMT</pubDate>
+            <description><![CDATA[Numeric truncation error in Windows DNS allows an authorized attacker to elevate privileges locally.
+
+Score: 6.7 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-62878 [CVSS:3.1 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62878</link>
+            <guid isPermaLink="false">CVE-2026-62878</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:20 GMT</pubDate>
+            <description><![CDATA[Stack-based buffer overflow in Windows DNS allows an unauthorized attacker to execute code over a network.
+
+Score: 9.8 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-62842 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62842</link>
+            <guid isPermaLink="false">CVE-2026-62842</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:19 GMT</pubDate>
+            <description><![CDATA[Out-of-bounds read in Microsoft Office allows an unauthorized attacker to disclose information locally.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-62820 [CVSS:3.1 8.1 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62820</link>
+            <guid isPermaLink="false">CVE-2026-62820</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:17 GMT</pubDate>
+            <description><![CDATA[Concurrent execution using shared resource with improper synchronization ('race condition') in Windows DNS allows an unauthorized attacker to execute code over a network.
+
+Score: 8.1 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-62815 [CVSS:3.1 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62815</link>
+            <guid isPermaLink="false">CVE-2026-62815</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:16 GMT</pubDate>
+            <description><![CDATA[Use after free in Microsoft QUIC allows an unauthorized attacker to execute code over a network.
+
+Score: 9.8 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-62814 [CVSS:3.1 6.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62814</link>
+            <guid isPermaLink="false">CVE-2026-62814</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:16 GMT</pubDate>
+            <description><![CDATA[Integer underflow (wrap or wraparound) in Windows DHCP Server allows an unauthorized attacker to disclose information over an adjacent network.
+
+Score: 6.5 (MEDIUM)
+Vector: CVSS:3.1/AV:A/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-62803 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62803</link>
+            <guid isPermaLink="false">CVE-2026-62803</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:15 GMT</pubDate>
+            <description><![CDATA[Improper link resolution before file access ('link following') in Windows DHCP Server allows an authorized attacker to elevate privileges locally.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-62800 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62800</link>
+            <guid isPermaLink="false">CVE-2026-62800</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:14 GMT</pubDate>
+            <description><![CDATA[Heap-based buffer overflow in Windows SMB Server allows an authorized attacker to execute code over a network.
+
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-62796 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62796</link>
+            <guid isPermaLink="false">CVE-2026-62796</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:13 GMT</pubDate>
+            <description><![CDATA[Out-of-bounds read in Windows NTFS allows an authorized attacker to disclose information locally.
 
 Score: 5.5 (MEDIUM)
 Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-61361 [CVSS:3.1 7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61361</link>
-            <guid isPermaLink="false">CVE-2026-61361</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Use after free in Windows DHCP Client allows an authorized attacker to execute code locally.
-
-Score: 7 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-61363 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61363</link>
-            <guid isPermaLink="false">CVE-2026-61363</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Heap-based buffer overflow in Remote Desktop Client allows an unauthorized attacker to execute code over a network.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-61364 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61364</link>
-            <guid isPermaLink="false">CVE-2026-61364</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Missing authentication for critical function in Windows Remote Desktop Services allows an authorized attacker to elevate privileges locally.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-61365 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61365</link>
-            <guid isPermaLink="false">CVE-2026-61365</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Missing authentication for critical function in Windows Remote Desktop Services allows an authorized attacker to elevate privileges locally.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-61366 [CVSS:3.1 7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61366</link>
-            <guid isPermaLink="false">CVE-2026-61366</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Double free in Windows Network Connection Broker allows an authorized attacker to elevate privileges locally.
-
-Score: 7 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-61367 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61367</link>
-            <guid isPermaLink="false">CVE-2026-61367</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Missing authentication for critical function in Windows Remote Desktop Services allows an authorized attacker to elevate privileges locally.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-61368 [CVSS:3.1 5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61368</link>
-            <guid isPermaLink="false">CVE-2026-61368</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Heap-based buffer overflow in Windows Hyper-V allows an authorized attacker to disclose information locally.
-
-Score: 5 (MEDIUM)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:R/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-61918 [CVSS:3.1 6.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61918</link>
-            <guid isPermaLink="false">CVE-2026-61918</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Out-of-bounds read in Remote Desktop Client allows an unauthorized attacker to disclose information over a network.
-
-Score: 6.5 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-61920 [CVSS:3.1 6.6 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61920</link>
-            <guid isPermaLink="false">CVE-2026-61920</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Concurrent execution using shared resource with improper synchronization ('race condition') in Windows DNS allows an authorized attacker to execute code over a network.
-
-Score: 6.6 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:H/PR:H/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-61921 [CVSS:3.1 6.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61921</link>
-            <guid isPermaLink="false">CVE-2026-61921</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Out-of-bounds read in Remote Desktop Client allows an unauthorized attacker to disclose information over a network.
-
-Score: 6.5 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-61923 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61923</link>
-            <guid isPermaLink="false">CVE-2026-61923</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Heap-based buffer overflow in Windows Display Enhancement Service allows an authorized attacker to elevate privileges locally.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-61924 [CVSS:3.1 6.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61924</link>
-            <guid isPermaLink="false">CVE-2026-61924</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Out-of-bounds read in Remote Desktop Client allows an unauthorized attacker to disclose information over a network.
-
-Score: 6.5 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-61925 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61925</link>
-            <guid isPermaLink="false">CVE-2026-61925</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Incorrect authorization in Windows Installer allows an authorized attacker to elevate privileges locally.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-61926 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61926</link>
-            <guid isPermaLink="false">CVE-2026-61926</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Heap-based buffer overflow in Windows USB Driver allows an authorized attacker to elevate privileges locally.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-61927 [CVSS:3.1 7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61927</link>
-            <guid isPermaLink="false">CVE-2026-61927</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Use after free in Windows Bind Filter Driver allows an authorized attacker to elevate privileges locally.
-
-Score: 7 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-61928 [CVSS:3.1 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61928</link>
-            <guid isPermaLink="false">CVE-2026-61928</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Cleartext storage of sensitive information in Windows Hello allows an authorized attacker to perform tampering locally.
-
-Score: 5.5 (MEDIUM)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:H/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-61929 [CVSS:3.1 7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61929</link>
-            <guid isPermaLink="false">CVE-2026-61929</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
+            <title><![CDATA[CVE-2026-62788 [CVSS:3.1 7 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62788</link>
+            <guid isPermaLink="false">CVE-2026-62788</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:12 GMT</pubDate>
             <description><![CDATA[Use after free in Windows Kernel allows an authorized attacker to elevate privileges locally.
 
 Score: 7 (HIGH)
 Vector: CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-61930 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61930</link>
-            <guid isPermaLink="false">CVE-2026-61930</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Heap-based buffer overflow in Windows Kernel allows an authorized attacker to elevate privileges locally.
+            <title><![CDATA[CVE-2026-62784 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62784</link>
+            <guid isPermaLink="false">CVE-2026-62784</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:11 GMT</pubDate>
+            <description><![CDATA[Heap-based buffer overflow in Microsoft Local Security Authority Server (lsasrv) allows an authorized attacker to execute code over a network.
+
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-62782 [CVSS:3.1 6.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62782</link>
+            <guid isPermaLink="false">CVE-2026-62782</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:11 GMT</pubDate>
+            <description><![CDATA[Out-of-bounds read in Windows SMB Client allows an unauthorized attacker to disclose information over a network.
+
+Score: 6.5 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-62779 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62779</link>
+            <guid isPermaLink="false">CVE-2026-62779</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:10 GMT</pubDate>
+            <description><![CDATA[Use after free in Windows Schannel allows an authorized attacker to elevate privileges locally.
 
 Score: 7.8 (HIGH)
 Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-61932 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61932</link>
-            <guid isPermaLink="false">CVE-2026-61932</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Access of resource using incompatible type ('type confusion') in Windows DWM Core Library allows an authorized attacker to elevate privileges locally.
+            <title><![CDATA[CVE-2026-62774 [CVSS:3.1 7 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62774</link>
+            <guid isPermaLink="false">CVE-2026-62774</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:09 GMT</pubDate>
+            <description><![CDATA[Use after free in Windows Graphics Kernel allows an authorized attacker to elevate privileges locally.
+
+Score: 7 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-62769 [CVSS:3.1 6.7 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62769</link>
+            <guid isPermaLink="false">CVE-2026-62769</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:08 GMT</pubDate>
+            <description><![CDATA[Numeric truncation error in Windows DNS allows an authorized attacker to elevate privileges locally.
+
+Score: 6.7 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-62757 [CVSS:3.1 5.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62757</link>
+            <guid isPermaLink="false">CVE-2026-62757</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:08 GMT</pubDate>
+            <description><![CDATA[Improper verification of cryptographic signature in Windows Schannel allows an unauthorized attacker to bypass a security feature over a network.
+
+Score: 5.3 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:N/I:H/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-62751 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62751</link>
+            <guid isPermaLink="false">CVE-2026-62751</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:07 GMT</pubDate>
+            <description><![CDATA[Integer overflow or wraparound in Windows Projected File System allows an authorized attacker to elevate privileges locally.
 
 Score: 7.8 (HIGH)
 Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-61933 [CVSS:3.1 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61933</link>
-            <guid isPermaLink="false">CVE-2026-61933</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Out-of-bounds read in Windows DWM Core Library allows an authorized attacker to disclose information locally.
+            <title><![CDATA[CVE-2026-62749 [CVSS:3.1 7 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62749</link>
+            <guid isPermaLink="false">CVE-2026-62749</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:06 GMT</pubDate>
+            <description><![CDATA[Use after free in Windows Kernel allows an authorized attacker to elevate privileges locally.
+
+Score: 7 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-62746 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62746</link>
+            <guid isPermaLink="false">CVE-2026-62746</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:05 GMT</pubDate>
+            <description><![CDATA[Buffer over-read in Windows Win32K allows an authorized attacker to disclose information locally.
 
 Score: 5.5 (MEDIUM)
 Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-61934 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61934</link>
-            <guid isPermaLink="false">CVE-2026-61934</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Use after free in Windows Bind Filter Driver allows an authorized attacker to elevate privileges locally.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-61936 [CVSS:3.1 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61936</link>
-            <guid isPermaLink="false">CVE-2026-61936</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Missing authorization in Windows Defender Firewall Service allows an authorized attacker to bypass a security feature locally.
+            <title><![CDATA[CVE-2026-62743 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62743</link>
+            <guid isPermaLink="false">CVE-2026-62743</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:05 GMT</pubDate>
+            <description><![CDATA[Out-of-bounds read in Windows Win32K allows an authorized attacker to disclose information locally.
 
 Score: 5.5 (MEDIUM)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:H/A:N]]></description>
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-61937 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61937</link>
-            <guid isPermaLink="false">CVE-2026-61937</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Integer overflow or wraparound in Windows HTTP.sys allows an authorized attacker to elevate privileges locally.
+            <title><![CDATA[CVE-2026-62740 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62740</link>
+            <guid isPermaLink="false">CVE-2026-62740</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:04 GMT</pubDate>
+            <description><![CDATA[Use of uninitialized resource in Windows Imaging Component allows an authorized attacker to disclose information locally.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-62735 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62735</link>
+            <guid isPermaLink="false">CVE-2026-62735</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:03 GMT</pubDate>
+            <description><![CDATA[Heap-based buffer overflow in Windows HTTP.sys allows an authorized attacker to elevate privileges locally.
 
 Score: 7.8 (HIGH)
 Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-61938 [CVSS:3.1 7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61938</link>
-            <guid isPermaLink="false">CVE-2026-61938</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Use after free in Windows Installer allows an authorized attacker to elevate privileges locally.
+            <title><![CDATA[CVE-2026-62733 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62733</link>
+            <guid isPermaLink="false">CVE-2026-62733</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:02 GMT</pubDate>
+            <description><![CDATA[Out-of-bounds read in Windows Win32K allows an authorized attacker to elevate privileges locally.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-62729 [CVSS:3.1 7 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62729</link>
+            <guid isPermaLink="false">CVE-2026-62729</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:01 GMT</pubDate>
+            <description><![CDATA[Concurrent execution using shared resource with improper synchronization ('race condition') in Windows Telephony Service allows an authorized attacker to elevate privileges locally.
 
 Score: 7 (HIGH)
 Vector: CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-61939 [CVSS:3.1 7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61939</link>
-            <guid isPermaLink="false">CVE-2026-61939</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Use after free in Winlogon allows an authorized attacker to elevate privileges locally.
+            <title><![CDATA[CVE-2026-62723 [CVSS:3.1 7 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62723</link>
+            <guid isPermaLink="false">CVE-2026-62723</guid>
+            <pubDate>Tue, 11 Aug 2026 20:18:00 GMT</pubDate>
+            <description><![CDATA[Use after free in Windows Telephony Service allows an authorized attacker to elevate privileges locally.
 
 Score: 7 (HIGH)
 Vector: CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-62688 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62688</link>
-            <guid isPermaLink="false">CVE-2026-62688</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Heap-based buffer overflow in Windows MIDI Service Module allows an authorized attacker to elevate privileges locally.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-62690 [CVSS:3.1 7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62690</link>
-            <guid isPermaLink="false">CVE-2026-62690</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Concurrent execution using shared resource with improper synchronization ('race condition') in Windows Push Notifications allows an authorized attacker to elevate privileges locally.
-
-Score: 7 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-62692 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62692</link>
-            <guid isPermaLink="false">CVE-2026-62692</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Heap-based buffer overflow in Windows Remote Desktop Services allows an authorized attacker to elevate privileges locally.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-62693 [CVSS:3.1 7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62693</link>
-            <guid isPermaLink="false">CVE-2026-62693</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Concurrent execution using shared resource with improper synchronization ('race condition') in Windows MIDI Service Module allows an authorized attacker to elevate privileges locally.
-
-Score: 7 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-62695 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62695</link>
-            <guid isPermaLink="false">CVE-2026-62695</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Heap-based buffer overflow in Windows Storage allows an authorized attacker to elevate privileges locally.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-62696 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62696</link>
-            <guid isPermaLink="false">CVE-2026-62696</guid>
-            <pubDate>Tue, 11 Aug 2026 18:53:55 GMT</pubDate>
-            <description><![CDATA[Integer underflow (wrap or wraparound) in Windows Program Compatibility Assistant Service allows an authorized attacker to elevate privileges locally.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
         </item>
     </channel>
 </rss>
