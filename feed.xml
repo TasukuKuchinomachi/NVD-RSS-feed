@@ -4,11 +4,21 @@
         <title>NVD CVE Feed</title>
         <link>https://github.com/TasukuKuchinomachi/NVD-RSS-feed</link>
         <description>Latest CVE entries from the National Vulnerability Database. This product uses the NVD API but is not endorsed or certified by the NVD.</description>
-        <lastBuildDate>Sat, 15 Aug 2026 19:16:32 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 15 Aug 2026 21:16:23 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>National Vulnerability Database - NIST</copyright>
+        <item>
+            <title><![CDATA[CVE-2026-4878 [CVSS:3.1 7 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-4878</link>
+            <guid isPermaLink="false">CVE-2026-4878</guid>
+            <pubDate>Sat, 15 Aug 2026 21:16:23 GMT</pubDate>
+            <description><![CDATA[A flaw was found in libcap. A local unprivileged user can exploit a Time-of-check-to-time-of-use (TOCTOU) race condition in the `cap_set_file()` function. This allows an attacker with write access to a parent directory to redirect file capability updates to an attacker-controlled file. By doing so, capabilities can be injected into or stripped from unintended executables, leading to privilege escalation.
+
+Score: 7 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
         <item>
             <title><![CDATA[CVE-2026-19906 [CVSS:4.0 6.3 MEDIUM]]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19906</link>
@@ -2586,38 +2596,6 @@ unprivileged reader of /dev/snd/controlC*.
 Zero-initialise the buffer so a short read yields zeros instead of stack
 residue.  This mirrors snd_rme_get_status1(), which already clears its
 output word before the same kind of vendor read.
-
-Discovered by XBOW, triaged by Baul Lee <baul.lee@xbow.com>]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-74499]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-74499</link>
-            <guid isPermaLink="false">CVE-2026-74499</guid>
-            <pubDate>Sat, 15 Aug 2026 13:17:54 GMT</pubDate>
-            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
-
-ALSA: usb-audio: fix OOB write in snd_usbmidi_akai_output()
-
-snd_usbmidi_akai_output() computes its fill-loop bound
-
-	buf_end = ep->max_transfer - MAX_AKAI_SYSEX_LEN - 1;
-
-as a signed int, so a small device-advertised bulk-OUT max_transfer
-makes buf_end negative.  The loop guard then compares the u32
-urb->transfer_buffer_length against that negative int: the usual
-arithmetic conversion turns buf_end into a large unsigned value, so the
-guard stays true and each iteration keeps appending SysEx framing and
-payload bytes past the end of the URB transfer buffer, which is only
-max_transfer bytes long.
-
-A USB device that advertises a tiny bulk-OUT endpoint can therefore
-trigger an attacker-length- and content-controlled heap out-of-bounds
-write when a process writes to the created /dev/snd/midiC*D* node.
-
-Return early when there is no room for even one SysEx, so the loop is
-never entered with a bound that would wrap.  The loop is the last
-statement of the function, so bailing out is equivalent to it not
-running.
 
 Discovered by XBOW, triaged by Baul Lee <baul.lee@xbow.com>]]></description>
         </item>
