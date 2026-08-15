@@ -4,11 +4,21 @@
         <title>NVD CVE Feed</title>
         <link>https://github.com/TasukuKuchinomachi/NVD-RSS-feed</link>
         <description>Latest CVE entries from the National Vulnerability Database. This product uses the NVD API but is not endorsed or certified by the NVD.</description>
-        <lastBuildDate>Sat, 15 Aug 2026 14:17:07 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 15 Aug 2026 15:16:37 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>National Vulnerability Database - NIST</copyright>
+        <item>
+            <title><![CDATA[CVE-2026-19896 [CVSS:4.0 2.9 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19896</link>
+            <guid isPermaLink="false">CVE-2026-19896</guid>
+            <pubDate>Sat, 15 Aug 2026 15:16:37 GMT</pubDate>
+            <description><![CDATA[A flaw has been found in mangroup dtale up to 3.22.0. This vulnerability affects the function build_secret_key of the file dtale/app.py of the component Flask Session Cookie. This manipulation causes insufficiently random values. Remote exploitation of the attack is possible. The attack's complexity is rated as high. It is stated that the exploitability is difficult. The exploit has been published and may be used. The pull request to fix this issue awaits acceptance.
+
+Score: 2.9 (LOW)
+Vector: CVSS:4.0/AV:N/AC:H/AT:N/PR:N/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
         <item>
             <title><![CDATA[CVE-2026-19895 [CVSS:4.0 2.9 LOW]]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19895</link>
@@ -2911,54 +2921,6 @@ privileges.
 Reject a delimiter that is one of the flag characters up front. Such a
 registration was always rejected anyway, only after the out of bounds
 read, so no valid registration string changes meaning.]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-74484]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-74484</link>
-            <guid isPermaLink="false">CVE-2026-74484</guid>
-            <pubDate>Sat, 15 Aug 2026 13:17:53 GMT</pubDate>
-            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
-
-binfmt_misc: don't let an 'F' entry pin its own instance
-
-An entry registered with 'F' opens its interpreter at registration time
-and holds that file until the entry is freed. Any entry nobody removes
-by hand only gets closed once the binfmt_misc superblock is shut down.
-If the interpreter lives on a mount that keeps that superblock alive the
-two pin each other:
-
-    binfmt_misc sb -> inode -> entry -> interp_file -> vfsmount -> binfmt_misc sb
-
-TL;DR the file is never closed. Once the mount namespace is gone there
-is nothing left to unregister through either.
-
-There are two ways to trigger this bug:
-
-- Point the interpreter at the instance itself. Its files are regular
-  files owned by the mounter and both bm_get_inode() and
-  simple_fill_super() leave i_op at empty_iops. So notify_change() falls
-  back to simple_setattr() and chmod +x works. We never set SB_I_NOEXEC
-  and so open_exec() accepts it.
-
-- Use the instance as an overlayfs lower layer. The overlay superblock
-  holds a clone_private_mount() of every layer until it is destroyed and
-  that clone is in no namespace. So umount_tree() never reaches it.
-
-That's a DoS. And it isn't only the superblock that leaks. It pins the
-user namespace it was mounted in, so every iteration permanently eats
-one of the caller's user namespace charges.
-
-So let's just do the sane thing. SB_I_NOEXEC makes open_exec() fail on
-the instance's own files and s_stack_depth makes overlayfs reject the
-layer before it ever takes a clone. That also covers the ecryptfs and
-fuse passthrough variants. What 'F' promises is unchanged.
-
-The stable tag is narrower than the Fixes tags on purpose. Before
-sandboxed mounts this needed global root against the single instance
-everyone shares, and the change doesn't apply to those trees anyway.
-
-Note that SB_I_NODEV is implicitly raised for userns mounts but raise it
-explicitly here as well.]]></description>
         </item>
     </channel>
 </rss>
