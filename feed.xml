@@ -4,11 +4,31 @@
         <title>NVD CVE Feed</title>
         <link>https://github.com/TasukuKuchinomachi/NVD-RSS-feed</link>
         <description>Latest CVE entries from the National Vulnerability Database. This product uses the NVD API but is not endorsed or certified by the NVD.</description>
-        <lastBuildDate>Sat, 15 Aug 2026 15:16:37 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 15 Aug 2026 16:16:39 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>National Vulnerability Database - NIST</copyright>
+        <item>
+            <title><![CDATA[CVE-2026-19898 [CVSS:4.0 2.9 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19898</link>
+            <guid isPermaLink="false">CVE-2026-19898</guid>
+            <pubDate>Sat, 15 Aug 2026 16:16:39 GMT</pubDate>
+            <description><![CDATA[A vulnerability was found in VictoriaMetrics up to 1.146.0. Impacted is the function requestHandler of the file app/vmauth/main.go of the component VMAuth Authentication Endpoint. Performing a manipulation results in improper restriction of excessive authentication attempts. The attack is possible to be carried out remotely. The complexity of an attack is rather high. The exploitability is considered difficult. The exploit has been made public and could be used. Upgrading to version 1.147.0 is recommended to address this issue. The patch is named 119ba0fb5be8024d50c5ba946599b2e69e8803ea. Upgrading the affected component is recommended.
+
+Score: 2.9 (LOW)
+Vector: CVSS:4.0/AV:N/AC:H/AT:N/PR:N/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-19897 [CVSS:4.0 2.9 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19897</link>
+            <guid isPermaLink="false">CVE-2026-19897</guid>
+            <pubDate>Sat, 15 Aug 2026 16:16:38 GMT</pubDate>
+            <description><![CDATA[A vulnerability has been found in mangroup dtale up to 3.22.0. This issue affects the function Login of the file dtale/auth.py of the component Login Endpoint. Such manipulation leads to improper restriction of excessive authentication attempts. The attack can be executed remotely. This attack is characterized by high complexity. The exploitability is assessed as difficult. The exploit has been disclosed to the public and may be used. The project was informed of the problem early through an issue report but has not responded yet.
+
+Score: 2.9 (LOW)
+Vector: CVSS:4.0/AV:N/AC:H/AT:N/PR:N/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
         <item>
             <title><![CDATA[CVE-2026-19896 [CVSS:4.0 2.9 LOW]]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19896</link>
@@ -2847,80 +2867,6 @@ been leaking the write denial since the introduction of the flag.
 
 Restore write access in put_binfmt_handler() before closing the
 interpreter file.]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-74486]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-74486</link>
-            <guid isPermaLink="false">CVE-2026-74486</guid>
-            <pubDate>Sat, 15 Aug 2026 13:17:53 GMT</pubDate>
-            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
-
-binfmt_misc: use exe_file_deny_write_access() for the interpreter clone
-
-For MISC_FMT_OPEN_FILE entries load_misc_binary() clones the
-registered interpreter file and denies write access to the clone via
-plain deny_write_access(). The clone is installed as
-bprm->interpreter and later released by the exec machinery through
-exe_file_allow_write_access() which skips the i_writecount increment
-for files with FMODE_FSNOTIFY_HSM set.
-
-The deny and allow side can therefore come to different conclusions
-when pre-content watches are in play: if a pre-content watch is added
-to the interpreter after registration every subsequent exec through
-that entry takes a write denial on the clone that is never paired
-with a write allowance, driving the interpreter inode's i_writecount
-further down with each exec and leaving the interpreter unwritable
-even after the entry and all its users are gone.
-
-Take the write denial via exe_file_deny_write_access() so both sides
-of the pairing base their decision on the same file mode, and
-propagate failure instead of silently ignoring it: an interpreter
-that is concurrently open for writing now fails the exec with
-ETXTBSY, exactly like an interpreter freshly opened via open_exec()
-would.]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-74485]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-74485</link>
-            <guid isPermaLink="false">CVE-2026-74485</guid>
-            <pubDate>Sat, 15 Aug 2026 13:17:53 GMT</pubDate>
-            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
-
-binfmt_misc: reject a flag character as the field delimiter
-
-The registration string starts with a user chosen delimiter that
-separates the individual fields. So that the field parsers terminate
-even on a truncated string create_entry() pads the buffer with that
-same delimiter:
-
-	memset(buf + count, del, 8);
-
-Most fields are scanned for the delimiter with strchr()/scanarg() and
-happily stop on the padding. The flags field is different: instead of
-scanning for the delimiter check_special_flags() consumes the flag
-characters 'P', 'O', 'C' and 'F' and stops at the first byte that is
-none of them, relying on the trailing delimiter to end the scan.
-
-If the delimiter is itself a flag character the padding no longer acts
-as a terminator. The scan swallows all eight padding bytes and keeps
-reading past the end of the allocation until it hits a byte that is
-not a flag character. For example registering
-
-	PaPEPPxPPiP
-
-with 'P' as the delimiter (name "a", type extension, magic "x",
-interpreter "i", empty flags) leaves the flag scan running off the end
-of the buffer. The registration is rejected in the end because the
-parser does not stop exactly at buf + count, but only after the out of
-bounds read has already happened. With an unlucky allocation layout the
-scan can walk into an unmapped page; under KASAN it is reported as a
-slab out of bounds read. binfmt_misc mounts are available to
-unprivileged users in a user namespace so the read is reachable without
-privileges.
-
-Reject a delimiter that is one of the flag characters up front. Such a
-registration was always rejected anyway, only after the out of bounds
-read, so no valid registration string changes meaning.]]></description>
         </item>
     </channel>
 </rss>
