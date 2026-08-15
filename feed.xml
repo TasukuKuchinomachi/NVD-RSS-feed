@@ -4,11 +4,31 @@
         <title>NVD CVE Feed</title>
         <link>https://github.com/TasukuKuchinomachi/NVD-RSS-feed</link>
         <description>Latest CVE entries from the National Vulnerability Database. This product uses the NVD API but is not endorsed or certified by the NVD.</description>
-        <lastBuildDate>Sat, 15 Aug 2026 07:16:19 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 15 Aug 2026 09:16:29 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>National Vulnerability Database - NIST</copyright>
+        <item>
+            <title><![CDATA[CVE-2026-16142 [CVSS:3.1 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-16142</link>
+            <guid isPermaLink="false">CVE-2026-16142</guid>
+            <pubDate>Sat, 15 Aug 2026 09:16:29 GMT</pubDate>
+            <description><![CDATA[The TrueBooker plugin for WordPress is vulnerable to Account Takeover in all versions up to, and including, 1.2.6. This is due to the add_front_user_update() AJAX handler being registered for unauthenticated users and accepting an arbitrary truebooker_wp_user_id value, which is passed directly to wp_update_user() without verifying authentication or ownership. This makes it possible for unauthenticated attackers to change any WordPress user account email address, including an administrator, by submitting the target user ID and an attacker-controlled email address. An attacker can then use the native WordPress password reset flow to receive the reset link at the attacker-controlled email address and take over the account.
+
+Score: 9.8 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-15142 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-15142</link>
+            <guid isPermaLink="false">CVE-2026-15142</guid>
+            <pubDate>Sat, 15 Aug 2026 09:16:28 GMT</pubDate>
+            <description><![CDATA[The Real Estate Manager Pro plugin for WordPress is vulnerable to Privilege Escalation in all versions up to, and including, 12.8.6. This is due to improper capability handling in the allow_attachment_actions() function, which can treat a target user ID as a media attachment ID during user capability checks. This makes it possible for authenticated attackers, with Subscriber-level access and above, to edit an administrator account and escalate their privileges to Administrator when the targeted user ID matches the ID of an existing media attachment.
+
+Score: 7.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
         <item>
             <title><![CDATA[CVE-2026-15826 [CVSS:3.1 9.8 CRITICAL]]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-15826</link>
@@ -2659,93 +2679,6 @@ Mirror the list draining behavior by marking nodes as busy while the root
 is being detached, then clear the rb node and release the owner before
 dropping the containing object. This makes surviving nodes unowned and
 safe to reject from remove or accept for a later add.]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-74343]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-74343</link>
-            <guid isPermaLink="false">CVE-2026-74343</guid>
-            <pubDate>Sat, 15 Aug 2026 06:22:35 GMT</pubDate>
-            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
-
-kernfs: fix xattr race condition with multiple superblocks
-
-Multiple superblocks with different namespaces can share the same
-kernfs_node when kernfs_test_super() finds a matching root but
-different namespace. This means multiple inodes from different
-superblocks can reference the same kernfs_node->iattr->xattrs
-structure.
-
-The VFS layer only holds per-inode locks during xattr operations,
-which is insufficient to serialize concurrent xattr modifications on
-the shared kernfs_node. This can lead to race conditions in
-simple_xattr_set() where the lookup->replace/remove sequence is not
-atomic with respect to operations from other superblocks.
-
-Fix this by protecting xattr operations with the existing hashed
-kernfs_locks->open_file_mutex[] array, which is already used to
-protect per-node open file data. The hashed mutex array provides
-scalable per-node serialization (scaled by CPU count, up to 1024 locks
-on 32+ CPU systems) with zero memory overhead.
-
-Changes:
-- Rename open_file_mutex[] to node_mutex[] to reflect dual purpose
-- Add kernfs_node_lock_ptr() and kernfs_node_lock() helpers
-- Protect simple_xattr_set() calls in kernfs_xattr_set() and
-  kernfs_vfs_user_xattr_set() with the hashed mutex
-- Update file.c to use new helpers via compatibility wrappers
-- Update documentation to explain the extended lock usage]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-74342]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-74342</link>
-            <guid isPermaLink="false">CVE-2026-74342</guid>
-            <pubDate>Sat, 15 Aug 2026 06:22:35 GMT</pubDate>
-            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
-
-kernfs: link kn to its parent before the LSM init hook
-
-After commit 12e9e3cd03b5 ("simpe_xattr: use per-sb cache"),
-kernfs_xattr_set() and kernfs_xattr_get() compute the cache via
-kernfs_root(kn) before any other check.  kernfs_root(kn) walks
-kn->__parent first and falls back to kn->dir.root, both of which are
-NULL on a freshly kmem_cache_zalloc()'d kn. kn->__parent was being set
-in kernfs_new_node() after __kernfs_new_node() returned, and kn->dir.root
-is set even later by kernfs_create_dir_ns() / kernfs_create_empty_dir().
-
-The LSM kernfs_init_security hook is invoked from inside
-__kernfs_new_node(), before either field has been initialized.
-selinux_kernfs_init_security() ends with kernfs_xattr_set(kn,
-XATTR_NAME_SELINUX, ...).  kernfs_root(kn) then returns NULL, and
-&((struct kernfs_root *)NULL)->xa_cache evaluates to
-offsetof(struct kernfs_root, xa_cache) which faults:
-
-  BUG: kernel NULL pointer dereference, address: 00000000000000e0
-  RIP: 0010:simple_xattr_set+0x27/0x8b0
-  Call Trace:
-   kernfs_xattr_set+0x63/0xb0
-   selinux_kernfs_init_security+0x13b/0x270
-   security_kernfs_init_security+0x36/0xc0
-   __kernfs_new_node+0x182/0x290
-   kernfs_new_node+0x80/0xc0
-   kernfs_create_dir_ns+0x2b/0xa0
-   cgroup_create+0x116/0x380
-   cgroup_mkdir+0x7c/0x1a0
-
-Reproduces deterministically at PID 1 (systemd) on an SELinux-enabled
-distro. The first cgroup mkdir under /sys/fs/cgroup with a labelled
-parent panics the kernel.
-
-The LSM hook's contract is that the kn_dir argument is the parent of
-the new kn, so kn->__parent should already point at kn_dir when the
-hook runs.  Move kernfs_get(parent) and rcu_assign_pointer of
-kn->__parent from kernfs_new_node() into __kernfs_new_node() right
-before the security hook, and unwind the parent reference on the
-err_out4 path.  kernfs_root(kn) then takes its parent branch during
-the hook and returns parent->dir.root, which is the correct root.
-
-This also closes the same-shape latent bug in kernfs_xattr_get() (which
-today is hidden only by kernfs_iattrs_noalloc() returning NULL on a
-fresh kn).]]></description>
         </item>
     </channel>
 </rss>
