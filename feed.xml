@@ -4,11 +4,21 @@
         <title>NVD CVE Feed</title>
         <link>https://github.com/TasukuKuchinomachi/NVD-RSS-feed</link>
         <description>Latest CVE entries from the National Vulnerability Database. This product uses the NVD API but is not endorsed or certified by the NVD.</description>
-        <lastBuildDate>Sat, 15 Aug 2026 09:16:29 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 15 Aug 2026 10:16:29 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>National Vulnerability Database - NIST</copyright>
+        <item>
+            <title><![CDATA[CVE-2026-18438 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-18438</link>
+            <guid isPermaLink="false">CVE-2026-18438</guid>
+            <pubDate>Sat, 15 Aug 2026 10:16:29 GMT</pubDate>
+            <description><![CDATA[The Templately – Elementor & Gutenberg Template Library: 6500+ Free & Pro Ready Templates And Cloud! plugin for WordPress is vulnerable to Remote Code Execution in all versions up to, and including, 3.7.1 via the fetch_remote_file function. This is due to a filename validation/destination mismatch in fetch_remote_file, where file type validation is performed against the attacker-controlled Content-Disposition filename rather than the URL-path-derived destination filename. This makes it possible for authenticated attackers, with contributor-level access and above, to execute code on the server. A GIF+PHP polyglot file passes wp_check_filetype_and_ext validation as image/gif via the Content-Disposition filename, while the actual destination path is written with a .php extension derived from the URL path, bypassing the unfiltered_upload capability gate entirely. The affected endpoints are reachable at this privilege level because Templately's entire REST API — including the cloud import endpoints used in this attack (/templately/v1/clouds/upload and /templately/v1/insert) — is authorized only by a current_user_can('delete_posts') check, with no administrator or manage_options capability requirement. The same permission gate also allows a contributor to overwrite the site's global Templately cloud connection via the /templately/v1/login endpoint with global_signin set to true. A complete remediation should both correct fetch_remote_file to validate the file type against the actual destination filename rather than the Content-Disposition header (and avoid deriving the write path from the request URL), and restrict state-changing Templately REST routes to an appropriate administrator-level capability.
+
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
         <item>
             <title><![CDATA[CVE-2026-16142 [CVSS:3.1 9.8 CRITICAL]]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-16142</link>
@@ -2654,31 +2664,6 @@ This fixes a:
 
 which occurred after processing a malformed MPA request during connection
 establishment, causing the new endpoint to be closed.]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-74344]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-74344</link>
-            <guid isPermaLink="false">CVE-2026-74344</guid>
-            <pubDate>Sat, 15 Aug 2026 06:22:35 GMT</pubDate>
-            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
-
-bpf: Clear rb node linkage when freeing bpf_rb_root
-
-bpf_rb_root_free() detaches the root by copying the current rb_root_cached
-and then replacing the live root with RB_ROOT_CACHED. It then walks the
-copied root and drops each object contained in the tree.
-
-This leaves the rb node state intact while dropping the object. If the
-object is refcounted and survives the drop, its bpf_rb_node_kern still
-contains an owner pointer to the freed root and stale rb tree linkage. If
-a later bpf_rb_root allocation reuses the same address, bpf_rbtree_remove()
-can incorrectly pass the owner check and call rb_erase_cached() on a node
-whose rb pointers belong to the old tree.
-
-Mirror the list draining behavior by marking nodes as busy while the root
-is being detached, then clear the rb node and release the owner before
-dropping the containing object. This makes surviving nodes unowned and
-safe to reject from remove or accept for a later add.]]></description>
         </item>
     </channel>
 </rss>
