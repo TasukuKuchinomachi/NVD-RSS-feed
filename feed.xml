@@ -4,11 +4,31 @@
         <title>NVD CVE Feed</title>
         <link>https://github.com/TasukuKuchinomachi/NVD-RSS-feed</link>
         <description>Latest CVE entries from the National Vulnerability Database. This product uses the NVD API but is not endorsed or certified by the NVD.</description>
-        <lastBuildDate>Sat, 15 Aug 2026 16:16:39 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 15 Aug 2026 17:16:24 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>National Vulnerability Database - NIST</copyright>
+        <item>
+            <title><![CDATA[CVE-2026-19900 [CVSS:4.0 8.2 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19900</link>
+            <guid isPermaLink="false">CVE-2026-19900</guid>
+            <pubDate>Sat, 15 Aug 2026 17:16:24 GMT</pubDate>
+            <description><![CDATA[A vulnerability was identified in LB-LINK X-PRO 1.0.22-20231206. The impacted element is an unknown function of the file /etc/shadow. The manipulation leads to hard-coded credentials. It is possible to initiate the attack remotely. A high degree of complexity is needed for the attack. The exploitability is regarded as difficult. The exploit is publicly available and might be used. The vendor was contacted early about this disclosure but did not respond in any way.
+
+Score: 8.2 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:H/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-19899 [CVSS:4.0 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19899</link>
+            <guid isPermaLink="false">CVE-2026-19899</guid>
+            <pubDate>Sat, 15 Aug 2026 17:16:23 GMT</pubDate>
+            <description><![CDATA[A vulnerability was determined in SourceCodester Class and Exam Timetabling System 1.0. The affected element is an unknown function of the file /edit_teacher.php. Executing a manipulation of the argument ID can lead to sql injection. The attack may be performed from remote. The exploit has been publicly disclosed and may be utilized.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
         <item>
             <title><![CDATA[CVE-2026-19898 [CVSS:4.0 2.9 LOW]]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19898</link>
@@ -2782,91 +2802,6 @@ tid_tx dereference left after ieee80211_remove_tid_tx() in this function.
 
 [move/change the comment a bit to be more general not just on ndp,
  initialize ndp directly]]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-74488]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-74488</link>
-            <guid isPermaLink="false">CVE-2026-74488</guid>
-            <pubDate>Sat, 15 Aug 2026 13:17:53 GMT</pubDate>
-            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
-
-wifi: mwifiex: use the subframe length when parsing A-MSDU TDLS frames
-
-mwifiex_11n_dispatch_amsdu_pkt() splits an A-MSDU with
-ieee80211_amsdu_to_8023s() and walks the resulting subframes. For each
-subframe it passes the subframe data pointer to
-mwifiex_process_tdls_action_frame(), but pairs it with skb->len, the
-length of the A-MSDU parent, instead of rx_skb->len:
-
-	rx_skb = __skb_dequeue(&list);
-	rx_hdr = (struct rx_packet_hdr *)rx_skb->data;
-	if (ISSUPP_TDLS_ENABLED(priv->adapter->fw_cap_info) &&
-	    ntohs(rx_hdr->eth803_hdr.h_proto) == ETH_P_TDLS) {
-		mwifiex_process_tdls_action_frame(priv, (u8 *)rx_hdr,
-						  skb->len);
-	}
-
-The parent is not a valid description of that buffer, and may not be
-valid memory at all. ieee80211_amsdu_to_8023s() ends with
-
-	if (!reuse_skb)
-		dev_kfree_skb(skb);
-
-and it only sets reuse_skb when the parent is linear, is not a
-head_frag, and is being consumed as the *last* subframe. So when the
-parent does not qualify for reuse it has already been freed, and the
-read of skb->len is a use-after-free. When it is reused, skb->len is
-the length of the last subframe, applied to every earlier subframe,
-which over-states the buffer whenever an earlier subframe is shorter.
-
-The callee cannot absorb a wrong length, because it derives its own
-ceiling from the value it is given. Each frame type computes
-
-	ies_len = len - sizeof(struct ethhdr) - TDLS_*_FIX_LEN;
-
-and the element walk is then bounded entirely against that ceiling,
-
-	for (end = pos + ies_len; pos + 1 < end; pos += 2 + pos[1]) {
-		u8 ie_len = pos[1];
-
-		if (pos + 2 + ie_len > end)
-			break;
-
-so a too-large len moves end past the end of the subframe and the walk
-reads and copies beyond it. The A-MSDU layout is chosen by the sender,
-which makes the difference between the last subframe and a shorter
-earlier one remotely selectable. Reaching this requires TDLS support in
-firmware and the TDLS ethertype on the subframe.
-
-The other caller, mwifiex_process_rx_packet(), is correct: it passes a
-pointer and a length that describe the same region of the RX buffer.
-
-Pass rx_skb->len, the length of the subframe actually being parsed.]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-74487]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-74487</link>
-            <guid isPermaLink="false">CVE-2026-74487</guid>
-            <pubDate>Sat, 15 Aug 2026 13:17:53 GMT</pubDate>
-            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
-
-binfmt_misc: restore write access when removing an entry
-
-Registering an entry with the MISC_FMT_OPEN_FILE flag opens the
-interpreter via open_exec() which denies write access to it for as
-long as the entry exists. Removing the entry closes the interpreter
-file via filp_close() but never restores write access, leaving the
-inode's i_writecount permanently negative. Opening the interpreter
-for writing keeps failing with ETXTBSY long after the entry is gone
-until the inode is evicted from the inode cache.
-
-Commit 90f601b497d7 ("binfmt_misc: restore write access before
-closing files opened by open_exec()") fixed the same imbalance in the
-error path of bm_register_write() but the actual removal path has
-been leaking the write denial since the introduction of the flag.
-
-Restore write access in put_binfmt_handler() before closing the
-interpreter file.]]></description>
         </item>
     </channel>
 </rss>
