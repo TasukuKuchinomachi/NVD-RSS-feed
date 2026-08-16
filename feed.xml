@@ -4,11 +4,83 @@
         <title>NVD CVE Feed</title>
         <link>https://github.com/TasukuKuchinomachi/NVD-RSS-feed</link>
         <description>Latest CVE entries from the National Vulnerability Database. This product uses the NVD API but is not endorsed or certified by the NVD.</description>
-        <lastBuildDate>Sun, 16 Aug 2026 07:16:31 GMT</lastBuildDate>
+        <lastBuildDate>Sun, 16 Aug 2026 09:16:21 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>National Vulnerability Database - NIST</copyright>
+        <item>
+            <title><![CDATA[CVE-2026-74578]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-74578</link>
+            <guid isPermaLink="false">CVE-2026-74578</guid>
+            <pubDate>Sun, 16 Aug 2026 09:16:21 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+crypto: algif_skcipher - force synchronous processing on trees without ctx->state
+
+The AIO/async path in skcipher_recvmsg() passes the socket-wide ctx->iv
+directly into the skcipher request. After io_submit() the socket lock is
+dropped and the request is processed asynchronously, so a concurrent
+sendmsg(ALG_SET_IV) can overwrite ctx->iv and make the in-flight request
+run under an attacker-controlled IV. For CTR/stream modes this is
+IV/keystream reuse and lets an unprivileged user recover the plaintext of
+a concurrent operation.
+
+Snapshotting ctx->iv into per-request storage for the async path is not
+sufficient. For ciphers with statesize == 0 - which includes cbc and ctr -
+the MSG_MORE inter-chunk IV chaining is carried solely by the in-place
+req->iv writeback, which a snapshot redirects into per-request memory that
+af_alg_free_resources() releases on completion, silently producing wrong
+output. Writing the IV back from the completion callback instead is not
+possible either: that would require lock_sock() there, but the callback can
+run in softirq/atomic context, so it must not sleep.
+
+Make the operation synchronous instead, which removes both the IV race and
+any writeback race. This is equivalent to the upstream resolution, commit
+fcc77d33a34c ("net: Remove support for AIO on sockets"), which removed the
+AIO socket path across net/ entirely and so produces the same end state for
+this file. This patch deviates from that commit deliberately: rather than
+removing AIO socket support tree-wide, which would be far too invasive for
+stable, it removes only the AIO branch in crypto/algif_skcipher.c.
+io_submit() now completes synchronously; AF_ALG async is rarely used in
+practice.
+
+The -EIOCBQUEUED check in skcipher_recvmsg() is now dead but harmless,
+and is left alone to keep the fix minimal.
+
+Tested on 6.6.y: attacker IV injection dropped from 2296/200000 to 0/200000
+after the change; MSG_MORE chunked CTR output bit-identical to single-shot.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-46579 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-46579</link>
+            <guid isPermaLink="false">CVE-2026-46579</guid>
+            <pubDate>Sun, 16 Aug 2026 09:16:21 GMT</pubDate>
+            <description><![CDATA[A flaw was found in the OpenShift Router. When a Route has `insecureEdgeTerminationPolicy` set to Allow, the HTTP frontend does not remove `X-SSL-Client-*` headers from incoming requests. This allows an unauthenticated attacker to send plain HTTP requests with crafted `X-SSL-Client-*` headers. As a result, backends relying on these headers for mutual TLS (Transport Layer Security) authentication can be bypassed, enabling the attacker to impersonate client certificate identities.
+
+Score: 7.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-16242 [CVSS:3.1 9.4 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-16242</link>
+            <guid isPermaLink="false">CVE-2026-16242</guid>
+            <pubDate>Sun, 16 Aug 2026 09:16:20 GMT</pubDate>
+            <description><![CDATA[A flaw was found in the Konnectivity proxy-server configuration for hosted control planes. The agent-facing listener was started without --cluster-ca-cert (and without token-based agent authentication), so client certificates were not validated. A remote attacker who can reach the Konnectivity cluster endpoint could connect as an unauthenticated agent, join the routing pool, and potentially proxy, inspect, modify, or drop control-plane-to-node traffic.
+
+Score: 9.4 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:L]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2024-13784 [CVSS:3.1 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2024-13784</link>
+            <guid isPermaLink="false">CVE-2024-13784</guid>
+            <pubDate>Sun, 16 Aug 2026 09:16:19 GMT</pubDate>
+            <description><![CDATA[The Contact Form, Survey, Quiz & Popup Form Builder – ARForms plugin for WordPress is vulnerable to PHP Object Injection in all versions up to, and including, 1.8.5 via deserialization of untrusted input from form submissions. This makes it possible for unauthenticated attackers to inject a PHP Object. No known POP chain is present in the vulnerable software, which means this vulnerability has no impact unless another plugin or theme containing a POP chain is installed on the site. If a POP chain is present via an additional plugin or theme installed on the target system, it may allow the attacker to perform actions like delete arbitrary files, retrieve sensitive data, or execute code depending on the POP chain present.
+
+Score: 9.8 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
         <item>
             <title><![CDATA[CVE-2026-2497 [CVSS:3.1 7.2 HIGH]]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-2497</link>
@@ -954,46 +1026,6 @@ Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X
 
 Score: 8.7 (HIGH)
 Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:N/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-73044 [CVSS:4.0 9.4 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-73044</link>
-            <guid isPermaLink="false">CVE-2026-73044</guid>
-            <pubDate>Sat, 15 Aug 2026 22:16:54 GMT</pubDate>
-            <description><![CDATA[SiYuan versions before v3.7.4 fail to validate or escape table column width values, allowing stored cross-site scripting injection into style attributes. Attackers can inject malicious payloads through the setAttrViewColWidth API that break out of style attributes and inject event handlers on every table cell, executing arbitrary code in the Electron renderer with Node integration enabled.
-
-Score: 9.4 (CRITICAL)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:P/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-73043 [CVSS:4.0 9.4 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-73043</link>
-            <guid isPermaLink="false">CVE-2026-73043</guid>
-            <pubDate>Sat, 15 Aug 2026 22:16:54 GMT</pubDate>
-            <description><![CDATA[SiYuan versions before v3.7.4 contain a remote code execution vulnerability in the Template calculation operator, which renders user-authored Go templates and stores output verbatim without sanitization. Attackers can inject malicious HTML and JavaScript into template calculations that execute in the desktop client renderer with Node integration enabled, allowing arbitrary code execution when the database is opened.
-
-Score: 9.4 (CRITICAL)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:P/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-73042 [CVSS:4.0 9.4 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-73042</link>
-            <guid isPermaLink="false">CVE-2026-73042</guid>
-            <pubDate>Sat, 15 Aug 2026 22:16:54 GMT</pubDate>
-            <description><![CDATA[SiYuan before v3.7.4 fails to properly escape database menu metadata in HTML interpolation, allowing stored values to execute script when users open group, view, or field-edit menus. Attackers can inject markup through field descriptions or names that close containing elements and execute arbitrary code via event handlers, reaching Node built-ins due to Electron's insecure configuration.
-
-Score: 9.4 (CRITICAL)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:P/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-73041 [CVSS:4.0 9.4 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-73041</link>
-            <guid isPermaLink="false">CVE-2026-73041</guid>
-            <pubDate>Sat, 15 Aug 2026 22:16:53 GMT</pubDate>
-            <description><![CDATA[SiYuan versions before v3.7.4 fail to validate or escape annotation fields written to disk by the setFileAnnotation endpoint. Attackers can inject malicious markup into annotation fields that execute as script in the PDF renderer with full Node.js access when a user opens an annotated PDF.
-
-Score: 9.4 (CRITICAL)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:P/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
         </item>
     </channel>
 </rss>
