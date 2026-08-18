@@ -4,11 +4,1287 @@
         <title>NVD CVE Feed</title>
         <link>https://github.com/TasukuKuchinomachi/NVD-RSS-feed</link>
         <description>Latest CVE entries from the National Vulnerability Database. This product uses the NVD API but is not endorsed or certified by the NVD.</description>
-        <lastBuildDate>Tue, 18 Aug 2026 06:16:44 GMT</lastBuildDate>
+        <lastBuildDate>Tue, 18 Aug 2026 07:16:54 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>National Vulnerability Database - NIST</copyright>
+        <item>
+            <title><![CDATA[CVE-2026-74505]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-74505</link>
+            <guid isPermaLink="false">CVE-2026-74505</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:54 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+ALSA: 6fire: Fix UAF at error handling during probe
+
+Although 6fire driver had a few fixes for dealing with the early error
+handling during the probe phase, it forgot a pending URB before
+freeing the resources, which may lead to a UAF.
+
+This patch addresses it by doing the almost same cleanup procedure
+like the normal disconnect phase at the error path.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-74449 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-74449</link>
+            <guid isPermaLink="false">CVE-2026-74449</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:54 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+drm/amd/display: Fix divide-by-zero in calculate_mcache_setting on zero viewport
+
+If a plane reaches calculate_mcache_setting with a zero-area viewport,
+calculate_mcache_setting exits early with num_mcaches == 0 and
+mvmpg_width/height == 0. This will cause a divide-by-zero panic and can
+also cause an underflow on num_mcaches.
+
+Fix this by changing calculate_mcache_setting to bool and adding guards
+after each calculate_mcache_row_bytes call. If num_mcaches or
+mvmpg_width/height is zero, return a false. Callers will propagate the
+failure as a rejected mode, which prevents the panic.
+
+(cherry picked from commit 29c0f7c655f47bcbd575ff75e58480df6ec3c9da)
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-74448]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-74448</link>
+            <guid isPermaLink="false">CVE-2026-74448</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:54 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+drm/amdkfd: fix QID bit leak in pqm_create_queue()
+
+When MES is enabled and amdgpu_amdkfd_alloc_kernel_mem() fails during
+the first queue creation for a process, pqm_create_queue() returns
+early via 'return retval' without going through the err_create_queue
+cleanup label.
+
+This means clear_bit(*qid, pqm->queue_slot_bitmap) is never called,
+leaving the reserved QID bit permanently set in queue_slot_bitmap.
+Over time this leaks QID slots, potentially exhausting all available
+queue slots.
+
+Fix this by replacing 'return retval' with 'goto err_allocate_pqn'
+so that clear_bit() is always called on the error path without
+touching the uninitialized pqn pointer.
+
+AILIKFD-813
+
+(cherry picked from commit a107f74c38edbb80d6ab64dcaeeb292c14e9779f)]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-74424]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-74424</link>
+            <guid isPermaLink="false">CVE-2026-74424</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:54 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+fbcon: fix NULL pointer dereference for a console without vc_data
+
+fbcon_new_modelist() runs when a framebuffer's modelist changes. For each
+console mapped to it with fb_display[i].mode set, it reads vc_cons[i].d and
+passes the vc_num to fbcon_set_disp(). This assumes a console with a mode
+set has a vc_data, but it can be NULL. fbcon_set_disp() sets
+fb_display[i].mode before it checks vc_data, and fbcon_deinit() leaves the
+mode set after the vc_data is freed. fbcon_new_modelist() then dereferences
+the NULL vc_data.
+
+Keep fb_display[i].mode set only while the console has a vc_data. Check
+vc_data before setting the mode in fbcon_set_disp(), and clear the mode in
+fbcon_deinit(). The existing mode check in fbcon_new_modelist() then skips
+such consoles.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-72243 [CVSS:3.1 8.4 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72243</link>
+            <guid isPermaLink="false">CVE-2026-72243</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:54 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+selinux: check connect-related permissions on TCP Fast Open
+
+Similar to Landlock, SELinux was not updated when TCP Fast Open
+support was introduced to ensure connect-related permissions are
+checked when using TCP Fast Open. Update its socket_sendmsg() hook to
+call selinux_socket_connect() when MSG_FASTOPEN is passed.
+
+Score: 8.4 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-72211 [CVSS:3.1 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72211</link>
+            <guid isPermaLink="false">CVE-2026-72211</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:54 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+ntfs: grow index root value before reparent header update
+
+ntfs_ir_reparent() moves the resident index root entries into an index
+block and leaves a small root stub containing the child VCN. That root
+stub can be larger than the existing resident value. For example, an
+empty root with value_length 48 has an index area of 32 bytes, while the
+large-index root stub needs index_length and allocated_size of 40 bytes.
+
+The current code publishes the larger index.index_length and
+index.allocated_size before resizing the resident value. If the resize
+returns -ENOSPC, the recovery path can call ntfs_inode_add_attrlist(),
+which looks attributes up again while the root header says
+allocated_size 40 but the resident value still only provides 32 bytes of
+index area. Lookup-time $INDEX_ROOT validation then correctly rejects
+that transient layout as corrupt.
+
+This reproduces as a generic/013 failure under qemu. In the failing run,
+the transient root had value_len=48, index_size=32, index_length=40, and
+allocated_size=40, and ntfsprogs-plus ntfsck reported "Corrupt index
+root in MFT record 1177".
+
+When the root stub grows, resize the resident value before publishing the
+larger root header. If the resize fails, the old root remains valid for
+recovery lookups. Keep the existing header-before-resize ordering for
+shrink or same-size cases so the resident value never temporarily
+exposes an allocated_size beyond its bounds.
+
+Score: 9.8 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-72210 [CVSS:3.1 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72210</link>
+            <guid isPermaLink="false">CVE-2026-72210</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:54 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+ntfs: fix off-by-one in mapping pairs decoding bounds checks
+
+In ntfs_mapping_pairs_decompress(), attr_end points one byte past the
+end of the attribute record:
+
+    attr_end = (u8 *)attr + le32_to_cpu(attr->length);
+
+The two bounds checks validating that mapping pair data bytes fit within
+the attribute use strict greater-than (>), which allows a one-byte
+out-of-bounds read when the data extends exactly to attr_end:
+
+  b = *buf & 0xf;
+  if (b) {
+      if (unlikely(buf + b > attr_end))   // off-by-one
+          goto io_error;
+      for (deltaxcn = (s8)buf[b--]; b; b--)
+          deltaxcn = (deltaxcn << 8) + buf[b];
+  }
+
+When buf + b == attr_end, the check evaluates to false and buf[b] reads
+one byte past the valid attribute boundary. The same pattern appears in
+the LCN delta bytes check.
+
+Fix both checks to use >= so that buf[b] at exactly attr_end is
+correctly rejected as out of bounds.
+
+Score: 9.8 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-72208 [CVSS:3.1 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72208</link>
+            <guid isPermaLink="false">CVE-2026-72208</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:54 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+ntfs: add bounds check before accessing EA entries
+
+in ntfs_ea_lookup and ntfs_listxattr, this verifies that there is enough
+space in the EA entry before accessing the next_entry_offset field of
+the EA entry.
+
+Score: 9.8 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-72207 [CVSS:3.1 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72207</link>
+            <guid isPermaLink="false">CVE-2026-72207</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:54 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+ntfs: not change 0-byte $DATA attribute to non-resident
+
+When ntfs_resident_attr_resize() cannot grow a resident attribute in
+place, it retries after converting other resident attributes to
+non-resident to free space in the MFT recrord.
+
+Do not select zero-length resident $DATA attributes for this conversion.
+fsck treats 0-byte non-resident $DATA attribute as corruptions.
+
+Score: 9.8 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-72206 [CVSS:3.1 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72206</link>
+            <guid isPermaLink="false">CVE-2026-72206</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:53 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+ntfs: validate index block header more strictly
+
+Modify ntfs_index_block_inconsisent() to perform stricter validation of
+INDEX_HEADER geometry in INDX blocks, and update
+ntfs_lookup_inode_by_name() to use that function to validate INDX
+blocks.
+
+Score: 9.8 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-72205]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72205</link>
+            <guid isPermaLink="false">CVE-2026-72205</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:53 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+ntfs: free volume-wide resources on fill_super failure
+
+ntfs_fill_super()'s err_out_now path frees only the volume struct via
+kfree(vol), leaving several vol-owned allocations behind on every mount
+failure:
+
+  - vol->nls_map, loaded by ntfs_init_fs_context() via
+    load_nls_default() (or replaced by an explicit nls= option in
+    ntfs_parse_param()), is never unload_nls()'d.
+
+  - vol->volume_label, allocated by load_system_files() through
+    ntfs_ucstonls() once the $Volume name attribute has been parsed, is
+    not released by load_system_files()'s own error labels nor by the
+    fill_super() inline cleanup that only runs on d_make_root()
+    failure.  Any later failure inside load_system_files() leaks it.
+
+  - vol->lcn_empty_bits_per_page was kvfree()'d in
+    unl_upcase_iput_tmp_ino_err_out_now without clearing the pointer,
+    so it could not be folded into a single common cleanup.
+
+Because the failure paths never call ntfs_volume_free() and never reach
+the d_make_root() inline cleanup block (it sits above the label and is
+jumped over by the load_system_files() / kvmalloc failure gotos), these
+resources accumulate per failed mount attempt with no chance of
+recovery short of unloading the module.  This is a silent leak: the
+inodes loaded prior to failure remain hashed but generic_shutdown_super()
+skips evict_inodes() when sb->s_root is unset, so no CHECK_DATA_CORRUPTION
+warning is emitted either.
+
+Move the per-volume frees down to err_out_now and drop the
+lcn_empty_bits_per_page kvfree() from the upper label so the cleanup is
+performed exactly once on every failure path.  Using unconditional
+kvfree() / kfree() / unload_nls() is safe because they all accept NULL
+and the upper labels that previously freed nls_map (the d_make_root()
+inline cleanup) already clear the pointer.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-72204 [CVSS:3.1 8.4 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72204</link>
+            <guid isPermaLink="false">CVE-2026-72204</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:53 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+ntfs: centalize $INDEX_ROOT header validation
+
+Add a dedicated helper to perform stricter validation of $INDEX_ROOT and
+use it for both directory inodes and named index inodes. This keeps the
+root size and header geometry checks consistent across both read paths.
+
+Score: 8.4 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-72203 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72203</link>
+            <guid isPermaLink="false">CVE-2026-72203</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:53 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+ntfs: skip extent mft records in writeback to prevent deadlock
+
+This patch fixes the ABBA deadlock between extent_lock and extent
+mrec_lock triggered by xfstests generic/113, that occurs since the commit
+6994acf33bae ("ntfs: use base mft_no when looking up base inode for
+		extent record").
+
+Path A (inode writeback):
+  VFS writeback
+    -> ntfs_write_inode()
+      -> __ntfs_write_inode()
+        -> mutex_lock(&ni->extent_lock)
+        -> mutex_lock(&tni->mrec_lock)
+
+Path B (MFT folio writeback):
+  VFS writeback of $MFT dirty folios
+    -> ntfs_mft_writepages()
+      -> ntfs_write_mft_block()
+        -> ntfs_may_write_mft_record()
+          -> holds one extent mrec_lock from a previous iteration
+          -> tries to acquire another base inode extent_lock
+
+By removing all extent_lock and extent mrec_lock acquisition from the MFT
+folio writeback path, the ABBA lock ordering is eliminated:
+
+Path A: __ntfs_write_inode(): extent_lock -> mrec_lock
+Path B (removed): ntfs_write_mft_block(): mrec_lock -> extent_lock
+
+Path B is always redundant for extent records because:
+
+1. mark_mft_record_dirty(ext_ni) does NOT dirty the MFT folio.
+   It only sets NInoDirty(ext_ni) and marks the base VFS inode dirty
+   via __mark_inode_dirty(I_DIRTY_DATASYNC), which triggers Path A.
+   Therefore, normal extent modifications never create a situation where
+   the MFT folio is dirty and Path B is not scheduled.
+
+2. The MFT folio only gets dirtied via ntfs_mft_mark_dirty() inside
+   ntfs_mft_record_alloc(). But all identified callers in attrib.c
+   (ntfs_attr_add, ntfs_attr_record_move_away,
+   ntfs_attr_make_non_resident, ntfs_attr_record_resize) follow through
+   with mark_mft_record_dirty(), which triggers Path A to write the
+   complete record.
+
+3. ntfs_evict_big_inode() calls ntfs_commit_inode() before freeing extent
+   inodes, ensuring all dirty extents are flushed via Path A before the
+   base inode leaves the icache.
+
+Score: 7.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-72202 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72202</link>
+            <guid isPermaLink="false">CVE-2026-72202</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:53 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+ntfs: avoid heap allocation for free-cluster readahead state
+
+get_nr_free_clusters() allocates a temporary file_ra_state before it
+publishes the precomputed free cluster count, sets NVolFreeClusterKnown(),
+and wakes vol->free_waitq. If that allocation fails, the worker returns
+without setting the flag or waking waiters, so callers waiting for the free
+count can block indefinitely.
+
+The readahead state is only used synchronously while scanning the bitmap.
+Keep it on the stack and pass it by address to the readahead helper. This
+eliminates the early allocation failure path instead of adding a special
+case that publishes a conservative count and wakes the waitqueue.
+Zero-initialize the on-stack state because file_ra_state_init() only sets
+ra_pages and prev_pos.
+
+Apply the same treatment to __get_nr_free_mft_records(), which scans the
+MFT bitmap with the same short-lived readahead state.
+
+Score: 7.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-72201 [CVSS:3.1 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72201</link>
+            <guid isPermaLink="false">CVE-2026-72201</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:53 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+ntfs: validate index entries on reading
+
+Validate index entries immediately after reading an index root or index
+block from disk. This eliminates repeated checks in lookup and readdir,
+and reduce the risk of missing checks in those paths.
+
+Score: 9.8 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-72200 [CVSS:3.1 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72200</link>
+            <guid isPermaLink="false">CVE-2026-72200</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:53 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+ntfs: detect mapping-pairs LCN accumulator overflow
+
+The NTFS mapping-pairs parser accumulates relative LCN deltas in a
+signed integer.  A corrupted attribute can drive that addition past
+the representable range.
+
+One corrupt runlist shape sets the accumulated LCN to S64_MAX and
+then adds a delta of 1 in the next mapping-pairs entry.
+
+Signed overflow is undefined and can turn an invalid runlist into a
+different set of physical clusters.
+
+Check the LCN addition for overflow before storing the next run.
+
+Score: 9.8 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-72199 [CVSS:3.1 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72199</link>
+            <guid isPermaLink="false">CVE-2026-72199</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:53 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+ntfs: validate resident index root values on lookup
+
+Resident $INDEX_ROOT values carry index header fields that callers
+consume after lookup. Some callers already validate parts of the layout
+before walking entries, but those checks are scattered and do not cover
+all root header invariants, such as entries_offset alignment and lower
+bound, index_length, and allocated_size consistency.
+
+The resident root resize paths now keep these header fields consistent
+while the value size changes: ntfs_ir_truncate() lowers
+index.allocated_size before shrinking the resident value, and
+ntfs_ir_reparent() grows the resident value before publishing a larger
+root header. Lookup-time validation can therefore cover these invariants
+without tripping over the driver's own resize paths.
+
+Add $INDEX_ROOT to the minimum resident value size table and validate the
+resident index header fields before returning the attribute from lookup.
+Require 8-byte aligned index header fields, a sane entries_offset, an
+index_length within allocated_size, allocated_size within the resident
+value, and enough entry space for at least an index entry header.
+
+The shared validator already rejects non-resident records for
+resident-only attribute types, including $INDEX_ROOT.
+
+Score: 9.8 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-72198 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72198</link>
+            <guid isPermaLink="false">CVE-2026-72198</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:53 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+ntfs: reject non-resident records for resident-only attributes
+
+The shared lookup-time attribute validator rejects non-resident
+$FILE_NAME and $VOLUME_NAME records because their formats require
+resident values and callers handle returned records as resident
+attributes. Other resident-only attribute types still pass through the
+generic non-resident mapping-pairs checks.
+
+That leaves real resident/non-resident union confusion paths. Inode load
+looks up $STANDARD_INFORMATION and then reads data.resident.value_offset
+without checking a->non_resident. ntfs_inode_sync_standard_information()
+does the same when updating the standard information value.
+ntfs_write_volume_flags() also looks up $VOLUME_INFORMATION and reads
+data.resident.value_offset directly. $INDEX_ROOT callers in dir.c and
+index.c depend on the same lookup contract before consuming the resident
+index root value.
+
+Reject non-resident records for all resident-only attribute types in the
+shared validator. Keep the existing $FILE_NAME and $VOLUME_NAME behavior,
+but factor it through a helper and extend it to
+$STANDARD_INFORMATION, $OBJECT_ID, $VOLUME_INFORMATION, $INDEX_ROOT, and
+$EA_INFORMATION. For $OBJECT_ID and $EA_INFORMATION this is contract
+hardening for resident-only formats; this patch only rejects the
+non-resident form and does not add new resident value validation for
+those types.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-72162 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72162</link>
+            <guid isPermaLink="false">CVE-2026-72162</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:53 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+ocfs2: fix UBSAN array-index-out-of-bounds in ocfs2_sum_rightmost_rec
+
+[BUG]
+On-disk corruption setting l_next_free_rec to 0 in an inode's embedded
+extent list triggers a UBSAN panic on the next write to that file.
+
+[CAUSE]
+ocfs2_sum_rightmost_rec() computes
+i = le16_to_cpu(el->l_next_free_rec) - 1
+and accesses el->l_recs[i] without validating i. When l_next_free_rec
+is 0, i becomes -1; when l_next_free_rec exceeds l_count, i falls
+past the end of the array. Either case violates the
+__counted_by_le(l_count) annotation on l_recs[] and triggers UBSAN.
+
+[FIX]
+Validate the inode's embedded extent list when the inode is read, in
+ocfs2_validate_inode_block(): l_count must be non-zero and no larger
+than the inode block can hold, and l_next_free_rec must not exceed
+l_count. A corrupt list is rejected at read time, before the b-tree
+code can index l_recs[] out of bounds.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-72150]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72150</link>
+            <guid isPermaLink="false">CVE-2026-72150</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:52 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+sunrpc: fix uninitialized xprt_create_args structure
+
+The xprt_create_args structure is allocated on the stack without
+initialization in rpc_sysfs_xprt_switch_add_xprt_store(). While some
+fields are manually populated, critical fields like srcaddr, bc_xps,
+and flags contain uninitialized stack garbage.
+
+This can lead to:
+1. Kernel panic when xs_setup_xprt() dereferences garbage srcaddr
+2. Information leak if srcaddr points to sensitive stack data
+3. Unpredictable behavior if flags has random bits set
+
+The fix is to zero-initialize the structure to ensure all unused
+fields are NULL/0, preventing the transport setup code from acting
+on garbage data.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-72106]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72106</link>
+            <guid isPermaLink="false">CVE-2026-72106</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:52 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+dm-ioctl: fix a possible overflow in list_version_get_info
+
+sizeof(tt->version) is 12 bytes, but the code writes 16 bytes into the
+output buffer - info->vers->version[0], info->vers->version[1],
+info->vers->version[2] and info->vers->next. This can cause buffer
+overflow.
+
+Fix this buffer overflow by replacing "sizeof(tt->version)" with
+"sizeof(struct dm_target_versions)".]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-72031]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72031</link>
+            <guid isPermaLink="false">CVE-2026-72031</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:52 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+ata: libata-core: Add NOLPM quirk for PNY CS900 1TB SSD
+
+The PNY CS900 1TB SSD (Phison PS3111-S11, DRAM-less) drops off the bus
+after entering Device-Initiated Slumber during idle. With the default
+med_power_with_dipm policy the link goes down (SStatus 1 SControl 300)
+and does not recover, forcing the filesystem read-only. Forcing
+max_performance keeps the link stable across prolonged idle.
+
+Add a NOLPM quirk so link power management is disabled for this drive
+specifically, leaving it intact for other devices on the host.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-72025]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72025</link>
+            <guid isPermaLink="false">CVE-2026-72025</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:52 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+s390/monwriter: Reject buffer reuse with different data length
+
+When data buffers are reused, e.g. for interval sample records, the
+first record determines the data length, and the size of the buffer for
+user copy. Current monwriter code does not check if the data length was
+changed for subsequent records, which also would never happen for valid
+user programs.
+
+However, a malicious user could change the data length, resulting in out
+of bounds user copy to the kernel buffer, and memory corruption. By
+default, the monwriter misc device is created with root-only permissions,
+so practical impact is typically low.
+
+Fix this by checking for changed data length and rejecting such records.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-68480]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-68480</link>
+            <guid isPermaLink="false">CVE-2026-68480</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:52 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+x86/bugs: Make Safe-RET robust against interrupt injection
+
+An attacker injecting interrupts while the Safe-RET mitigation executes
+on machines affected by SRSO can neutralize the safe return sequence,
+potentially leading to data leakage through speculative execution.
+
+Fixup register state as if the Safe-RET sequence executed successfully
+by "emulating" it, in a manner of speaking, and avoid executing a RET
+instruction after returning from the interrupt.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-68460]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-68460</link>
+            <guid isPermaLink="false">CVE-2026-68460</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:52 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+f2fs: fix potential deadlock in f2fs_balance_fs()
+
+When the f2fs filesystem space is nearly exhausted, we encounter deadlock
+issues as below:
+
+INFO: task A:1890 blocked for more than 120 seconds.
+      Tainted: G           O       6.12.41-g3fe07ddf05ab #1
+"echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+task:A    state:D stack:0     pid:1890  tgid:1626  ppid:1153   flags:0x00000204
+Call trace:
+ __switch_to+0xf4/0x158
+ __schedule+0x27c/0x908
+ schedule+0x3c/0x118
+ io_schedule+0x44/0x68
+ folio_wait_bit_common+0x174/0x370
+ folio_wait_bit+0x20/0x38
+ folio_wait_writeback+0x54/0xc8
+ truncate_inode_partial_folio+0x70/0x1e0
+ truncate_inode_pages_range+0x1b0/0x450
+ truncate_pagecache+0x54/0x88
+ f2fs_file_write_iter+0x3e8/0xb80
+ do_iter_readv_writev+0xf0/0x1e0
+ vfs_writev+0x138/0x2c8
+ do_writev+0x88/0x130
+ __arm64_sys_writev+0x28/0x40
+ invoke_syscall+0x50/0x120
+ el0_svc_common.constprop.0+0xc8/0xf0
+ do_el0_svc+0x24/0x38
+ el0_svc+0x30/0xf8
+ el0t_64_sync_handler+0x120/0x130
+ el0t_64_sync+0x190/0x198
+
+INFO: task kworker/u8:11:2680853 blocked for more than 120 seconds.
+      Tainted: G           O       6.12.41-g3fe07ddf05ab #1
+"echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+task:kworker/u8:11   state:D stack:0     pid:2680853 tgid:2680853 ppid:2      flags:0x00000208
+Workqueue: writeback wb_workfn (flush-254:0)
+Call trace:
+ __switch_to+0xf4/0x158
+ __schedule+0x27c/0x908
+ schedule+0x3c/0x118
+ io_schedule+0x44/0x68
+ folio_wait_bit_common+0x174/0x370
+ __filemap_get_folio+0x214/0x348
+ pagecache_get_page+0x20/0x70
+ f2fs_get_read_data_page+0x150/0x3e8
+ f2fs_get_lock_data_page+0x2c/0x160
+ move_data_page+0x50/0x478
+ do_garbage_collect+0xd38/0x1528
+ f2fs_gc+0x240/0x7e0
+ f2fs_balance_fs+0x1a0/0x208
+ f2fs_write_single_data_page+0x6e4/0x730
+ f2fs_write_cache_pages+0x378/0x9b0
+ f2fs_write_data_pages+0x2e4/0x388
+ do_writepages+0x8c/0x2c8
+ __writeback_single_inode+0x4c/0x498
+ writeback_sb_inodes+0x234/0x4a8
+ __writeback_inodes_wb+0x58/0x118
+ wb_writeback+0x2f8/0x3c0
+ wb_workfn+0x2c4/0x508
+ process_one_work+0x180/0x408
+ worker_thread+0x258/0x368
+ kthread+0x118/0x128
+ ret_from_fork+0x10/0x200
+
+INFO: task kworker/u8:8:2641297 blocked for more than 120 seconds.
+      Tainted: G           O       6.12.41-g3fe07ddf05ab #1
+"echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+task:kworker/u8:8    state:D stack:0     pid:2641297 tgid:2641297 ppid:2      flags:0x00000208
+Workqueue: writeback wb_workfn (flush-254:0)
+Call trace:
+ __switch_to+0xf4/0x158
+ __schedule+0x27c/0x908
+ rt_mutex_schedule+0x30/0x60
+ __rt_mutex_slowlock_locked.constprop.0+0x460/0x8a8
+ rwbase_write_lock+0x24c/0x378
+ down_write+0x1c/0x30
+ f2fs_balance_fs+0x184/0x208
+ f2fs_write_inode+0xf4/0x328
+ __writeback_single_inode+0x370/0x498
+ writeback_sb_inodes+0x234/0x4a8
+ __writeback_inodes_wb+0x58/0x118
+ wb_writeback+0x2f8/0x3c0
+ wb_workfn+0x2c4/0x508
+ process_one_work+0x180/0x408
+ worker_thread+0x258/0x368
+ kthread+0x118/0x128
+ ret_from_fork+0x10/0x20
+
+INFO: task B:1902 blocked for more than 120 seconds.
+      Tainted: G           O       6.12.41-g3fe07ddf05ab #1
+"echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+task:B     state:D stack:0     pid:1902  tgid:1626  ppid:1153   flags:0x0000020c
+Call trace:
+ __switch_to+0xf4/0x158
+ __schedule+0x27c/0x908
+ rt_mutex_schedule+0x30/0x60
+ __rt_mutex_slowlock_locked.constprop.0+0x460/0x8a8
+ rwbase_write_lock+0x24c/0x378
+ down_write+0x1c/0x30
+ f2fs_balance_fs+0x184/0x208
+ f2fs_map_blocks+0x94c/0x1110
+ f2fs_file_write_iter+0x228/0xb80
+ do_iter_readv_writev+0xf0/0x1e0
+ vfs_writev+0x138/0x2c8
+ do_writev+0x88/0x130
+ __arm64_sys_writev+0x28/0x40
+ invoke_syscall+0x50/0x120
+ el0_svc_common.constprop.0+0xc8/0xf0
+ do_el0_svc+0x24/0x38
+ el0_svc+0x30/0xf8
+ el0t_64_sync_handler+0x120/0x130
+ el0t_64_sync+0x190/0x198
+
+INFO: task sync:2769849 blocked for more than 120 seconds.
+      Tainted: G     
+---truncated---]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-68457 [CVSS:3.1 9.1 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-68457</link>
+            <guid isPermaLink="false">CVE-2026-68457</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:52 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+ksmbd: use opener credentials for FSCTL mutations
+
+SET_SPARSE, SET_ZERO_DATA and SET_COMPRESSION operate on an open SMB
+handle but call VFS xattr, fallocate or fileattr helpers with the current
+ksmbd worker credentials. Those helpers can revalidate inode permissions,
+ownership and LSM policy independently of the SMB handle access mask.
+
+Run each operation with the credentials captured in the target file when
+the handle was opened. Keep credential handling local to these single-file
+FSCTLs rather than applying session credentials to the complete IOCTL
+handler, which also contains handle-less and multi-handle operations.
+
+Score: 9.1 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-68447 [CVSS:3.1 7.1 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-68447</link>
+            <guid isPermaLink="false">CVE-2026-68447</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:52 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+drm/amdkfd: clamp v9 CRIU control stack checkpoint copy to BO size
+
+CRIU checkpoint copies the MQD control stack using cp_hqd_cntl_stack_size
+from hardware without bounding it to the allocated BO region. If the HW
+field is larger than the queue's control stack allocation, memcpy reads
+past the BO into adjacent GTT memory and can leak kernel data to userspace.
+
+Store the page-aligned control stack BO size in mqd_manager and clamp
+checkpoint copies and reported checkpoint sizes to
+min(cp_hqd_cntl_stack_size, mm->ctl_stack_size). Apply the same bound
+for multi-XCC v9.4.3 checkpoint layout.
+
+(cherry picked from commit 6c2abd0ec09e86c6323010673766f76050e28aa3)
+
+Score: 7.1 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-68436]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-68436</link>
+            <guid isPermaLink="false">CVE-2026-68436</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:52 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+drm/amd/display: use kvzalloc to allocate struct dc
+
+struct dc has grown large over time (most of it the two inlined
+dc_scratch_space copies) and now sits close to the page allocator's 4 MiB
+contiguous allocation limit. Its actual size is not fixed by the source
+alone, it also depends on the compiler and the .config, so it can easily
+cross 4 MiB, e.g. with a newer GCC or a config change.
+
+dc_create() allocates it with kzalloc(). Once struct dc exceeds 4 MiB the
+request is rounded up to order 11 (8 MiB), which is above MAX_PAGE_ORDER,
+so the page allocator warns and returns NULL. dc_create() then fails, DM
+init fails and amdgpu probe aborts with -EINVAL:
+
+  WARNING: mm/page_alloc.c:5197 at __alloc_frozen_pages_noprof+0x2f9/0x380
+   dc_create+0x38/0x660 [amdgpu]
+   amdgpu_dm_init+0x2d9/0x510 [amdgpu]
+   dm_hw_init+0x1b/0x90 [amdgpu]
+   amdgpu_device_init.cold+0x150d/0x1e13 [amdgpu]
+   amdgpu_driver_load_kms+0x19/0x80 [amdgpu]
+   amdgpu_pci_probe+0x1e2/0x4c0 [amdgpu]
+
+dc_create() then returns NULL and DM init fails, which aborts the whole
+GPU init and makes amdgpu probe fail with -EINVAL ("hw_init of IP block
+<dm> failed -22"), leaving the display unusable. The subsequent
+amdgpu_irq_put() warnings during teardown are just fallout of unwinding
+a half-initialized device.
+
+struct dc is a software-only bookkeeping structure that is never handed
+to hardware DMA and is only ever kept as an opaque pointer, so it does
+not require physically contiguous memory. Allocate it with kvzalloc()
+(and free it with kvfree()) so that the allocator can fall back to
+vmalloc() when a contiguous allocation of that size is not available,
+which also avoids the MAX_PAGE_ORDER warning entirely.
+
+v2:
+ - Rebase to amd-staging-drm-next.
+
+(cherry picked from commit 991e0516a8072f2292681c6ae98a924ab0e32575)]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-68430]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-68430</link>
+            <guid isPermaLink="false">CVE-2026-68430</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:52 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+drm/amdgpu/gfx8: drop unecessary BUG_ON()
+
+There's no need to crash the kernel for this case.
+
+(cherry picked from commit 4d7c25208ca612b754f3bf39e9f16e725b828891)]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-68427 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-68427</link>
+            <guid isPermaLink="false">CVE-2026-68427</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:51 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+gpu: host1x: Fix use-after-free in host1x_bo_clear_cached_mappings
+
+__host1x_bo_unpin() drops the last reference to the mapping and frees
+it, so we can't dereference mapping afterwards. The cache itself
+outlives the mapping, so use the cache local variable instead.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-68374 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-68374</link>
+            <guid isPermaLink="false">CVE-2026-68374</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:51 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+usb: core: sysfs: add lock to bos_descriptors_read()
+
+Add a lock to the function bos_descriptors_read().
+
+This function accesses udev->bos, which could be simultaneously freed in
+usb_reset_and_verify_device(), a function that is commonly called in
+drivers all over the kernel.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-68364]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-68364</link>
+            <guid isPermaLink="false">CVE-2026-68364</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:51 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+drm/amd/display: Fix ISM dc_lock deadlock during suspend
+
+[Why]
+System hang observed during suspend/resume while video is playing.
+amdgpu_dm_ism_disable() is called under dc_lock and waits for ISM
+delayed work via disable_delayed_work_sync(). The work handlers
+themselves take dc_lock, producing an ABBA deadlock when a worker is
+in flight at suspend time.
+
+[How]
+Split the disable path into two phases with opposite locking
+contracts:
+  1. amdgpu_dm_ism_disable() -- quiesces workers, must NOT hold
+     dc_lock.
+  2. amdgpu_dm_ism_force_full_power() (new) -- drives the ISM FSM
+     back to FULL_POWER_RUNNING, must hold dc_lock.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-68259]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-68259</link>
+            <guid isPermaLink="false">CVE-2026-68259</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:51 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+drm/amdkfd: Check bounds in allocate_event_notification_slot
+
+The valid event ids go from 0 to KFD_SIGNAL_EVENT_LIMIT
+
+allocate_event_notification_slot has an option to specify
+an event id to allocate at, used by CRIU. We weren't checking
+the bounds on that value.
+
+Check them.
+
+v2: Lower bounds check is unecessary because of idr_alloc
+already rejecting negative numbers. Upper bounds check should
+be KFD_SIGNAL_EVENT_LIMIT since the signal mode mappings might
+not yet exist
+
+(cherry picked from commit 6853f1f6cbbeb3f53ebbbd7286536aeb2c5d5f50)]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-68258 [CVSS:3.1 7.1 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-68258</link>
+            <guid isPermaLink="false">CVE-2026-68258</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:51 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+drm/amdkfd: Check bounds on CRIU restore queue type and mqd size
+
+We weren't checking whether the values provided in the private
+data in kfd CRIU restore were within bounds.
+
+For queue type, add a KFD_QUEUE_TYPE_MAX and ensure the provided
+type is less than it.
+
+For mqd_size, add new function mqd_size_from_queue_type and confirm
+that the provided mqd_size matches expectations.
+
+(cherry picked from commit f19d8086f6644083c913d70bfdeee20e1b6f46a5)
+
+Score: 7.1 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-68257 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-68257</link>
+            <guid isPermaLink="false">CVE-2026-68257</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:51 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+drm/amdkfd: fix 32-bit overflow in CWSR total size calculation
+
+total_cwsr_size was computed in 32-bit before being used as a BO/SVM
+allocation size.
+With large ctx_save_restore_area_size and debug_memory_size
+multiplied by the XCC count, the product can wrap,
+yielding an undersized CWSR save area that firmware later overruns.
+
+Promote total_cwsr_size to u64 and use check_add_overflow()/
+check_mul_overflow() in both kfd_queue_acquire_buffers() and
+kfd_queue_release_buffers().
+
+(cherry picked from commit 319f7e13423ae3f486b9aea82f9ad2d6af0ee608)
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-68252]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-68252</link>
+            <guid isPermaLink="false">CVE-2026-68252</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:51 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+drm/amdgpu/sdma7.0: replace BUG_ON() with WARN_ON()
+
+There's no need to crash the kernel for these cases.
+
+(cherry picked from commit 9723a8bed3aa251a26bee4583bac9d8fb064dd44)]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-68251]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-68251</link>
+            <guid isPermaLink="false">CVE-2026-68251</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:51 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+drm/amdgpu/sdma6.0: replace BUG_ON() with WARN_ON()
+
+There's no need to crash the kernel for these cases.
+
+(cherry picked from commit c17a508a7d652da3728f8bbc481bfffe96d65a87)]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-68250]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-68250</link>
+            <guid isPermaLink="false">CVE-2026-68250</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:51 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+drm/amdgpu/sdma5.2: replace BUG_ON() with WARN_ON()
+
+There's no need to crash the kernel for these cases.
+
+(cherry picked from commit ae658afc7f47f6147371ec42cc6b1a793dfdb5af)]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-68249]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-68249</link>
+            <guid isPermaLink="false">CVE-2026-68249</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:51 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+drm/amdgpu/sdma5.0: replace BUG_ON() with WARN_ON()
+
+There's no need to crash the kernel for these cases.
+
+(cherry picked from commit 8d144a0eb09537055841af48c9e7c2d4cd48e84d)]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-68246]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-68246</link>
+            <guid isPermaLink="false">CVE-2026-68246</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:50 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+drm/amdgpu/gfx11: replace BUG_ON() with WARN_ON()
+
+There's no need to crash the kernel for these cases.
+
+(cherry picked from commit daa62107452d2451787c4248ca38fa2d1a0cbefd)]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-68245 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-68245</link>
+            <guid isPermaLink="false">CVE-2026-68245</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:50 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+drm/amdgpu: fix lifetime issue of amdgpu_vm_get_task_info_pasid()
+
+The vm pointer returned from amdgpu_vm_get_vm_from_pasid() is only
+valid while the lock is still being held. Once xa_unlock_irqrestore is
+called and returned, the pointer is no longer under lock and is subject
+to modification. Since, the caller still dereferences vm->task_info in
+amdgpu_vm_get_task_info_vm() after the lock is removed, this causes a
+use after unlock problem.
+
+Remove the lifetime issue present in amdgpu_vm_get_task_info_pasid()
+through removing the amdgpu_vm_get_vm_from_pasid() function from
+amdgpu_vm.c and making the relevant code inline to hold the lock while
+it is still in use.
+
+(cherry picked from commit 9d01579f3f868b333acc901815972685989092c7)
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-68235]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-68235</link>
+            <guid isPermaLink="false">CVE-2026-68235</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:50 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+drm/amd/display: dce100: skip non-DP stream encoders for DP MST
+
+On DCE8-class ASICs (e.g. Bonaire), the resource pool contains digital
+DIG stream encoders plus one analog DAC encoder. When assigning a stream
+encoder for a second DisplayPort MST stream, if the preferred digital
+encoder is already acquired, dce100_find_first_free_match_stream_enc_for_link()
+falls back to the first free pool entry. That entry may be the analog
+encoder, whose funcs table lacks DP hooks such as dp_set_stream_attribute.
+The subsequent atomic commit then dereferences NULL function pointers in
+link_set_dpms_on() and crashes.
+
+Skip encoders without dp_set_stream_attribute when the stream uses a DP
+signal (including MST). Use dc_is_dp_signal(stream->signal) for the MST
+fallback path instead of checking only the link connector signal.
+
+Tested on:
+- GPU: AMD Radeon R7 260X (Bonaire / DCE8)
+- Board: Supermicro C9X299-PG300
+- Setup: DP MST daisy chain, hotplug second monitor or have it connected on boot
+- Kernel: 7.1.3 (issue observed since 6.19)
+- Result: kernel oops without patch; dual monitors stable with patch
+
+(cherry picked from commit 28ec64943e3ee4d9b8d30cea61e380f1429953a8)]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-68234]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-68234</link>
+            <guid isPermaLink="false">CVE-2026-68234</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:50 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+drm/amdgpu: fix bo->pin leaking in amdgpu_bo_create_reserved
+
+amdgpu_bo_create_reserved() only allocates a new BO when
+*bo_ptr (struct amdgpu_bo **bo_ptr as input parameter) is
+NULL, it simply skips creation when *bo_ptr is non-NULL.
+But it unconditionally reserves, pins, gart allocates
+and maps the BO afterwards.
+
+When the same non-NULL BO pointer is passed in again,
+for example firmware buffers that live in adev and are
+re-loaded on every resume / cp_resume / start
+under AMDGPU_FW_LOAD_DIRECT, amdgpu_bo_pin() just increases
+pin_count unconditionally, however the matching teardown only unpins
+once, so pin_count never drops to zero, so TTM is not able
+to move, swap or evict a BO, causing BO leaks.
+
+This commit fixes this issue by only pinning the bo
+once at creation, and repeated calls no longer
+take additional pin references.
+
+(cherry picked from commit 3ddc0ae76202c447b6aec61e907b852bc94671cf)]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-68185]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-68185</link>
+            <guid isPermaLink="false">CVE-2026-68185</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:50 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+LoongArch: Move jump_label_init() before parse_early_param()
+
+When enabling both CONFIG_MEM_ALLOC_PROFILING=y and
+CONFIG_MEM_ALLOC_PROFILING_ENABLED_BY_DEFAULT=y, then diabling memory
+profiling by adding the boot parameter 'sysctl.vm.mem_profiling=0' will
+cause the kernel failed to boot.
+
+After analysis, this is because jump_label_init() must be called before
+parse_early_param(), the early param handlers may modify static keys by
+static_branch_enable/disable().
+
+Fix this by moving jump_label_init() to before parse_early_param(). The
+solution is similar to other architectures.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-68155 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-68155</link>
+            <guid isPermaLink="false">CVE-2026-68155</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:50 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+libceph: Reject monmaps advertising zero monitors
+
+A message of type CEPH_MSG_MON_MAP contains a monmap that is sent from a
+monitor to the client. This monmap contains information about the
+existing monitors in the cluster. Currently, a monmap indicating that
+there are zero monitors in the cluster is treated as valid. However, it
+is impossible to have zero monitors in the cluster and still receive a
+valid monmap from a monitor. Therefore, such a monmap must be corrupted
+and should be treated as invalid. Furthermore, a monmap with a monitor
+count of zero can subsequently crash the client when attempting to open
+a session with a monitor in __open_session(). This happens because the
+"BUG_ON(monc->monmap->num_mon < 1)" assertion in pick_new_mon() is
+triggered.
+
+This patch extends a check in ceph_monmap_decode() to also reject
+arriving mon_maps with num_mon == 0 rather than only with
+num_mon > CEPH_MAX_MON.
+
+[ idryomov: drop "log output for unusual values of num_mon" part ]
+
+Score: 7.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-68115]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-68115</link>
+            <guid isPermaLink="false">CVE-2026-68115</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:50 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+drm/amdgpu/gfx10: replace BUG_ON() with WARN_ON()
+
+There's no need to crash the kernel for these cases.
+
+(cherry picked from commit ac6f00beb658239bced4aaed9efbb04a35348d48)]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-68114]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-68114</link>
+            <guid isPermaLink="false">CVE-2026-68114</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:50 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+drm/amdgpu/gfx12.1: replace BUG_ON() with WARN_ON()
+
+There's no need to crash the kernel for these cases.
+
+(cherry picked from commit e4d99e04b2e9b13b97d3b17804c735f62689db23)]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-68113]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-68113</link>
+            <guid isPermaLink="false">CVE-2026-68113</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:50 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+drm/amdgpu/gfx12: replace BUG_ON() with WARN_ON()
+
+There's no need to crash the kernel for these cases.
+
+(cherry picked from commit f952076f76d62f783e8ba4995a7c400d39354ccf)]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-68112]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-68112</link>
+            <guid isPermaLink="false">CVE-2026-68112</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:50 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+drm/amdgpu/gfx9.4.3: replace BUG_ON() with WARN_ON()
+
+There's no need to crash the kernel for these cases.
+
+(cherry picked from commit 5676593d08998d7a6d9e2d51d6b54b3820e3755c)]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-4740 [CVSS:3.1 8.2 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-4740</link>
+            <guid isPermaLink="false">CVE-2026-4740</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:49 GMT</pubDate>
+            <description><![CDATA[A flaw was found in Open Cluster Management (OCM), the technology underlying Red Hat Advanced Cluster Management (ACM). Improper validation of Kubernetes client certificate renewal allows a managed cluster administrator to forge a client certificate that can be approved by the OCM controller. This enables cross-cluster privilege escalation and may allow an attacker to gain control over other managed clusters, including the hub cluster.
+
+Score: 8.2 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:H/UI:N/S:C/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-1784 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-1784</link>
+            <guid isPermaLink="false">CVE-2026-1784</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:49 GMT</pubDate>
+            <description><![CDATA[The Route OpenShift resource allows to define routes to make pods reachable at a subdomain through HAProxy. It was found that the checks performed on the spec.path YAML stanza in a Route document was insufficient and could allow a controlled injection of the HAProxy configuration.
+
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-17107 [CVSS:3.1 8.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17107</link>
+            <guid isPermaLink="false">CVE-2026-17107</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:49 GMT</pubDate>
+            <description><![CDATA[A flaw was found in the cluster-proxy service-proxy component used in Red Hat Advanced Cluster Management for Kubernetes (RHACM) and multicluster-engine (MCE). The service-proxy appends impersonation group headers to proxied requests without first removing caller-supplied values, and the spoke ServiceAccount holds unrestricted impersonation permissions. An authenticated hub principal can inject an Impersonate-Group header to escalate to cluster-admin on every managed cluster.
+
+Score: 8.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:C/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-16242 [CVSS:3.1 9.4 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-16242</link>
+            <guid isPermaLink="false">CVE-2026-16242</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:49 GMT</pubDate>
+            <description><![CDATA[A flaw was found in the Konnectivity proxy-server configuration for hosted control planes. The agent-facing listener was started without --cluster-ca-cert (and without token-based agent authentication), so client certificates were not validated. A remote attacker who can reach the Konnectivity cluster endpoint could connect as an unauthenticated agent, join the routing pool, and potentially proxy, inspect, modify, or drop control-plane-to-node traffic.
+
+Score: 9.4 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:L]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-15371 [CVSS:3.1 8.1 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-15371</link>
+            <guid isPermaLink="false">CVE-2026-15371</guid>
+            <pubDate>Tue, 18 Aug 2026 07:16:48 GMT</pubDate>
+            <description><![CDATA[Velociraptor's web GUI allows specifying a custom type for columns in tables. The URL type takes the cell value and forms a URL which can be clicked in the GUI.The code does not limit the schemes allowed in this URL , allowing an attacker to specify a JavaScript scheme exposing the user to XSS.
+
+Score: 8.1 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:C/C:H/I:H/A:N]]></description>
+        </item>
         <item>
             <title><![CDATA[CVE-2026-75091 [CVSS:3.1 7.2 HIGH]]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-75091</link>
@@ -18,16 +1294,6 @@
 
 Score: 7.2 (HIGH)
 Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:L/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-1784 [CVSS:3.1 8.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-1784</link>
-            <guid isPermaLink="false">CVE-2026-1784</guid>
-            <pubDate>Tue, 18 Aug 2026 06:16:41 GMT</pubDate>
-            <description><![CDATA[The Route OpenShift resource allows to define routes to make pods reachable at a subdomain through HAProxy. It was found that the checks performed on the spec.path YAML stanza in a Route document was insufficient and could allow a controlled injection of the HAProxy configuration.
-
-Score: 8.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H]]></description>
         </item>
         <item>
             <title><![CDATA[CVE-2026-15748 [CVSS:3.1 9.8 CRITICAL]]]></title>
@@ -502,538 +1768,6 @@ Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X
 
 Score: 7.5 (HIGH)
 Vector: CVSS:4.0/AV:N/AC:L/AT:P/PR:H/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-73655 [CVSS:3.1 7.4 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-73655</link>
-            <guid isPermaLink="false">CVE-2026-73655</guid>
-            <pubDate>Tue, 18 Aug 2026 02:17:29 GMT</pubDate>
-            <description><![CDATA[Trigger.dev is a platform for building and deploying fully managed AI agents and workflows. Prior to 4.5.2, addGoogleStrategy() in apps/webapp/app/services/googleAuth.server.ts passes a Google profile email to findOrCreateGoogleUser() in apps/webapp/app/models/user.server.ts without requiring Google's email_verified assertion. When existingEmailUser && !existingUser is true, the flow writes the new Google authIdentifier into the existing email-matched account and returns that user object, allowing an attacker-controlled Google profile with an unverified matching email to take over the account. This issue is fixed in version 4.5.2.
-
-Score: 7.4 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-73650 [CVSS:3.1 8.2 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-73650</link>
-            <guid isPermaLink="false">CVE-2026-73650</guid>
-            <pubDate>Tue, 18 Aug 2026 02:17:29 GMT</pubDate>
-            <description><![CDATA[SVGO, short for SVG Optimizer, is a Node.js library and command-line application for optimizing SVG files. From version 1.0.0 until versions 2.8.3, 3.3.4, and 4.0.2, the removeScripts plugin, named removeScriptElement in versions 1 through 3, can leave executable content in optimized SVGs because it does not remove namespaced or prefixed script elements such as <svg:script> and, in versions 3 and 4, matches JavaScript URIs case sensitively. Applications that process untrusted SVG input with this plugin enabled and serve the result can allow scripts to execute when another user opens the SVG, exposing local storage or cookies. This issue is fixed in versions 2.8.3, 3.3.4, and 4.0.2.
-
-Score: 8.2 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:H/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-73644 [CVSS:3.1 9.6 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-73644</link>
-            <guid isPermaLink="false">CVE-2026-73644</guid>
-            <pubDate>Tue, 18 Aug 2026 02:17:29 GMT</pubDate>
-            <description><![CDATA[OpenDJ is an LDAPv3 compliant directory service. Prior to 5.1.2, the SASL PLAIN authorization identity path in opendj-server-legacy/src/main/java/org/opends/server/extensions/PlainSASLMechanismHandler.java checked the PROXIED_AUTH privilege but did not evaluate the mayProxy proxy ACI scope when an authzid resolved to a different user. Both dn: and u: or bare authzid forms could therefore let an authenticated account holding PROXIED_AUTH assume any resolvable non-root identity outside the identities permitted by its proxy ACI. The fix returns INVALID_CREDENTIALS (49) before password verification when the target authorization identity is not permitted. This issue is fixed in version 5.1.2.
-
-Score: 9.6 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-73566 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-73566</link>
-            <guid isPermaLink="false">CVE-2026-73566</guid>
-            <pubDate>Tue, 18 Aug 2026 02:17:29 GMT</pubDate>
-            <description><![CDATA[node-tar is a tar archive manipulation library for Node.js. Prior to 7.5.21, node-tar's filesFilter in src/list.ts uses the recursive mapHas helper to walk an archive entry path upward with path.dirname() and no segment cap when tar.t(...) or tar.x(...) receives a non-empty member-selection list. A crafted GNU L or PAX x long-path header with thousands of slash-separated segments reaches this.filter(entry.path, entry) in Parser[CONSUMEHEADER] in src/parse.ts before Unpack[CHECKPATH] applies maxDepth, causing an uncatchable RangeError stack overflow that terminates asynchronous and streaming Node.js consumers. This issue is fixed in version 7.5.21.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-73561 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-73561</link>
-            <guid isPermaLink="false">CVE-2026-73561</guid>
-            <pubDate>Tue, 18 Aug 2026 02:17:29 GMT</pubDate>
-            <description><![CDATA[Hub is a Node.js WebSocket server and client with added features. Prior to 0.2.16, every incoming unauthenticated WebSocket connection triggers loadDefaultConnectionEventListeners to call requestClientId, which calls rpc.send for the get-client-id action and pushes a request into RPC.requests. The RPC.waitForReply function starts a setInterval polling loop every 10 milliseconds that is cleared only after a matching reply; if the client remains silent and closes, the timer and pending request stay allocated because the socket close path does not cancel them. Repeated connections therefore cause unbounded timers and heap entries, exhausting CPU and memory and making the server unavailable. This issue is fixed in version 0.2.16.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-73482 [CVSS:4.0 7.2 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-73482</link>
-            <guid isPermaLink="false">CVE-2026-73482</guid>
-            <pubDate>Tue, 18 Aug 2026 02:17:29 GMT</pubDate>
-            <description><![CDATA[phpList before 3.7.0-RC5 contains a cross-site request forgery (CSRF) vulnerability in lists/admin/admins.php. The administrator deletion action is triggered via an unauthenticated GET request (?page=admins&delete=N) that is not protected by a CSRF token (the central verifyCsrfGetToken check uses enforce=false and is bypassed when the token parameter is absent). A remote attacker can trick a logged-in super-administrator into loading a crafted URL (e.g., embedded as an image in an email) to delete any non-self administrator account.
-
-Score: 7.2 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:P/VC:N/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-73421 [CVSS:4.0 9.1 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-73421</link>
-            <guid isPermaLink="false">CVE-2026-73421</guid>
-            <pubDate>Tue, 18 Aug 2026 02:17:28 GMT</pubDate>
-            <description><![CDATA[NextAuth.js provides authentication for Next.js. From next-auth 5.0.0-beta.0 until 5.0.0-beta.32, applications that gate access by checking only for the existence of the auth object returned by the auth() wrapper can fail open when Auth.js has a server configuration error. In middleware, Route Handlers, React Server Components, and other auth() entry points, a non-OK session response is parsed into a truthy error object instead of null, so checks such as !!auth and if (req.auth) evaluate to true for unauthenticated requests. A provider missing both the issuer and authorization endpoint triggers InvalidEndpoints, and an unset AUTH_SECRET or another server configuration error can produce the same behavior. There is no impact while configuration is valid, but after a deployment becomes misconfigured, routes protected only by session existence silently grant access to every visitor. This issue is fixed in next-auth 5.0.0-beta.32.
-
-Score: 9.1 (CRITICAL)
-Vector: CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:H/VI:H/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-73305 [CVSS:3.1 8.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-73305</link>
-            <guid isPermaLink="false">CVE-2026-73305</guid>
-            <pubDate>Tue, 18 Aug 2026 02:17:28 GMT</pubDate>
-            <description><![CDATA[Budibase is an open-source low-code platform. Prior to 3.39.24, POST /api/public/v1/roles/assign called validateGlobalRoleUpdate without checking appBuilder.appId or role.appId in packages/server/src/api/controllers/public/globalRoleValidation.ts. An app-scoped builder could scope the request to an app they control and then grant themselves builder access or an arbitrary role in another app, exposing that app data, datasource configuration, and automations. This issue is fixed in version 3.39.24.
-
-Score: 8.8 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-73266 [CVSS:3.1 7.1 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-73266</link>
-            <guid isPermaLink="false">CVE-2026-73266</guid>
-            <pubDate>Tue, 18 Aug 2026 02:17:28 GMT</pubDate>
-            <description><![CDATA[A flaw was found in the clusterclaims-controller component of Multicluster Engine (MCE). An authenticated tenant can exploit this vulnerability by manipulating ClusterClaim labels. This allows the tenant to force a cluster to join a ManagedClusterSet belonging to another tenant. Such unauthorized access could enable the injection of policies and workloads into other tenants' clusters.
-
-Score: 7.1 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:C/C:H/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-73049 [CVSS:4.0 6.9 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-73049</link>
-            <guid isPermaLink="false">CVE-2026-73049</guid>
-            <pubDate>Tue, 18 Aug 2026 02:17:28 GMT</pubDate>
-            <description><![CDATA[SiYuan versions before v3.7.4 contain an information disclosure vulnerability in the getAttributeViewBacklinks endpoint that consults the forbidden access list instead of the visibility list when filtering backlinks. Anonymous readers can supply a publicly visible database row identifier to discover hidden-tier documents that reference it, receiving the database name, row title, and document path of hidden documents.
-
-Score: 6.9 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:N/VA:N/SC:L/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-72853 [CVSS:4.0 8.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72853</link>
-            <guid isPermaLink="false">CVE-2026-72853</guid>
-            <pubDate>Tue, 18 Aug 2026 02:17:28 GMT</pubDate>
-            <description><![CDATA[Budibase before 3.40.0 contains a SQL injection vulnerability in the Oracle datasource connector's post-write row lookup that fails to escape table names in identifiers. Attackers with write permission on a table with a double-quote in its name can inject SQL that executes as the datasource's database user to read or modify arbitrary data.
-
-Score: 8.8 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:H/AT:P/PR:H/UI:P/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-72841 [CVSS:4.0 9.4 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72841</link>
-            <guid isPermaLink="false">CVE-2026-72841</guid>
-            <pubDate>Tue, 18 Aug 2026 02:17:28 GMT</pubDate>
-            <description><![CDATA[luci-app-openvpn fails to properly validate the instance_name2 parameter during file upload, allowing authenticated users to perform path traversal and write arbitrary files outside the intended directory. Attackers can upload malicious payloads to gain persistent root code execution by placing SSH keys in system directories accessible on reboot.
-
-Score: 9.4 (CRITICAL)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-72836 [CVSS:4.0 9.2 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72836</link>
-            <guid isPermaLink="false">CVE-2026-72836</guid>
-            <pubDate>Tue, 18 Aug 2026 02:17:28 GMT</pubDate>
-            <description><![CDATA[FileBrowser before 2.63.19 does not account for case-insensitive filesystems when checking home directory ownership during self-registration. When Signup and CreateUserDir are enabled and FileBrowser's root is on a case-insensitive filesystem (confirmed on Windows/NTFS), two self-registered usernames that differ only in letter case (e.g., CaseVictim and casevictim) are stored as distinct accounts but resolve to the same physical home directory, because the scope-ownership check compares the persisted scope as an exact case-sensitive string. A second registrant can therefore read, overwrite, and delete another account's files through authenticated HTTP endpoints, without needing an existing account or victim interaction.
-
-Score: 9.2 (CRITICAL)
-Vector: CVSS:4.0/AV:N/AC:H/AT:P/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-72831 [CVSS:4.0 8.7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72831</link>
-            <guid isPermaLink="false">CVE-2026-72831</guid>
-            <pubDate>Tue, 18 Aug 2026 02:17:28 GMT</pubDate>
-            <description><![CDATA[The Flex Objects plugin (through 1.4.6, tested with Grav 2.0.11) contains an incorrect authorization vulnerability in its Flex Objects API. FlexApiController::update() checks only the general Flex directory permission and does not apply the additional target/field/super-admin checks enforced by the dedicated Users and Groups API controllers. An authenticated account with api.access, admin.login, and users.update permissions (but without api.users.write or admin.super) can use the generic /api/v1/flex-objects/user-accounts endpoint to change a super administrator's password, or the /api/v1/flex-objects/user-groups endpoint to grant its group admin.super, resulting in full site takeover. Fixed in Flex Objects 1.4.7.
-
-Score: 8.7 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-72826 [CVSS:4.0 9.3 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72826</link>
-            <guid isPermaLink="false">CVE-2026-72826</guid>
-            <pubDate>Tue, 18 Aug 2026 02:17:27 GMT</pubDate>
-            <description><![CDATA[The getgrav/grav-plugin-api plugin before 1.0.13 fails to validate that the scopes of a newly created API key are a subset of the caller's scopes in createApiKey. The self-target path of requireApiKeyPermission() requires only the baseline api.access scope, and the new key's scopes are read directly from the request body with no subset check. An attacker holding a minimal-scope API key on a super account can submit an empty scopes array to mint an unscoped, full-access super key, bypassing scope restrictions (and enabling further chains such as configuration write to RCE).
-
-Score: 9.3 (CRITICAL)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-72821 [CVSS:4.0 5.1 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72821</link>
-            <guid isPermaLink="false">CVE-2026-72821</guid>
-            <pubDate>Tue, 18 Aug 2026 02:17:27 GMT</pubDate>
-            <description><![CDATA[Grav Form plugin versions before 9.1.15 contain a stored cross-site scripting vulnerability in radio and toggle field option labels rendered with the Twig |raw filter. Attackers with form authoring permissions can inject HTML and script payloads in option labels that execute in the browsers of visitors and administrators viewing the form.
-
-Score: 5.1 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:P/VC:L/VI:L/VA:N/SC:L/SI:L/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-72815 [CVSS:4.0 6.9 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72815</link>
-            <guid isPermaLink="false">CVE-2026-72815</guid>
-            <pubDate>Tue, 18 Aug 2026 02:17:27 GMT</pubDate>
-            <description><![CDATA[go-chi chi versions >= 5.2.1 and before 5.3.0 contain an IP spoofing vulnerability in the RealIP middleware, which blindly trusts the first (leftmost) value of the X-Forwarded-For HTTP header. A remote attacker can bypass IP-based access control lists and rate-limiting mechanisms, and forge log entries, by supplying a spoofed IP address in the X-Forwarded-For header. The issue is fixed in version 5.3.0.
-
-Score: 6.9 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:L/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-72776 [CVSS:4.0 9.3 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72776</link>
-            <guid isPermaLink="false">CVE-2026-72776</guid>
-            <pubDate>Tue, 18 Aug 2026 02:17:27 GMT</pubDate>
-            <description><![CDATA[AgenticSeek (commit fc242c7) contains an unauthenticated remote code execution vulnerability that allows any network-adjacent attacker to execute arbitrary commands by submitting crafted queries to the unprotected POST /query API endpoint bound to 0.0.0.0:7777 with wildcard CORS. Attackers can send unauthenticated HTTP requests that cause the autonomous agent to generate and execute shell commands through BashInterpreter using subprocess.Popen with shell=True and safety=False, bypassing the incomplete command blocklist to achieve full host-level code execution.
-
-Score: 9.3 (CRITICAL)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-72741 [CVSS:4.0 8.6 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72741</link>
-            <guid isPermaLink="false">CVE-2026-72741</guid>
-            <pubDate>Tue, 18 Aug 2026 02:17:27 GMT</pubDate>
-            <description><![CDATA[Rainbond through 6.9.7 contains a broken access control vulnerability in the CheckToken function that allows authenticated attackers to access unauthorized enterprise resources by substituting another enterprise's tenant name in URL paths. Attackers can use any valid API token to bypass enterprise ID verification and access or modify another enterprise's services, plugins, environment variables, and certificates.
-
-Score: 8.6 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-58224 [CVSS:3.1 6.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-58224</link>
-            <guid isPermaLink="false">CVE-2026-58224</guid>
-            <pubDate>Tue, 18 Aug 2026 02:17:27 GMT</pubDate>
-            <description><![CDATA[A flaw was found in Samba's CTDB, the clustered database service used by Samba. Insufficient integrity validation of received CTDB protocol packets allows malformed packets containing invalid field lengths, improperly terminated strings, or inconsistent packet sizes to be processed without adequate bounds checking. A remote attacker with access to the CTDB private network may trigger a denial of service through process crashes or excessive memory consumption and, in limited cases, disclose adjacent memory contents.
-
-Score: 6.5 (MEDIUM)
-Vector: CVSS:3.1/AV:A/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-53970 [CVSS:4.0 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-53970</link>
-            <guid isPermaLink="false">CVE-2026-53970</guid>
-            <pubDate>Tue, 18 Aug 2026 02:17:27 GMT</pubDate>
-            <description><![CDATA[ZeroBrew version 0.3.1 and prior contains a missing integrity verification vulnerability in the Ruby compatibility shim that allows network attackers to execute arbitrary code by substituting malicious content at formula resource or URL-based patch URLs without checksum validation. Attackers can intercept or replace downloads for secondary resource and patch paths in shim.rb, injecting attacker-controlled build steps or source tree modifications that execute during source builds via 'zb install --build-from-source' without any integrity warning.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:H/AT:N/PR:N/UI:A/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-49864 [CVSS:4.0 8.6 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-49864</link>
-            <guid isPermaLink="false">CVE-2026-49864</guid>
-            <pubDate>Tue, 18 Aug 2026 02:17:27 GMT</pubDate>
-            <description><![CDATA[wetty provides terminal access in browser over http/https. Prior to version 3.0.4, the wetty client decodes a base64 filename from the file-download escape sequence and interpolates it raw into a Toastify HTML string (`escapeMarkup: false`). Any output the victim renders - a `cat`'d file, a tailed log, an SSH MOTD, a `curl` response - that contains `\x1b[5i...:...\x1b[4i` runs script in the wetty origin and types attacker-chosen keystrokes into the victim's SSH session. Version 3.0.4 fixes the issue.
-
-Score: 8.6 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:A/VC:H/VI:H/VA:L/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-47191 [CVSS:4.0 2.1 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-47191</link>
-            <guid isPermaLink="false">CVE-2026-47191</guid>
-            <pubDate>Tue, 18 Aug 2026 02:17:26 GMT</pubDate>
-            <description><![CDATA[kas is a setup tool for bitbake based projects. Prior to version 5.3, when relying solely on a git commit ID (SHA-1 or SHA-256) to qualify if a checkout of a repository is equivalent to the state validated while adding its commit ID to a kas configuration, users may be tricked to check out a branch of the same name from this repository. This implies that the referenced repository has been taken over by an attacker and modified to carry such a branch. SHA-1 commits may also be replaced by creating hash collisions, so the primary impact of this issue is on SHA-256 commit IDs. Version 5.3 fixes the issue. As a workaround, avoid relying solely on the commit ID for integrity validation of a repository that might become under control of a malicious 3rd party. If available, additional validate cryptographically signed commits or tags. Alternatively, mirror the repository to a save place, validate its integrity, and use this instead of the original one.
-
-Score: 2.1 (LOW)
-Vector: CVSS:4.0/AV:N/AC:H/AT:P/PR:L/UI:P/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-45699 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-45699</link>
-            <guid isPermaLink="false">CVE-2026-45699</guid>
-            <pubDate>Tue, 18 Aug 2026 02:17:26 GMT</pubDate>
-            <description><![CDATA[Netatalk is a Free and Open Source file server suite for Unix-like operating systems. In versions 3.1.19 through 4.4.2, a  stack-based buffer overflow exists in the copydir() function of Netatalk's afpd daemon due to an integer underflow in the calculation of the remaining buffer size used for path construction. copydir() is a utility function called when a file operation crosses a device boundary inside an AFP shared volume, which the standard library's renameat() cannot handle. The function attempts to track available buffer space using srem and drem for source and destination paths. Incorrect arithmetic causes both srem and drem to underflow to SIZE_MAX. Consequently, boundary checks against strlen(de->d_name) always pass, allowing strcpy() to append filenames into nearly full stack buffers. Version 4.4.3 patches the issue. As a workaround, configure each AFP shared volume to be structured as a single file system, in other words no subdirectory of a shared volume should be a mount point for a different file system.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-19847 [CVSS:4.0 7.4 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19847</link>
-            <guid isPermaLink="false">CVE-2026-19847</guid>
-            <pubDate>Tue, 18 Aug 2026 02:17:26 GMT</pubDate>
-            <description><![CDATA[A security flaw has been discovered in TOTOLINK A800R 4.1.2cu.5137_B20200730. Affected is the function setWiFiWpsConfig of the file /cgi-bin/cstecgi.cgi of the component wps.so. The manipulation of the argument pin results in stack-based buffer overflow. The attack can be launched remotely. The exploit has been released to the public and may be used for attacks.
-
-Score: 7.4 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-19839 [CVSS:4.0 2 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19839</link>
-            <guid isPermaLink="false">CVE-2026-19839</guid>
-            <pubDate>Tue, 18 Aug 2026 02:17:26 GMT</pubDate>
-            <description><![CDATA[A vulnerability was detected in SourceCodester Simple Doctors Appointment System 1.0. This issue affects the function save_doctor of the file /save_file.php. The manipulation results in unrestricted upload. The attack can be executed remotely. The exploit is now public and may be used.
-
-Score: 2 (LOW)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:H/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-19834 [CVSS:4.0 2 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19834</link>
-            <guid isPermaLink="false">CVE-2026-19834</guid>
-            <pubDate>Tue, 18 Aug 2026 02:17:26 GMT</pubDate>
-            <description><![CDATA[A vulnerability was determined in Webkul Bagisto up to 2.4.4. Affected is an unknown function of the file /admin/customers/login-as-customer/ of the component Admin Customer Impersonation Feature. This manipulation of the argument ID causes authorization bypass. The attack can be initiated remotely. The exploit has been publicly disclosed and may be utilized. The vendor confirms: "The reported issues were already identified through our internal security assessment process prior to this notification and are being handled through our established internal security and development lifecycle. Some of these items have already been addressed, while the remaining items are planned for resolution in upcoming product releases."
-
-Score: 2 (LOW)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:H/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-19826 [CVSS:4.0 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19826</link>
-            <guid isPermaLink="false">CVE-2026-19826</guid>
-            <pubDate>Tue, 18 Aug 2026 02:17:26 GMT</pubDate>
-            <description><![CDATA[A vulnerability was detected in alldatacenter alldata up to 0.6.8. This affects the function Hessian2Input.readObject of the file /serialize/impl/HessianSerializer.java of the component xxl-rpc Listener. The manipulation results in deserialization. The attack may be performed from remote. The exploit is now public and may be used. The project closed the issue report as "not planned" without any further explanation.
-
-Score: 5.5 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-19821 [CVSS:4.0 7.4 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19821</link>
-            <guid isPermaLink="false">CVE-2026-19821</guid>
-            <pubDate>Tue, 18 Aug 2026 02:17:26 GMT</pubDate>
-            <description><![CDATA[A vulnerability was determined in Tenda AC12 15.03.06.23_multi_TD01. This vulnerability affects the function formSetRebootTimer of the file /goform/SetSysAutoRebbotCfg of the component httpd web management interface. This manipulation of the argument rebootTime causes buffer overflow. The attack may be initiated remotely. The exploit has been publicly disclosed and may be utilized.
-
-Score: 7.4 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-19811 [CVSS:4.0 7.4 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19811</link>
-            <guid isPermaLink="false">CVE-2026-19811</guid>
-            <pubDate>Tue, 18 Aug 2026 02:17:26 GMT</pubDate>
-            <description><![CDATA[A security flaw has been discovered in TOTOLINK A800R 4.1.2cu.5137_B20200730. The impacted element is the function setIpQosRules of the file /cgi-bin/cstecgi.cgi of the component firewall.so. The manipulation of the argument Comment results in stack-based buffer overflow. The attack can be executed remotely. The exploit has been released to the public and may be used for attacks.
-
-Score: 7.4 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-19788 [CVSS:4.0 7.4 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19788</link>
-            <guid isPermaLink="false">CVE-2026-19788</guid>
-            <pubDate>Tue, 18 Aug 2026 02:17:25 GMT</pubDate>
-            <description><![CDATA[A vulnerability was found in Tenda AC1206 15.03.06.23_multi_TD01. This affects the function set_device_name of the file /goform/SetOnlineDevName of the component httpd web management interface. The manipulation of the argument devName results in stack-based buffer overflow. The attack may be launched remotely. The exploit has been made public and could be used.
-
-Score: 7.4 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-19771 [CVSS:4.0 7.3 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19771</link>
-            <guid isPermaLink="false">CVE-2026-19771</guid>
-            <pubDate>Tue, 18 Aug 2026 02:17:25 GMT</pubDate>
-            <description><![CDATA[A vulnerability was identified in Baicells EG3661M BaiCE_BQ6_2.0.5.3_NA. This impacts an unknown function of the file /cgi-bin/luci of the component LuCI Web Interface. Such manipulation of the argument MaxHops/Timeout/Size leads to os command injection. The attack may be launched remotely. The exploit is publicly available and might be used. The vendor was contacted early about this disclosure but did not respond in any way.
-
-Score: 7.3 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:H/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-19763 [CVSS:4.0 5.1 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19763</link>
-            <guid isPermaLink="false">CVE-2026-19763</guid>
-            <pubDate>Tue, 18 Aug 2026 02:17:25 GMT</pubDate>
-            <description><![CDATA[A vulnerability was determined in DTStack Taier 1.4.0. Affected by this issue is the function FileUtils.deleteDirectory of the file ClusterController.java of the component Cluster Creation. This manipulation of the argument clusterName causes path traversal. Remote exploitation of the attack is possible. Upgrading to version 1.5.0 can resolve this issue. Patch name: ec8c59c76aceb04ab3080543ab2d9c6a4b674729. The affected component should be upgraded.
-
-Score: 5.1 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:H/UI:N/VC:N/VI:L/VA:L/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-19756 [CVSS:4.0 2.1 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19756</link>
-            <guid isPermaLink="false">CVE-2026-19756</guid>
-            <pubDate>Tue, 18 Aug 2026 02:17:25 GMT</pubDate>
-            <description><![CDATA[A vulnerability has been found in Dromara lamp-cloud up to 5.10.0. This affects an unknown part of the file DefGenProjectController.java of the component Code Generator. Such manipulation of the argument outputDir/parent/projectPrefix leads to path traversal. It is possible to launch the attack remotely. The exploit has been disclosed to the public and may be used. The project was informed of the problem early through an issue report but has not responded yet.
-
-Score: 2.1 (LOW)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-19749 [CVSS:4.0 2.9 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19749</link>
-            <guid isPermaLink="false">CVE-2026-19749</guid>
-            <pubDate>Tue, 18 Aug 2026 02:17:25 GMT</pubDate>
-            <description><![CDATA[A vulnerability was detected in Tenda CH7, CH7G, CH10, CP3, CP3 Pro, CP7, TC3B14C, TC3B15C, TC3T14C and TC3T15C up to 20260625. Affected by this vulnerability is an unknown functionality of the component RTSP/ONVIF. Performing a manipulation results in missing authentication. It is possible to initiate the attack remotely. The attack is considered to have high complexity. The exploitation appears to be difficult. The exploit is now public and may be used.
-
-Score: 2.9 (LOW)
-Vector: CVSS:4.0/AV:N/AC:H/AT:N/PR:N/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-16982 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-16982</link>
-            <guid isPermaLink="false">CVE-2026-16982</guid>
-            <pubDate>Tue, 18 Aug 2026 02:17:25 GMT</pubDate>
-            <description><![CDATA[IBM i 7.6, 7.5, 7.4, and 7.3 could allow a remote attacker to cause a denial of service due to a heap buffer overflow.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-16529 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-16529</link>
-            <guid isPermaLink="false">CVE-2026-16529</guid>
-            <pubDate>Tue, 18 Aug 2026 02:17:25 GMT</pubDate>
-            <description><![CDATA[A signed integer overflow in the PCP __pmGetPDU() function can be exploited via crafted network packets during PDU processing or SASL negotiation. This permanently blinds the affected daemon, resulting in a total denial of service (DoS) for subsequent packet reads.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-16527 [CVSS:3.1 7.3 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-16527</link>
-            <guid isPermaLink="false">CVE-2026-16527</guid>
-            <pubDate>Tue, 18 Aug 2026 02:17:24 GMT</pubDate>
-            <description><![CDATA[An unauthenticated remote attacker can bypass access controls by sending crafted requests to the PCP pmproxy /store endpoint. This allows the attacker to overwrite any PMDA metric, leading to arbitrary code execution and system takeover.
-
-Score: 7.3 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-16526 [CVSS:3.1 8.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-16526</link>
-            <guid isPermaLink="false">CVE-2026-16526</guid>
-            <pubDate>Tue, 18 Aug 2026 02:17:24 GMT</pubDate>
-            <description><![CDATA[A flaw in the PCP linux_sockets module exposes an unsecured internal connection.
-An attacker with initial code execution can exploit this to escalate privileges and execute arbitrary commands as root.
-
-Score: 8.8 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-16524 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-16524</link>
-            <guid isPermaLink="false">CVE-2026-16524</guid>
-            <pubDate>Tue, 18 Aug 2026 02:17:23 GMT</pubDate>
-            <description><![CDATA[A command injection flaw in PCP's linux_sockets PMDA allows malicious shell metacharacters via the network.persocket.filter metric.
-This failed validation lets attackers execute arbitrary commands as the PMDA user when metrics refresh.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-75089 [CVSS:4.0 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-75089</link>
-            <guid isPermaLink="false">CVE-2026-75089</guid>
-            <pubDate>Tue, 18 Aug 2026 01:16:43 GMT</pubDate>
-            <description><![CDATA[A weakness has been identified in PHPGurukul Complaint Management System 1.0. Affected by this issue is some unknown functionality of the file user/check_availability.php. This manipulation of the argument email causes sql injection. Remote exploitation of the attack is possible. The exploit has been made available to the public and could be used for attacks.
-
-Score: 5.5 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-75088 [CVSS:4.0 2.1 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-75088</link>
-            <guid isPermaLink="false">CVE-2026-75088</guid>
-            <pubDate>Tue, 18 Aug 2026 01:16:43 GMT</pubDate>
-            <description><![CDATA[A vulnerability was determined in itsourcecode Hospital Management System 1.0. This impacts an unknown function of the file /viewbilling.php. Executing a manipulation of the argument delid can lead to sql injection. The attack can be launched remotely. The exploit has been publicly disclosed and may be utilized.
-
-Score: 2.1 (LOW)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-75087 [CVSS:4.0 2.1 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-75087</link>
-            <guid isPermaLink="false">CVE-2026-75087</guid>
-            <pubDate>Tue, 18 Aug 2026 01:16:42 GMT</pubDate>
-            <description><![CDATA[A vulnerability was found in itsourcecode Hospital Management System 1.0. This affects an unknown function of the file /viewdepartment.php. Performing a manipulation of the argument delid results in sql injection. The attack can be initiated remotely. The exploit has been made public and could be used.
-
-Score: 2.1 (LOW)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-75086 [CVSS:4.0 2.1 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-75086</link>
-            <guid isPermaLink="false">CVE-2026-75086</guid>
-            <pubDate>Tue, 18 Aug 2026 01:16:42 GMT</pubDate>
-            <description><![CDATA[A vulnerability has been found in itsourcecode Hospital Management System 1.0. The impacted element is an unknown function of the file /viewroom.php. Such manipulation of the argument delid leads to sql injection. It is possible to launch the attack remotely. The exploit has been disclosed to the public and may be used.
-
-Score: 2.1 (LOW)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-75082 [CVSS:4.0 2.1 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-75082</link>
-            <guid isPermaLink="false">CVE-2026-75082</guid>
-            <pubDate>Tue, 18 Aug 2026 00:16:53 GMT</pubDate>
-            <description><![CDATA[A flaw has been found in Webkul Bagisto up to 2.4.4. The affected element is an unknown function of the file /customer/register of the component Customer-Registration Notification Email. This manipulation of the argument first_name/last_name causes basic cross site scripting. It is possible to initiate the attack remotely. The exploit has been published and may be used. The vendor confirms: "The reported issues were already identified through our internal security assessment process prior to this notification and are being handled through our established internal security and development lifecycle. Some of these items have already been addressed, while the remaining items are planned for resolution in upcoming product releases."
-
-Score: 2.1 (LOW)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:P/VC:N/VI:L/VA:N/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-75081 [CVSS:4.0 2.1 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-75081</link>
-            <guid isPermaLink="false">CVE-2026-75081</guid>
-            <pubDate>Tue, 18 Aug 2026 00:16:53 GMT</pubDate>
-            <description><![CDATA[A vulnerability was detected in Webkul Bagisto up to 2.4.4. Impacted is an unknown function of the file /customer/account/rma/store. The manipulation of the argument rma_qty/resolution_type/rma_reason_id results in enforcement of behavioral workflow. The attack may be performed from remote. The exploit is now public and may be used. The vendor confirms: "The reported issues were already identified through our internal security assessment process prior to this notification and are being handled through our established internal security and development lifecycle. Some of these items have already been addressed, while the remaining items are planned for resolution in upcoming product releases."
-
-Score: 2.1 (LOW)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:N/VI:L/VA:N/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-75080 [CVSS:4.0 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-75080</link>
-            <guid isPermaLink="false">CVE-2026-75080</guid>
-            <pubDate>Tue, 18 Aug 2026 00:16:53 GMT</pubDate>
-            <description><![CDATA[A security vulnerability has been detected in SourceCodester Class and Exam Timetabling System 1.0. This issue affects some unknown processing of the file /edit_subject1.php. The manipulation of the argument ID leads to sql injection. The attack is possible to be carried out remotely. The exploit has been disclosed publicly and may be used.
-
-Score: 5.5 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-75079 [CVSS:4.0 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-75079</link>
-            <guid isPermaLink="false">CVE-2026-75079</guid>
-            <pubDate>Tue, 18 Aug 2026 00:16:53 GMT</pubDate>
-            <description><![CDATA[A weakness has been identified in SourceCodester Class and Exam Timetabling System 1.0. This vulnerability affects unknown code of the file /edit_subject2.php. Executing a manipulation of the argument ID can lead to sql injection. The attack can be executed remotely. The exploit has been made available to the public and could be used for attacks.
-
-Score: 5.5 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-6229 [CVSS:3.1 7.2 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-6229</link>
-            <guid isPermaLink="false">CVE-2026-6229</guid>
-            <pubDate>Tue, 18 Aug 2026 00:16:52 GMT</pubDate>
-            <description><![CDATA[The Royal Elementor Addons plugin for WordPress is vulnerable to Server-Side Request Forgery in versions up to, and including, 1.7.1057. This is due to insufficient validation of user-supplied URLs in the render_csv_data() function, which can be bypassed by including 'docs.google.com/spreadsheets' in a query parameter, and the subsequent use of these URLs in fopen() calls without blocking internal or private network addresses. This makes it possible for authenticated attackers, with Contributor-level access and above, to make requests to arbitrary URLs and retrieve sensitive information from internal services.
-
-Score: 7.2 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:L/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-19389 [CVSS:3.1 7.1 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19389</link>
-            <guid isPermaLink="false">CVE-2026-19389</guid>
-            <pubDate>Tue, 18 Aug 2026 00:16:52 GMT</pubDate>
-            <description><![CDATA[Multiple integer overflow and underflow vulnerabilities were found in the GStreamer gst-plugins-ugly ASF demuxer (asfdemux) when parsing header objects from crafted ASF, WMV, or WMA files. Insufficient validation of attacker-controlled length and size values can bypass bounds checks and cause out-of-bounds heap reads. This can result in application crash, denial of service, or limited information disclosure when untrusted media is processed.
-
-Score: 7.1 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:N/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-19387 [CVSS:3.1 7.6 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19387</link>
-            <guid isPermaLink="false">CVE-2026-19387</guid>
-            <pubDate>Tue, 18 Aug 2026 00:16:52 GMT</pubDate>
-            <description><![CDATA[A heap out-of-bounds write vulnerability was found in the GStreamer gst-plugins-bad adpcmdec element when decoding IMA/DVI ADPCM audio. Insufficient validation of the per-block sample count for multi-channel streams allows a crafted WAV file to cause writes beyond the allocated output buffer. This can lead to application crash, denial of service, memory corruption, or potentially arbitrary code execution when untrusted media is processed.
-
-Score: 7.6 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:L/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-9693 [CVSS:3.1 3.5 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-9693</link>
-            <guid isPermaLink="false">CVE-2026-9693</guid>
-            <pubDate>Mon, 17 Aug 2026 23:16:52 GMT</pubDate>
-            <description><![CDATA[Mattermost versions 10.11.x <= 10.11.20, 11.7.x <= 11.7.5 Mattermost fails to remove thread membership records when a user is removed from or leaves a team, which allows a previously removed user who is later re-invited to the team to view private channel thread root post content and metadata via the team threads API.. Mattermost Advisory ID: MMSA-2026-00682
-
-Score: 3.5 (LOW)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:R/S:U/C:L/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-75587 [CVSS:3.1 3.6 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-75587</link>
-            <guid isPermaLink="false">CVE-2026-75587</guid>
-            <pubDate>Mon, 17 Aug 2026 23:16:52 GMT</pubDate>
-            <description><![CDATA[Mattermost Desktop App versions <=6.2 6.2.2.0 fail to redact the pre-auth secret when generating a diagnostics report, which allows a local attacker with access to a user's diagnostics report or log files to obtain the plaintext pre-auth secret configured for a connected server via inspecting the Server Connectivity (Step-3) diagnostics output. Mattermost Advisory ID: MMSA-2026-00716
-
-Score: 3.6 (LOW)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:C/C:L/I:N/A:N]]></description>
         </item>
     </channel>
 </rss>
