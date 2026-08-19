@@ -4,11 +4,126 @@
         <title>NVD CVE Feed</title>
         <link>https://github.com/TasukuKuchinomachi/NVD-RSS-feed</link>
         <description>Latest CVE entries from the National Vulnerability Database. This product uses the NVD API but is not endorsed or certified by the NVD.</description>
-        <lastBuildDate>Wed, 19 Aug 2026 06:17:43 GMT</lastBuildDate>
+        <lastBuildDate>Wed, 19 Aug 2026 07:16:59 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>National Vulnerability Database - NIST</copyright>
+        <item>
+            <title><![CDATA[CVE-2026-75981 [CVSS:3.1 7.2 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-75981</link>
+            <guid isPermaLink="false">CVE-2026-75981</guid>
+            <pubDate>Wed, 19 Aug 2026 07:16:59 GMT</pubDate>
+            <description><![CDATA[The TranslatePress – Translate Multilingual sites with AI Translation plugin for WordPress is vulnerable to unauthenticated Stored Cross-Site Scripting in versions up to and including 3.2.5. The special gettext markers '#!trpst#' and '#!trpen#' are unconditionally rewritten to '<' and '>' by translate_page() in includes/class-translation-render.php (lines 538-539). Because those markers are plain text with no HTML-special characters, an unauthenticated attacker can embed them in a comment; the markers survive wp_kses, and when the post is viewed in a secondary language the substitution turns the attacker's '#!trpst#img ... #!trpen#' into a real <img> tag. remove_tags_from_output() only strips <script>/<style>, so an <img onerror=...> executes in the visitor's browser.
+
+Score: 7.2 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:L/I:L/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-74484]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-74484</link>
+            <guid isPermaLink="false">CVE-2026-74484</guid>
+            <pubDate>Wed, 19 Aug 2026 07:16:55 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+binfmt_misc: don't let an 'F' entry pin its own instance
+
+An entry registered with 'F' opens its interpreter at registration time
+and holds that file until the entry is freed. Any entry nobody removes
+by hand only gets closed once the binfmt_misc superblock is shut down.
+If the interpreter lives on a mount that keeps that superblock alive the
+two pin each other:
+
+    binfmt_misc sb -> inode -> entry -> interp_file -> vfsmount -> binfmt_misc sb
+
+TL;DR the file is never closed. Once the mount namespace is gone there
+is nothing left to unregister through either.
+
+There are two ways to trigger this bug:
+
+- Point the interpreter at the instance itself. Its files are regular
+  files owned by the mounter and both bm_get_inode() and
+  simple_fill_super() leave i_op at empty_iops. So notify_change() falls
+  back to simple_setattr() and chmod +x works. We never set SB_I_NOEXEC
+  and so open_exec() accepts it.
+
+- Use the instance as an overlayfs lower layer. The overlay superblock
+  holds a clone_private_mount() of every layer until it is destroyed and
+  that clone is in no namespace. So umount_tree() never reaches it.
+
+That's a DoS. And it isn't only the superblock that leaks. It pins the
+user namespace it was mounted in, so every iteration permanently eats
+one of the caller's user namespace charges.
+
+So let's just do the sane thing. SB_I_NOEXEC makes open_exec() fail on
+the instance's own files and s_stack_depth makes overlayfs reject the
+layer before it ever takes a clone. That also covers the ecryptfs and
+fuse passthrough variants. What 'F' promises is unchanged.
+
+The stable tag is narrower than the Fixes tags on purpose. Before
+sandboxed mounts this needed global root against the single instance
+everyone shares, and the change doesn't apply to those trees anyway.
+
+Note that SB_I_NODEV is implicitly raised for userns mounts but raise it
+explicitly here as well.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-64158]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64158</link>
+            <guid isPermaLink="false">CVE-2026-64158</guid>
+            <pubDate>Wed, 19 Aug 2026 07:16:28 GMT</pubDate>
+            <description><![CDATA[Rejected reason: This CVE ID has been rejected or withdrawn by its CVE Numbering Authority.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-49423]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-49423</link>
+            <guid isPermaLink="false">CVE-2026-49423</guid>
+            <pubDate>Wed, 19 Aug 2026 07:16:28 GMT</pubDate>
+            <description><![CDATA[When building the iovec array for a received TLS 1.2 CBC record, ktls_ocf_tls_cbc_decrypt() incremented the iovec index for every mbuf in the chain, including mbufs that were skipped because they contained only TLS header bytes.  This left uninitialized entries in the iovec array.  The iovec array was allocated without zeroing.
+
+A remote TLS peer can cause the kernel to read from uninitialized iovec entries during HMAC computation, resulting in a kernel panic.  The peer must be able to control TCP segmentation such that the first mbuf of a CBC record contains only the 5-byte TLS record header.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-49332 [CVSS:3.1 8.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-49332</link>
+            <guid isPermaLink="false">CVE-2026-49332</guid>
+            <pubDate>Wed, 19 Aug 2026 07:16:27 GMT</pubDate>
+            <description><![CDATA[A flaw was found in openshift/oauth-proxy. The proxy sets authenticated identity headers using only dash-variant keys (X-Forwarded-User) but does not strip underscore-variant keys (X_Forwarded_User) from incoming requests. WSGI and PHP frameworks normalize both variants to the same variable, allowing an authenticated low-privilege user to smuggle a forged identity that may override the legitimate authenticated identity in the upstream application.
+
+Score: 8.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:L/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-15780 [CVSS:3.1 7.2 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-15780</link>
+            <guid isPermaLink="false">CVE-2026-15780</guid>
+            <pubDate>Wed, 19 Aug 2026 07:16:27 GMT</pubDate>
+            <description><![CDATA[The WP Statistics – Simple, privacy-friendly Google Analytics alternative plugin for WordPress is vulnerable to Stored Cross-Site Scripting via the 'utm_campaign' parameter in all versions up to, and including, 14.16.8 due to insufficient input sanitization and output escaping. This makes it possible for unauthenticated attackers to inject arbitrary web scripts in pages that will execute whenever a user accesses an injected page. The payload can be planted without authentication via the public /wp-statistics/v2/hit REST endpoint, because the required signature is exposed on the public homepage and a base64-encoded page_uri POST parameter overrides the previously sanitized REQUEST_URI, allowing the malicious utm_campaign value to bypass sanitization and be stored in the database.
+
+Score: 7.2 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:L/I:L/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-15446 [CVSS:3.1 6.4 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-15446</link>
+            <guid isPermaLink="false">CVE-2026-15446</guid>
+            <pubDate>Wed, 19 Aug 2026 07:16:27 GMT</pubDate>
+            <description><![CDATA[The EWWW Image Optimizer plugin for WordPress is vulnerable to Stored Cross-Site Scripting via 'data-script' Lazy Load Attribute in Post Content in all versions up to, and including, 8.7.3 due to insufficient input sanitization and output escaping. This makes it possible for authenticated attackers, with contributor-level access and above, to inject arbitrary web scripts in pages that will execute whenever a user accesses an injected page. The exploit is achieved by embedding a crafted img element with class='lazyload' and a data-script attribute pointing to an attacker-controlled URL in post content, which the plugin's bundled lazysizes ls.unveilhooks addon then uses to dynamically create and insert a script element into the DOM at page view time.
+
+Score: 6.4 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:L/I:L/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-23367 [CVSS:3.1 6.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-23367</link>
+            <guid isPermaLink="false">CVE-2025-23367</guid>
+            <pubDate>Wed, 19 Aug 2026 07:16:23 GMT</pubDate>
+            <description><![CDATA[A flaw was found in the Wildfly Server Role Based Access Control (RBAC) provider. When authorization to control management operations is secured using the Role Based Access Control provider, a user without the required privileges can suspend or resume the server. A user with a Monitor or Auditor role is supposed to have only read access permissions and should not be able to suspend the server. 
+The vulnerability is caused by the Suspend and Resume handlers not performing authorization checks to validate whether the current user has the required permissions to proceed with the action.
+
+Score: 6.5 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
         <item>
             <title><![CDATA[CVE-2026-8810 [CVSS:3.1 6.9 MEDIUM]]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-8810</link>
@@ -805,86 +920,6 @@ Vector: CVSS:4.0/AV:L/AC:L/AT:P/PR:N/UI:A/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X
 
 Score: 4.9 (MEDIUM)
 Vector: CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-15371 [CVSS:3.1 8.1 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-15371</link>
-            <guid isPermaLink="false">CVE-2026-15371</guid>
-            <pubDate>Wed, 19 Aug 2026 04:16:57 GMT</pubDate>
-            <description><![CDATA[Velociraptor's web GUI allows specifying a custom type for columns in tables. The URL type takes the cell value and forms a URL which can be clicked in the GUI.The code does not limit the schemes allowed in this URL , allowing an attacker to specify a JavaScript scheme exposing the user to XSS.
-
-Score: 8.1 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:C/C:H/I:H/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-14613 [CVSS:3.1 4.9 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-14613</link>
-            <guid isPermaLink="false">CVE-2026-14613</guid>
-            <pubDate>Wed, 19 Aug 2026 04:16:56 GMT</pubDate>
-            <description><![CDATA[A vulnerability was discovered in Keycloak's administrative interface that allows certain administrators to see information about groups they shouldn't have access to. When the new Fine-Grained Admin Permissions (FGAP v2) are turned on, an administrator who is allowed to see a specific "role" can also see a list of all groups assigned to that role. The system fails to check if the administrator has permission to see those specific groups. This could allow a restricted administrator to discover "hidden" groups and see their details, such as internal names and custom settings, which might contain sensitive deployment information.
-
-Score: 4.9 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-76048 [CVSS:4.0 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-76048</link>
-            <guid isPermaLink="false">CVE-2026-76048</guid>
-            <pubDate>Wed, 19 Aug 2026 03:16:53 GMT</pubDate>
-            <description><![CDATA[A flaw has been found in SourceCodester Simple Online Food Ordering System 1.0. The impacted element is an unknown function of the file /admin/ajax.php?action=login. Executing a manipulation of the argument Username can lead to sql injection. The attack may be performed from remote. The exploit has been published and may be used.
-
-Score: 5.5 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-76014 [CVSS:4.0 1.9 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-76014</link>
-            <guid isPermaLink="false">CVE-2026-76014</guid>
-            <pubDate>Wed, 19 Aug 2026 03:16:53 GMT</pubDate>
-            <description><![CDATA[A vulnerability has been found in BusyBox up to 1.30.1. This vulnerability affects unknown code of the file networking/wget.c of the component FEATURE_WGET_TIMEOUT Handler. Such manipulation of the argument -T leads to null pointer dereference. Local access is required to approach this attack. The exploit has been disclosed to the public and may be used. The name of the patch is 83a40bf7a93c8ac093d33ab452222dd5b9eb57ff. A patch should be applied to remediate this issue.
-
-Score: 1.9 (LOW)
-Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-76008 [CVSS:4.0 10 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-76008</link>
-            <guid isPermaLink="false">CVE-2026-76008</guid>
-            <pubDate>Wed, 19 Aug 2026 03:16:53 GMT</pubDate>
-            <description><![CDATA[A flaw has been found in Comfast CF-N1-S 2.6.0.1. This affects the function get_para_from_uri of the file /cgi-bin/mbox-config of the component URI Parameter Parsing. This manipulation of the argument width/height causes stack-based buffer overflow. The attack can be initiated remotely.
-
-Score: 10 (CRITICAL)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-76004 [CVSS:4.0 8.6 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-76004</link>
-            <guid isPermaLink="false">CVE-2026-76004</guid>
-            <pubDate>Wed, 19 Aug 2026 03:16:52 GMT</pubDate>
-            <description><![CDATA[A security vulnerability has been detected in UTT HiPER 1250GW up to 3.2.7-210907-180535. Affected by this vulnerability is the function strcpy of the file /goform/aspApBasicConfigUrcp of the component HTTP Handler. The manipulation of the argument pvid leads to stack-based buffer overflow. It is possible to initiate the attack remotely. The exploit has been disclosed publicly and may be used.
-
-Score: 8.6 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-76003 [CVSS:4.0 8.6 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-76003</link>
-            <guid isPermaLink="false">CVE-2026-76003</guid>
-            <pubDate>Wed, 19 Aug 2026 03:16:52 GMT</pubDate>
-            <description><![CDATA[A weakness has been identified in UTT HiPER 1200GW up to 2.5.3-170306. Affected is the function strcpy of the file /goform/formGroupConfig. Executing a manipulation of the argument timestart can lead to stack-based buffer overflow. The attack may be performed from remote. The exploit has been made available to the public and could be used for attacks.
-
-Score: 8.6 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-19387 [CVSS:3.1 7.6 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19387</link>
-            <guid isPermaLink="false">CVE-2026-19387</guid>
-            <pubDate>Wed, 19 Aug 2026 03:16:52 GMT</pubDate>
-            <description><![CDATA[A heap out-of-bounds write vulnerability was found in the GStreamer gst-plugins-bad adpcmdec element when decoding IMA/DVI ADPCM audio. Insufficient validation of the per-block sample count for multi-channel streams allows a crafted WAV file to cause writes beyond the allocated output buffer. This can lead to application crash, denial of service, memory corruption, or potentially arbitrary code execution when untrusted media is processed.
-
-Score: 7.6 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:L/A:H]]></description>
         </item>
     </channel>
 </rss>
