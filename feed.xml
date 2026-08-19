@@ -4,11 +4,117 @@
         <title>NVD CVE Feed</title>
         <link>https://github.com/TasukuKuchinomachi/NVD-RSS-feed</link>
         <description>Latest CVE entries from the National Vulnerability Database. This product uses the NVD API but is not endorsed or certified by the NVD.</description>
-        <lastBuildDate>Wed, 19 Aug 2026 10:16:38 GMT</lastBuildDate>
+        <lastBuildDate>Wed, 19 Aug 2026 11:16:47 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>National Vulnerability Database - NIST</copyright>
+        <item>
+            <title><![CDATA[CVE-2026-72210 [CVSS:3.1 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72210</link>
+            <guid isPermaLink="false">CVE-2026-72210</guid>
+            <pubDate>Wed, 19 Aug 2026 11:16:47 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+ntfs: fix off-by-one in mapping pairs decoding bounds checks
+
+In ntfs_mapping_pairs_decompress(), attr_end points one byte past the
+end of the attribute record:
+
+    attr_end = (u8 *)attr + le32_to_cpu(attr->length);
+
+The two bounds checks validating that mapping pair data bytes fit within
+the attribute use strict greater-than (>), which allows a one-byte
+out-of-bounds read when the data extends exactly to attr_end:
+
+  b = *buf & 0xf;
+  if (b) {
+      if (unlikely(buf + b > attr_end))   // off-by-one
+          goto io_error;
+      for (deltaxcn = (s8)buf[b--]; b; b--)
+          deltaxcn = (deltaxcn << 8) + buf[b];
+  }
+
+When buf + b == attr_end, the check evaluates to false and buf[b] reads
+one byte past the valid attribute boundary. The same pattern appears in
+the LCN delta bytes check.
+
+Fix both checks to use >= so that buf[b] at exactly attr_end is
+correctly rejected as out of bounds.
+
+Score: 9.8 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-66792 [CVSS:3.1 9.9 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-66792</link>
+            <guid isPermaLink="false">CVE-2026-66792</guid>
+            <pubDate>Wed, 19 Aug 2026 11:16:46 GMT</pubDate>
+            <description><![CDATA[A flaw was found in the multicloud-operators-subscription component. This vulnerability allows a user on a managed cluster to escalate their privileges by creating a Subscription with specific, crafted annotations. Successful exploitation grants the attacker the ability to deploy resources into any namespace with the elevated permissions of the controller's Service Account, potentially leading to unauthorized access and control over cluster resources.
+
+Score: 9.9 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-18950 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-18950</link>
+            <guid isPermaLink="false">CVE-2026-18950</guid>
+            <pubDate>Wed, 19 Aug 2026 11:16:46 GMT</pubDate>
+            <description><![CDATA[A flaw was found in odh-dashboard. An authenticated user of the dashboard can exploit a vulnerability related to how RoleBindings are created. The system does not properly validate the `roleRef` field, allowing a user to specify an arbitrary role, including highly privileged ones like `cluster-admin`. This can lead to privilege escalation, where an attacker gains unauthorized elevated access within their namespace and potentially persistent control over the system.
+
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-18948 [CVSS:3.1 9.9 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-18948</link>
+            <guid isPermaLink="false">CVE-2026-18948</guid>
+            <pubDate>Wed, 19 Aug 2026 11:16:46 GMT</pubDate>
+            <description><![CDATA[A flaw was found in Feast. The system improperly deserializes user-defined functions (UDFs) stored in its registry, which are serialized using the 'dill' library. This allows a remote attacker to store a malicious UDF, leading to unauthenticated arbitrary code execution on the feature server in default configurations. An authenticated attacker can also achieve arbitrary code execution on the registry server by bypassing authorization checks during deserialization. This vulnerability can result in cross-tenant data access and lateral movement within the system.
+
+Score: 9.9 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-18947 [CVSS:3.1 8.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-18947</link>
+            <guid isPermaLink="false">CVE-2026-18947</guid>
+            <pubDate>Wed, 19 Aug 2026 11:16:46 GMT</pubDate>
+            <description><![CDATA[A flaw was found in Feast. An authorization bypass vulnerability exists in the /materialize and /materialize-incremental endpoints. By sending a specially crafted request that omits the feature_views field, an attacker can bypass intended permission checks. This allows an unauthenticated remote attacker, or any authenticated user, to trigger a full re-materialization of all feature views. The consequence is a Denial of Service (DoS) due to data corruption and significant resource consumption across all tenants.
+
+Score: 8.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:N/I:H/A:L]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-16517 [CVSS:3.1 2.9 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-16517</link>
+            <guid isPermaLink="false">CVE-2026-16517</guid>
+            <pubDate>Wed, 19 Aug 2026 11:16:46 GMT</pubDate>
+            <description><![CDATA[A signed integer overflow vulnerability was found in libarchive's ZIP writer. In the archive_write_zip_header function in archive_write_set_format_zip.c, when ZIP encryption is enabled and the entry file size is close to INT64_MAX, the addition of the encryption overhead to the entry size overflows int64_t, resulting in undefined behavior. This could lead to incorrect Zip64 extension decisions or potential memory corruption.
+
+Score: 2.9 (LOW)
+Vector: CVSS:3.1/AV:L/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:L]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-16440 [CVSS:4.0 5.7 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-16440</link>
+            <guid isPermaLink="false">CVE-2026-16440</guid>
+            <pubDate>Wed, 19 Aug 2026 11:16:46 GMT</pubDate>
+            <description><![CDATA[In Eclipse OpenJ9 versions up to 0.60, a crafted .class file with deeply nested annotations causes a segmentation fault.
+
+Score: 5.7 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:P/PR:L/UI:A/VC:N/VI:N/VA:H/SC:N/SI:N/SA:L/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-15028 [CVSS:3.1 3.9 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-15028</link>
+            <guid isPermaLink="false">CVE-2026-15028</guid>
+            <pubDate>Wed, 19 Aug 2026 11:16:46 GMT</pubDate>
+            <description><![CDATA[A flaw was found in libarchive. This vulnerability allows a remote attacker to trigger a heap overflow by providing a specially crafted tar archive. The issue occurs during the parsing of a PAX extended header containing a malformed SUN.holesdata sparse-file attribute. Successful exploitation could lead to a denial of service, making the system unavailable, or potentially allow for arbitrary code execution, giving the attacker control over the affected system.
+
+Score: 3.9 (LOW)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:R/S:U/C:L/I:N/A:L]]></description>
+        </item>
         <item>
             <title><![CDATA[CVE-2026-76166 [CVSS:3.1 4.3 MEDIUM]]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-76166</link>
@@ -102,42 +208,6 @@ A client that can submit messages and time the replies may recover a valid signa
 verify resolves the signature method class from the signature_method parameter of the incoming message. signature_method is required on every request, so the algorithm used to check a signature is chosen by whoever sent it, and nothing lets the verifying party pin the method instead. When a message names HMAC-SHA1 or HMAC-SHA256, the key is derived from consumer_secret and token_secret rather than from the key the provider deployed.
 
 A provider deployed on RSA-SHA1 holds only the consumer public key, and RFC 5849 does not use consumer_secret for that method, so the required parameter is filled with a placeholder. A client that names HMAC-SHA1 instead has its signature checked against that placeholder, so a guessable one is enough to forge requests for any consumer key and token.]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-72210 [CVSS:3.1 9.8 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72210</link>
-            <guid isPermaLink="false">CVE-2026-72210</guid>
-            <pubDate>Wed, 19 Aug 2026 08:17:13 GMT</pubDate>
-            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
-
-ntfs: fix off-by-one in mapping pairs decoding bounds checks
-
-In ntfs_mapping_pairs_decompress(), attr_end points one byte past the
-end of the attribute record:
-
-    attr_end = (u8 *)attr + le32_to_cpu(attr->length);
-
-The two bounds checks validating that mapping pair data bytes fit within
-the attribute use strict greater-than (>), which allows a one-byte
-out-of-bounds read when the data extends exactly to attr_end:
-
-  b = *buf & 0xf;
-  if (b) {
-      if (unlikely(buf + b > attr_end))   // off-by-one
-          goto io_error;
-      for (deltaxcn = (s8)buf[b--]; b; b--)
-          deltaxcn = (deltaxcn << 8) + buf[b];
-  }
-
-When buf + b == attr_end, the check evaluates to false and buf[b] reads
-one byte past the valid attribute boundary. The same pattern appears in
-the LCN delta bytes check.
-
-Fix both checks to use >= so that buf[b] at exactly attr_end is
-correctly rejected as out of bounds.
-
-Score: 9.8 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
             <title><![CDATA[CVE-2026-72203 [CVSS:3.1 7.5 HIGH]]]></title>
@@ -967,76 +1037,6 @@ Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:H/A:H]]></description>
 
 Score: 6.5 (MEDIUM)
 Vector: CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-76050 [CVSS:4.0 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-76050</link>
-            <guid isPermaLink="false">CVE-2026-76050</guid>
-            <pubDate>Wed, 19 Aug 2026 04:17:42 GMT</pubDate>
-            <description><![CDATA[A vulnerability was found in SourceCodester Simple Online Food Ordering System 1.0. This impacts an unknown function of the file /admin/ajax.php?action=delete_menu. The manipulation of the argument ID results in sql injection. It is possible to launch the attack remotely. The exploit has been made public and could be used.
-
-Score: 5.5 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-76049 [CVSS:4.0 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-76049</link>
-            <guid isPermaLink="false">CVE-2026-76049</guid>
-            <pubDate>Wed, 19 Aug 2026 04:17:38 GMT</pubDate>
-            <description><![CDATA[A vulnerability has been found in SourceCodester Simple Online Food Ordering System 1.0. This affects an unknown function of the file /admin/ajax.php?action=save_menu. The manipulation of the argument ID leads to sql injection. It is possible to initiate the attack remotely. The exploit has been disclosed to the public and may be used.
-
-Score: 5.5 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-73373 [CVSS:4.0 8.9 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-73373</link>
-            <guid isPermaLink="false">CVE-2026-73373</guid>
-            <pubDate>Wed, 19 Aug 2026 04:17:38 GMT</pubDate>
-            <description><![CDATA[Joomla! Core - [20260810] - Unrestricted uploads of SHTML files in Joomla 1.0.0-5.4.7, 6.0.0-6.1.2 - The default list of dangerous files did not include SHTML files. On servers that executed these files, that could lead to code execution.
-
-Score: 8.9 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:P/PR:H/UI:N/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-71539 [CVSS:4.0 8.9 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-71539</link>
-            <guid isPermaLink="false">CVE-2026-71539</guid>
-            <pubDate>Wed, 19 Aug 2026 04:17:37 GMT</pubDate>
-            <description><![CDATA[n8n is an open source workflow automation platform. Prior to 1.123.64, 2.29.8, and 2.30.1, the Git node clone operation allows an authenticated workflow user to swap a validated directory for a symlink before cloning, planting a crafted repository in the community node directory that loads as a custom JavaScript node after restart and executes arbitrary code on the server. This issue is fixed in versions 1.123.64, 2.29.8, and 2.30.1.
-
-Score: 8.9 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:H/AT:P/PR:L/UI:N/VC:H/VI:H/VA:H/SC:H/SI:L/SA:L/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-70415 [CVSS:3.1 8.1 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-70415</link>
-            <guid isPermaLink="false">CVE-2026-70415</guid>
-            <pubDate>Wed, 19 Aug 2026 04:17:37 GMT</pubDate>
-            <description><![CDATA[Dell PowerStore SDNAS contains a Buffer Copy without Checking Size of Input vulnerability in the NFS/RPC. An unauthenticated attacker with remote access could potentially exploit this vulnerability, leading to Command execution and Denial of service.
-
-Score: 8.1 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-67271 [CVSS:3.1 9.8 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-67271</link>
-            <guid isPermaLink="false">CVE-2026-67271</guid>
-            <pubDate>Wed, 19 Aug 2026 04:17:37 GMT</pubDate>
-            <description><![CDATA[Dell PowerStore SDNAS, contains an Out-of-bounds Write vulnerability in the SMB/CIFS. An unauthenticated attacker with remote access could potentially exploit this vulnerability, leading to Denial of service and Remote execution. This is a Critical vulnerability as a remote user could send a specially crafted SMB packet and cause a crash, that is persistent in case automatic restarts are enabled. Additionally, a more sophisticated attacker could use the same vulnerability for Remote Code execution.
-
-Score: 9.8 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-67262 [CVSS:3.1 8.1 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-67262</link>
-            <guid isPermaLink="false">CVE-2026-67262</guid>
-            <pubDate>Wed, 19 Aug 2026 04:17:37 GMT</pubDate>
-            <description><![CDATA[Dell PowerStore contains a Missing Authorization vulnerability. An attacker with access to a mapped host could exploit this vulnerability to read from or write to LUNs that the host is not authorized to access, bypassing per-initiator LUN access controls and leading to protection mechanism bypass.
-
-Score: 8.1 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
         </item>
     </channel>
 </rss>
