@@ -4,11 +4,170 @@
         <title>NVD CVE Feed</title>
         <link>https://github.com/TasukuKuchinomachi/NVD-RSS-feed</link>
         <description>Latest CVE entries from the National Vulnerability Database. This product uses the NVD API but is not endorsed or certified by the NVD.</description>
-        <lastBuildDate>Fri, 21 Aug 2026 09:16:41 GMT</lastBuildDate>
+        <lastBuildDate>Fri, 21 Aug 2026 10:16:39 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>National Vulnerability Database - NIST</copyright>
+        <item>
+            <title><![CDATA[CVE-2026-77755 [CVSS:4.0 8.7 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-77755</link>
+            <guid isPermaLink="false">CVE-2026-77755</guid>
+            <pubDate>Fri, 21 Aug 2026 10:16:39 GMT</pubDate>
+            <description><![CDATA[A denial-of-service vulnerability was identified in misp-stix when processing attacker-controlled STIX 1 or STIX 2 documents.
+
+The STIX import code used sys.exit() to handle several parsing and loading failures. Because SystemExit inherits from BaseException rather than Exception, these failures bypassed the exception handlers used by callers of the library. As a result, a malformed STIX document could terminate a long-running importer process instead of returning a recoverable parsing error.
+
+Additionally, no limit was imposed on the size of STIX documents before parsing. A submitted document was therefore read and materialised in memory before its validity or type was evaluated. Depending on the document and parsing path, processing could consume approximately two to seven times the input size in memory, allowing a sufficiently large STIX document to cause excessive memory and CPU consumption and potentially terminate or severely degrade the importing service.
+
+An attacker able to provide STIX content to a MISP-STIX import workflow could exploit either condition to affect availability. A malformed document could cause abnormal process termination through an uncaught SystemExit, while a large document could exhaust resources during deserialisation and conversion.
+
+The fixes replace process-terminating sys.exit() calls with catchable exceptions such as STIXLoadingError and MissingSTIXContentError, and extend exception handling around the complete STIX detection and conversion process. The importer also now enforces an input-size limit before parsing. The default maximum is 100 MB, can be adjusted by callers, and can explicitly be disabled when required. STIX 1 inputs are additionally checked for the expected root element before the complete XML tree is constructed.
+
+ImpactSuccessful exploitation can cause:
+
+  *  termination of a long-running MISP-STIX importer;
+  *  excessive memory allocation;
+  *  excessive CPU consumption;
+  *  degradation or temporary unavailability of services relying on the converter;
+  *  interruption of batch or automated STIX ingestion workflows.
+
+Score: 8.7 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:L/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-77751 [CVSS:4.0 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-77751</link>
+            <guid isPermaLink="false">CVE-2026-77751</guid>
+            <pubDate>Fri, 21 Aug 2026 10:16:39 GMT</pubDate>
+            <description><![CDATA[A path traversal vulnerability existed in the handling of MISP object template names during STIX 2 import and MISP-to-STIX 2 export.
+
+MISP object names are passed to PyMISP's object-template resolution mechanism, which constructs a filesystem path by joining the configured MISP object-template directory, the object name, and definition.json. An object name originating from untrusted STIX or MISP content was not sufficiently restricted before being used in this filesystem path.
+
+An attacker able to supply a crafted object name containing path separators or traversal sequences such as ../ could therefore cause template resolution to escape the expected template directory and attempt to load a definition.json file from another location accessible to the process.
+
+During STIX 2 import, an attacker-controlled x_misp_name from a custom STIX object could directly reach this template-resolution mechanism.
+
+The issue could also become persistent. A malicious object name stored in a MISP event could later be processed again during STIX 2 export. Consequently, content originally introduced in one security context could trigger filesystem access later when the event is exported by a process operating with different or greater privileges.
+
+If a suitable definition.json file exists outside the intended template directory, its contents may be interpreted as a MISP object template and fields from that file copied into the converted object. This can result in unintended disclosure of locally accessible data represented by the template file and modification of the resulting object's metadata or semantics.
+
+The patches introduce strict validation of object-template names. Valid names are restricted to a single path component containing letters, digits, hyphens, or underscores. Names that do not meet these requirements are replaced with the generic unknown-template name before reaching PyMISP template resolution. The original rejected name is preserved in the object's comment and a warning is generated, preventing traversal while retaining the source information.
+
+Score: 8.8 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:L/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-77681 [CVSS:4.0 2.1 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-77681</link>
+            <guid isPermaLink="false">CVE-2026-77681</guid>
+            <pubDate>Fri, 21 Aug 2026 10:16:39 GMT</pubDate>
+            <description><![CDATA[A vulnerability was identified in CodeAstro Online Job Portal 1.0. Affected by this vulnerability is an unknown functionality of the file /users/update-profile.php. The manipulation of the argument Name leads to unrestricted upload. The attack can be initiated remotely. The exploit is publicly available and might be used.
+
+Score: 2.1 (LOW)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-59323 [CVSS:3.1 5.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-59323</link>
+            <guid isPermaLink="false">CVE-2026-59323</guid>
+            <pubDate>Fri, 21 Aug 2026 10:16:38 GMT</pubDate>
+            <description><![CDATA[An application using Micrometer Tracing with W3C baggage propagation in the Brave bridge is vulnerable to denial of service (DoS) due to unbounded object allocation when extracting incoming baggage headers.
+
+
+
+Specifically, an application is vulnerable when all the following are true:
+
+  *  The application uses a vulnerable version of io.micrometer:micrometer-tracing-bridge-brave.
+  *  W3C propagation is active (either configured manually or active by default, such as in Spring Boot 3.x+).
+  *  Baggage propagation is enabled (which is the default in Spring Boot 3.x+) and a baggage manager (such as BraveBaggageManager) is configured to handle baggage fields.
+  *  The application processes requests or messages from untrusted sources with baggage headers which it normally should not, see:  https://www.w3.org/TR/trace-context/#security-considerations .
+  *  Network components including the (HTTP) server that receives the request do not limit the header size or the limit is high enough to cause issues.
+
+
+
+
+The last two points are very important: normally this should not affect applications because they should not receive untrusted and unlimited input for baggage.
+
+  *  The application processes requests or messages from untrusted sources with baggage headers.
+
+
+
+
+When extracting baggage from the W3C baggage header, incoming entries are parsed without enforcing limits on the number of entries or header size as mandated by the W3C Baggage specification. An attacker can send requests or messages with artificially inflated baggage headers containing many key-value pairs, causing unconditional BaggageField allocations per entry. This leads to garbage collection pressure, high CPU usage, and potential application crash via OutOfMemoryError.
+
+Score: 5.3 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-48590 [CVSS:4.0 2.1 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-48590</link>
+            <guid isPermaLink="false">CVE-2026-48590</guid>
+            <pubDate>Fri, 21 Aug 2026 10:16:38 GMT</pubDate>
+            <description><![CDATA[XML Injection vulnerability in joshnuss xml_builder (XmlBuilder module) allows Content Spoofing, XML Injection.
+
+This vulnerability is associated with program files lib/xml_builder.ex and program routines XmlBuilder.generate/1, XmlBuilder.generate/2, XmlBuilder.element/1, XmlBuilder.element/2, XmlBuilder.element/3.
+
+Element names, attribute names, and doctype identifiers are interpolated verbatim into the serialized XML output without validation or escaping of structural characters (<, >, ", ', &). An attacker who can influence a name argument (for example, an element name derived from a JSON object key or an HTTP form field name) can inject arbitrary XML markup including extra elements, comments, and event-handler attributes into the output document.
+
+This issue affects xml_builder: from 0.0.1 before 2.4.1.
+
+Score: 2.1 (LOW)
+Vector: CVSS:4.0/AV:L/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:N/SC:N/SI:L/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-47827 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-47827</link>
+            <guid isPermaLink="false">CVE-2026-47827</guid>
+            <pubDate>Fri, 21 Aug 2026 10:16:38 GMT</pubDate>
+            <description><![CDATA[Command Injection in BOSH CLI tool on windows in Cloud Foundry allows a remote attacker to execute arbitrary shell commands via command injection vulnerabilities
+
+Score: 7.5 (HIGH)
+Vector: CVSS:3.1/AV:A/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-47080 [CVSS:4.0 2.1 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-47080</link>
+            <guid isPermaLink="false">CVE-2026-47080</guid>
+            <pubDate>Fri, 21 Aug 2026 10:16:38 GMT</pubDate>
+            <description><![CDATA[XML Injection vulnerability in joshnuss xml_builder (XmlBuilder module) allows Content Spoofing, XML Injection.
+
+This vulnerability is associated with program files lib/xml_builder.ex and program routines XmlBuilder.generate/1, XmlBuilder.generate/2, XmlBuilder.escape/1.
+
+The escape/1 clause for {:cdata, data} in lib/xml_builder.ex concatenates data verbatim between the CDATA opener <![CDATA[ and closer ]]]]><![CDATA[> without rewriting or splitting on the embedded ]]> sequence. Because CDATA sections have no internal escape mechanism, the only safe way to embed arbitrary bytes is to split on ]]> and emit adjacent CDATA sections. An attacker who can supply input containing ]]> closes the CDATA section early; any bytes that follow are parsed as ordinary XML markup by downstream consumers, allowing injection of arbitrary elements, text, or entity references into the output document.
+
+This issue affects xml_builder: from 0.0.7 before 2.4.1.
+
+Score: 2.1 (LOW)
+Vector: CVSS:4.0/AV:L/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:N/SC:N/SI:L/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-47079 [CVSS:4.0 2.1 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-47079</link>
+            <guid isPermaLink="false">CVE-2026-47079</guid>
+            <pubDate>Fri, 21 Aug 2026 10:16:38 GMT</pubDate>
+            <description><![CDATA[Inappropriate Encoding for Output Context vulnerability in joshnuss xml_builder (XmlBuilder module) allows Content Spoofing, Cross-site Scripting.
+
+This vulnerability is associated with program files lib/xml_builder.ex and program routines XmlBuilder.generate/1, XmlBuilder.generate/2, XmlBuilder.escape_string/1, XmlBuilder.escape_entity/1.
+
+XmlBuilder.generate/1 does not escape literal & characters in text or attribute values when they are followed by an entity-like token (lt;, gt;, amp;, quot;, apos;). As a result, attacker-supplied input such as &lt;script&gt; is emitted verbatim into the serialized XML rather than being escaped to &amp;lt;script&amp;gt;. When a downstream XML parser later reads the document, it decodes the entity sequences into the literal characters <script>, promoting inert-looking text into real markup. This allows an attacker to bypass upstream filters that block raw < and > characters, injecting markup into any downstream consumer that parses the produced XML and renders the text content in a markup-sensitive context (HTML, SVG, RSS/Atom feeds). Both element text and attribute values are affected.
+
+This issue affects xml_builder: from 0.0.6 before 2.4.1.
+
+Score: 2.1 (LOW)
+Vector: CVSS:4.0/AV:L/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:N/SC:N/SI:L/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-23367 [CVSS:3.1 6.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-23367</link>
+            <guid isPermaLink="false">CVE-2025-23367</guid>
+            <pubDate>Fri, 21 Aug 2026 10:16:36 GMT</pubDate>
+            <description><![CDATA[A flaw was found in the Wildfly Server Role Based Access Control (RBAC) provider. When authorization to control management operations is secured using the Role Based Access Control provider, a user without the required privileges can suspend or resume the server. A user with a Monitor or Auditor role is supposed to have only read access permissions and should not be able to suspend the server. 
+The vulnerability is caused by the Suspend and Resume handlers not performing authorization checks to validate whether the current user has the required permissions to proceed with the action.
+
+Score: 6.5 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
         <item>
             <title><![CDATA[CVE-2026-77710 [CVSS:4.0 6.9 MEDIUM]]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-77710</link>
@@ -376,17 +535,6 @@ Users are recommended to upgrade to version 4.20.3.1 or 4.22.1.1 or later, which
 This issue affects Apache CloudStack: from 4.20.0.0 through 4.20.3.0 and from 4.21.0.0 through 4.22.1.0.
 
 Users are recommended to upgrade to version 4.20.3.1 or 4.22.1.1 or later, which fixes the issue.]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2025-23367 [CVSS:3.1 6.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-23367</link>
-            <guid isPermaLink="false">CVE-2025-23367</guid>
-            <pubDate>Fri, 21 Aug 2026 09:16:36 GMT</pubDate>
-            <description><![CDATA[A flaw was found in the Wildfly Server Role Based Access Control (RBAC) provider. When authorization to control management operations is secured using the Role Based Access Control provider, a user without the required privileges can suspend or resume the server. A user with a Monitor or Auditor role is supposed to have only read access permissions and should not be able to suspend the server. 
-The vulnerability is caused by the Suspend and Resume handlers not performing authorization checks to validate whether the current user has the required permissions to proceed with the action.
-
-Score: 6.5 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
         </item>
         <item>
             <title><![CDATA[CVE-2026-77264 [CVSS:3.1 9.8 CRITICAL]]]></title>
@@ -1022,82 +1170,6 @@ Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
 
 Score: 8.8 (HIGH)
 Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-72530 [CVSS:4.0 9.5 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72530</link>
-            <guid isPermaLink="false">CVE-2026-72530</guid>
-            <pubDate>Fri, 21 Aug 2026 04:18:15 GMT</pubDate>
-            <description><![CDATA[A remote unauthorized attacker with network access via port 4307/TCP to the TrueConf server versions 5.3.X to 5.3.9, 5.4.X to 5.4.9, 5.5.X to 5.5.5, and earlier could use a specially crafted script to break out of the isolated environment and execute arbitrary code on the host system.
-
-Score: 9.5 (CRITICAL)
-Vector: CVSS:4.0/AV:N/AC:H/AT:P/PR:N/UI:N/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-72529 [CVSS:4.0 9.3 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72529</link>
-            <guid isPermaLink="false">CVE-2026-72529</guid>
-            <pubDate>Fri, 21 Aug 2026 04:18:15 GMT</pubDate>
-            <description><![CDATA[A remote unauthorized attacker with network access via port 4307/TCP to the TrueConf server versions 5.3.X to 5.3.9, 5.4.X to 5.4.9, 5.5.X to 5.5.5, and earlier could execute an arbitrary script by calling an undocumented function.
-
-Score: 9.3 (CRITICAL)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-71551 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-71551</link>
-            <guid isPermaLink="false">CVE-2026-71551</guid>
-            <pubDate>Fri, 21 Aug 2026 04:18:15 GMT</pubDate>
-            <description><![CDATA[Super Productivity is an advanced todo list app with integrated timeboxing and time tracking capabilities. Prior to 18.13.0, the EXEC IPC handler in electron/ipc-handlers/exec.ts accepts a command string from the renderer through the IPC.EXEC channel and executes it with child_process.exec(). The electron/preload.ts bridge exposes window.ea.exec() to renderer code, including community plugins executed with new Function(), without requiring nodeExecution permission. A confirmation dialog protects only the first execution, its persistence checkbox is selected by default, and approved commands are stored in the ALLOWED_COMMANDS value in simpleSettings for silent later execution with the desktop account's privileges. This issue is fixed in version 18.13.0.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-70861 [CVSS:3.1 7.2 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-70861</link>
-            <guid isPermaLink="false">CVE-2026-70861</guid>
-            <pubDate>Fri, 21 Aug 2026 04:18:14 GMT</pubDate>
-            <description><![CDATA[Vulnerability in the PeopleSoft Enterprise FIN Common Objects Brazil product of Oracle PeopleSoft (component: Common Objects).   The supported version that is affected is 9.1. Easily exploitable vulnerability allows high privileged attacker with network access via T3, IIOP to compromise PeopleSoft Enterprise FIN Common Objects Brazil.  Successful attacks of this vulnerability can result in takeover of PeopleSoft Enterprise FIN Common Objects Brazil. CVSS 3.1 Base Score 7.2 (Confidentiality, Integrity and Availability impacts).  CVSS Vector: (CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H).
-
-Score: 7.2 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-67364 [CVSS:4.0 10 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-67364</link>
-            <guid isPermaLink="false">CVE-2026-67364</guid>
-            <pubDate>Fri, 21 Aug 2026 04:18:14 GMT</pubDate>
-            <description><![CDATA[Joomla Extension - balbooa.com - Pre-auth PHP Code Injection in Balbooa Forms < 2.4.3.2 - CWE-94 / CWE-95 | CVSS 3.1: 9.8 Critical (AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H)
-The form's optional custom-PHP post-submission handler is executed via eval(). The [URL parameter = X] shortcode is substituted with the raw, unescaped value of a query parameter, letting an unauthenticated attacker inject arbitrary PHP that executes server-side. The CSRF token needed to reach the endpoint is itself disclosed anonymously via a separate task, so it provides no real protection. Exploitability requires the form to have a custom-PHP handler configured (a documented builder feature) referencing that shortcode, and no reCAPTCHA on the submit button.
-
-Score: 10 (CRITICAL)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-65645]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-65645</link>
-            <guid isPermaLink="false">CVE-2026-65645</guid>
-            <pubDate>Fri, 21 Aug 2026 04:18:14 GMT</pubDate>
-            <description><![CDATA[Rocket.Chat in versions before 8.8.0, 8.7.1, 8.6.2, 8.5.3, 8.4.6. 8.3.8, 8.2.8, 8.1.8, and 7.10.15, the Meteor DDP methods getThreadsList and getThreadMessages accept rid / tmid as raw, untyped parameters with no schema validation. A MongoDB operator object (e.g. {"$gt": "4"}) can be substituted for a string room-id or message-id. The authorization check resolves to a room the attacker already has access to, while the downstream data query fans out across all rooms - disclosing private thread parents and their full reply content to any low-privilege authenticated user.
-The REST route chat.getThreadsList was patched in v5.0 (HackerOne report #1446767) by adding rid: {type:'string'} AJV validation. The equivalent DDP method was never given the same fix and remains exploitable]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-65644]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-65644</link>
-            <guid isPermaLink="false">CVE-2026-65644</guid>
-            <pubDate>Fri, 21 Aug 2026 04:18:13 GMT</pubDate>
-            <description><![CDATA[Rocket.Chat in versions before 8.8.0, 8.7.1, 8.6.2, 8.5.3, 8.4.6, 8.3.8, 8.2.8, 8.1.8, and 7.10.15 has a REST API endpoint POST /api/v1/livechat/visitor that accepts an unauthenticated, unsanitized name field for Livechat visitors. This name is stored raw and later rendered via dangerouslySetInnerHTML in the Omnichannel Queue side panel (InquireSidePanelItem.tsx), injecting a real, clickable HTML link - pointing to any attacker-controlled domain, with arbitrary social-engineering text - into the DOM of any agent viewing the queue.]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-63633 [CVSS:4.0 7.7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-63633</link>
-            <guid isPermaLink="false">CVE-2026-63633</guid>
-            <pubDate>Fri, 21 Aug 2026 04:18:13 GMT</pubDate>
-            <description><![CDATA[FreeRDP is a free implementation of the Remote Desktop Protocol. Prior to 3.28.0, freerdp_dsp_decode_opus in libfreerdp/codec/dsp.c calls Stream_EnsureRemainingCapacity on context->common.buffer even though opus_decode writes decoded PCM into the caller-supplied out stream. A malicious RDP server that negotiates WAVE_FORMAT_OPUS with a client built with WITH_OPUS enabled and WITH_DSP_FFMPEG disabled can make libopus write a large decoded frame beyond the 4096-byte StreamPool_Take destination used by channels/rdpsnd/client/rdpsnd_main.c. This can corrupt the client heap, crash the client, and may permit code execution. This issue is fixed in version 3.28.0.
-
-Score: 7.7 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:P/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
         </item>
     </channel>
 </rss>
