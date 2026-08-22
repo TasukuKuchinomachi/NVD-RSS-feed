@@ -4,11 +4,27 @@
         <title>NVD CVE Feed</title>
         <link>https://github.com/TasukuKuchinomachi/NVD-RSS-feed</link>
         <description>Latest CVE entries from the National Vulnerability Database. This product uses the NVD API but is not endorsed or certified by the NVD.</description>
-        <lastBuildDate>Sat, 22 Aug 2026 20:16:19 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 22 Aug 2026 21:16:48 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>National Vulnerability Database - NIST</copyright>
+        <item>
+            <title><![CDATA[CVE-2026-12999 [CVSS:3.1 5.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-12999</link>
+            <guid isPermaLink="false">CVE-2026-12999</guid>
+            <pubDate>Sat, 22 Aug 2026 21:16:48 GMT</pubDate>
+            <description><![CDATA[The Infineon Airoc Wi-Fi driver's transmit callback airoc_mgmt_send() in drivers/wifi/infineon/airoc_wifi.c allocates a net_buf from the fixed airoc_pool for every outbound packet. When whd_network_send_ethernet_data() returns a synchronous failure, the underlying WHD library does not take ownership of the buffer, but the pre-fix driver returned -EIO without releasing it. Each failed transmit therefore permanently leaks one buffer from the pool.
+
+airoc_pool is small and fixed (AIROC_WIFI_TX_PACKET_POOL_COUNT + AIROC_WIFI_RX_PACKET_POOL_COUNT, default 20 buffers) and is shared by WHD's whd_host_buffer_get callback for both transmit and receive. Once enough send failures have leaked the pool dry, airoc_wifi_host_buffer_get() returns WHD_BUFFER_ALLOC_FAIL for all subsequent allocations, so both transmit and the WHD-driven receive path fail and Wi-Fi connectivity is lost until the device is rebooted.
+
+The leak occurs only on the transmit error path. A Wi-Fi-adjacent attacker can influence the conditions that cause synchronous send failures (for example by deauthenticating/disassociating the station while the local stack continues to attempt transmits), and ordinary transient failures over the device's lifetime accumulate toward the same state. Reliable on-demand triggering is of high complexity and the impact is availability-only, but the resulting denial of service is permanent and non-recoverable without a reboot.
+
+The fix releases the buffer with airoc_wifi_buffer_release() on the failure branch, returning it to the pool. The commit also removes a redundant k_sem_give() in airoc_mgmt_disconnect(); because data->sema_common is a binary semaphore (limit 1) the duplicate give merely saturated at 1 and had no security impact.
+
+Score: 5.3 (MEDIUM)
+Vector: CVSS:3.1/AV:A/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
         <item>
             <title><![CDATA[CVE-2026-7163 [CVSS:3.1 5.5 MEDIUM]]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-7163</link>
@@ -2958,54 +2974,6 @@ the mapping is gone.
 
 Put the folios back on the invalid-nid path so ignored migration requests
 still return them to the LRU.]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-74643]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-74643</link>
-            <guid isPermaLink="false">CVE-2026-74643</guid>
-            <pubDate>Sat, 22 Aug 2026 16:16:37 GMT</pubDate>
-            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
-
-samples/damon/mtier: error out for zero quota goal target values
-
-Patch series "mm/damon: avoid division by zero from damos_quota_score()".
-
-DAMON_SAMPLE_MTIER and DAMON_LRU_SORT allow the user to trigger division
-by zero in damos_quota_score().  Avoid it by adding parameters validation
-checks.
-
-
-This patch (of 2):
-
-damos_quota_score() can trigger division by zero if the target_value is
-zero.  DAMON_SAMPLE_MTIER lets users set the target_value via
-node0_mem_{used,free}_bp parameters.  It doesn't guard zero value case,
-though.  As a result, users can trigger division by zero.  Fix the issue
-by returning an error when the user tries to start DAMON with zero
-node0_mem_{used,free}_bp parameter values.
-
-DAMON_SAMPLE_MTIER is just a sample module, but the consequence is quite
-bad.  Also the zero node0_mem_free_bp parameter might look like a
-reasonable setup to some users.  Hence, the issue might really happen in
-the real world.
-
-One reliable way to reproduce the issue is like below:
-
-    # cd /sys/module/damon_sample_mtier/parameters
-    # echo 4096 > node0_start_addr
-    # echo 8192 > node0_end_addr
-    # echo 8192 > node1_start_addr
-    # echo 81920 > node1_end_addr
-    # echo 0 > node0_mem_free_bp
-    # echo Y > enabled
-    # dmesg -w
-    [...]
-    [18792.235916] Oops: divide error: 0000 [#1] SMP NOPTI
-    [...]
-    [18792.242787] RIP: 0010:damos_quota_score+0x6f/0x480
-    [...]
-
-This issue was discovered [1] by Sashiko.]]></description>
         </item>
     </channel>
 </rss>
