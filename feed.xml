@@ -4,11 +4,31 @@
         <title>NVD CVE Feed</title>
         <link>https://github.com/TasukuKuchinomachi/NVD-RSS-feed</link>
         <description>Latest CVE entries from the National Vulnerability Database. This product uses the NVD API but is not endorsed or certified by the NVD.</description>
-        <lastBuildDate>Sun, 23 Aug 2026 04:17:09 GMT</lastBuildDate>
+        <lastBuildDate>Sun, 23 Aug 2026 05:16:53 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>National Vulnerability Database - NIST</copyright>
+        <item>
+            <title><![CDATA[CVE-2026-78063 [CVSS:4.0 2.1 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78063</link>
+            <guid isPermaLink="false">CVE-2026-78063</guid>
+            <pubDate>Sun, 23 Aug 2026 05:16:53 GMT</pubDate>
+            <description><![CDATA[A security flaw has been discovered in Tenda CH22 1.0.0.1. The impacted element is the function formeditFileName of the file /goform/editFileName. The manipulation of the argument editNameMit results in command injection. The attack can be launched remotely. The exploit has been released to the public and may be used for attacks.
+
+Score: 2.1 (LOW)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:L/VI:L/VA:L/SC:L/SI:L/SA:L/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-78062 [CVSS:4.0 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78062</link>
+            <guid isPermaLink="false">CVE-2026-78062</guid>
+            <pubDate>Sun, 23 Aug 2026 05:16:52 GMT</pubDate>
+            <description><![CDATA[A vulnerability was identified in vas3k TaxHacker up to 0.8.2. The affected element is the function envSchema.parse of the file lib/config.ts of the component JWT Secret Handler. The manipulation of the argument BETTER_AUTH_SECRET leads to hard-coded credentials. The attack can be initiated remotely. The project was informed of the problem early through an issue report but has not responded yet.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
         <item>
             <title><![CDATA[CVE-2026-78061 [CVSS:4.0 5.3 MEDIUM]]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78061</link>
@@ -2259,87 +2279,6 @@ kbd_keycode() reads vc->port.tty without acquiring a tty reference,
 racing against con_shutdown() which clears port.tty under a different
 lock. Use tty_port_tty_get()/tty_kref_put() to hold a proper reference
 for the duration the tty pointer is needed.]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-74674]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-74674</link>
-            <guid isPermaLink="false">CVE-2026-74674</guid>
-            <pubDate>Sat, 22 Aug 2026 16:16:41 GMT</pubDate>
-            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
-
-mm: fix incorrect flush address in direct page table reclaim
-
-When zap_pte_range reclaims a page table, it does:
-
-    pte_free_tlb(tlb, pmd_pgtable(pmdval), addr);
-
-and this is unconditionally wrong: if this code executes, addr *always*
-points one past the end of the range covered by the table.  The addr
-parameter is used to flush the TLB (really the paging-structure-cache)
-to drop references to the to-be-freed table, and any architecture that
-cares about the parameter will flush the wrong address.  (But they'll
-still free the correct page).
-
-I think it's worth contemplating why the kernel works at all.
-
-If we hit the offending line of code, we will first clear the PMD entry
-(line 1954, zap_empty_pte_table), then we will issue pending flushes if
-force_flush is set (tlb_flush_mmu_tlbonly(tlb)), then we will skip the
-retry on line 1979 (phew!), and then we will do the offending
-pte_free_tlb call.  *Or* we will clear the PMD entry immediately before
-pte_free_tlb (line 1983, zap_pte_table_if_empty).
-
-If we have any pending flushes (i.e. we actually zapped any last-level
-entries) at the time we clear the PMD entry, then the flush really ought
-to flush all references to the table (Linus certainly seems to think it
-will on all architectures [0]).
-
-The condition under which we have no accumulated flushes at the time of
-the clear is very complex (the whole zap_pte_range function has absurdly
-complex control flow).  If we do hit the bad case, then we will end up
-clearing the PMD entry after the last time the range is flushed, and any
-CPU is free to cache a reference to the (empty) page table.  If this
-happens due to an ordinary read or write, it would segfault, so it would
-be rare.  But the cache could be speculatively filled as well.  Then
-we'll flush the wrong address and then free and possibly reuse the
-table.
-
-On x86, even flushing the wrong address works on non-KPTI Intel systems
-because INVLPG flushes *all* paging-structure-caches, not just the ones
-for the target address.  But INVPCID does not, and flush_tlb_one_user
-will use INVPCID if it's available.  And then we're toast.  AMD systems
-are more susceptible: we set the EFER.TCE bit, which makes even INVLPG
-only flush the target address.
-
-I think this might fix an issue in ripgrep reported here:
-https://github.com/BurntSushi/ripgrep/issues/3494
-
-[0] https://lore.kernel.org/all/CA+55aFzBggoXtNXQeng5d_mRoDnaMBE5Y+URs+PHR67nUpMtaw@mail.gmail.com/T/#u]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-74673]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-74673</link>
-            <guid isPermaLink="false">CVE-2026-74673</guid>
-            <pubDate>Sat, 22 Aug 2026 16:16:41 GMT</pubDate>
-            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
-
-Input: evdev - fix information leak in evdev_pass_values()
-
-In evdev_pass_values(), the input_event structure is allocated on the
-kernel stack and populated field-by-field. However, it is never fully
-initialized. On architectures where struct input_event contains explicit
-or implicit padding (such as the 32-bit __pad field on SPARC64), these
-padding bytes are left uninitialized.
-
-When this event structure is subsequently passed to the client buffer
-and later copied to userspace, the uninitialized padding bytes leak
-kernel stack memory, potentially exposing sensitive information.
-
-Similar issues exist in __evdev_queue_syn_dropped and __pass_event.
-
-Fix this by explicitly zeroing the entire event structure with memset()
-before populating its fields. This ensures all padding bytes are cleared
-before the data crosses the security boundary.]]></description>
         </item>
     </channel>
 </rss>
