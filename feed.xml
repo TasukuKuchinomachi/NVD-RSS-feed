@@ -4,11 +4,32 @@
         <title>NVD CVE Feed</title>
         <link>https://github.com/TasukuKuchinomachi/NVD-RSS-feed</link>
         <description>Latest CVE entries from the National Vulnerability Database. This product uses the NVD API but is not endorsed or certified by the NVD.</description>
-        <lastBuildDate>Sun, 23 Aug 2026 18:16:53 GMT</lastBuildDate>
+        <lastBuildDate>Sun, 23 Aug 2026 19:16:28 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>National Vulnerability Database - NIST</copyright>
+        <item>
+            <title><![CDATA[CVE-2026-75922]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-75922</link>
+            <guid isPermaLink="false">CVE-2026-75922</guid>
+            <pubDate>Sun, 23 Aug 2026 19:16:28 GMT</pubDate>
+            <description><![CDATA[Reverse::Proxy versions before 0.04 for Perl allow HTTP request smuggling via a percent-decoded PATH_INFO written unencoded to the upstream request line.
+
+PSGI hands PATH_INFO to an application percent-decoded, so a %XX sequence in the client URL has become a raw byte by the time the proxy sees it. The proxy appends that byte string to the upstream base URL, and for an Upgrade tunnel writes it into a request line it serializes itself, re-encoding nothing in either path. The HTTP client that sends the resulting URL does not validate the target either. A path containing %0d%0a therefore arrives at the upstream as a CRLF that ends the request line, and a decoded space, '?' or '#' truncates it the same way.
+
+Everything the client writes after the CRLF is read by the upstream as a second request. On the buffered path it arrives on a keep-alive connection the proxy pools and reuses for other clients. Its method, path and headers are all chosen by the client, and the upstream attributes it to the proxy, so it reaches upstream paths that the proxy's own routing does not expose.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-2100 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-2100</link>
+            <guid isPermaLink="false">CVE-2026-2100</guid>
+            <pubDate>Sun, 23 Aug 2026 19:16:27 GMT</pubDate>
+            <description><![CDATA[A flaw was found in p11-kit. A remote attacker could exploit this vulnerability by calling the C_DeriveKey function on a remote token with specific IBM kyber or IBM btc derive mechanism parameters set to NULL. This could lead to the RPC-client attempting to return an uninitialized value, potentially resulting in a NULL dereference or undefined behavior. This issue may cause an application level denial of service or other unpredictable system states.
+
+Score: 7.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
         <item>
             <title><![CDATA[CVE-2026-4878 [CVSS:3.1 7 HIGH]]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-4878</link>
@@ -2528,69 +2549,6 @@ conditions.
 
 Score: 8.8 (HIGH)
 Vector: CVSS:3.1/AV:A/AC:L/PR:N/UI:N/S:C/C:L/I:L/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-72142]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72142</link>
-            <guid isPermaLink="false">CVE-2026-72142</guid>
-            <pubDate>Sun, 23 Aug 2026 13:16:40 GMT</pubDate>
-            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
-
-i2c: imx: fix locked bus on SMBus block-read of 0 (atomic)
-
-SMBus 3.1 6.5.7 allows a Block Read byte count of 0, but the atomic
-(polling) path rejects it as -EPROTO. Worse, it returns without a
-NACK+STOP: the next receive cycle has already started, so the target
-keeps holding SDA and the bus stays stuck until a power cycle for
-this i2c controller.
-
-Reading I2DR to obtain the count likewise arms the next byte on the
-count > I2C_SMBUS_BLOCK_MAX path, which also returned -EPROTO directly
-and left the bus held.
-
-Handle both: NACK the in-flight dummy byte (TXAK) and extend msgs->len so
-the existing last-byte handling emits STOP; the dummy byte is discarded.
-A count of 0 is a valid empty block read; a count above
-I2C_SMBUS_BLOCK_MAX is still reported as -EPROTO, but only after the bus
-has been released.
-
-The interrupt-driven path has the same flaw from a later commit and is
-fixed separately, as it carries a different Fixes: tag and stable range.]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-72110 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72110</link>
-            <guid isPermaLink="false">CVE-2026-72110</guid>
-            <pubDate>Sun, 23 Aug 2026 13:16:40 GMT</pubDate>
-            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
-
-bpf,fork: wipe ->bpf_storage before bailouts that access it
-
-Currently, copy_process() can bail out to free_task() before p->bpf_storage
-has been initialized, with this call graph (shown here for the
-!CONFIG_MEMCG case):
-
-copy_process
-  dup_task_struct
-    arch_dup_task_struct
-      [copies the entire task_struct, including ->bpf_storage member]
-  [RLIMIT_NPROC check fails]
-  delayed_free_task
-    free_task
-      bpf_task_storage_free
-        rcu_dereference(task->bpf_storage)
-        bpf_local_storage_destroy
-
-In this case, the nascent task's ->bpf_storage member that
-bpf_local_storage_destroy() operates on is a plain copy of the parent's
-->bpf_storage pointer, not a real initialized pointer.
-This leads to badness (kernel hangs, UAF).
-
-This is reachable as long as the process calling fork() has been inserted
-into a task storage map.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
         </item>
     </channel>
 </rss>
