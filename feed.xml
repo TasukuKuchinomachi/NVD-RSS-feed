@@ -4,116 +4,206 @@
         <title>NVD CVE Feed</title>
         <link>https://github.com/TasukuKuchinomachi/NVD-RSS-feed</link>
         <description>Latest CVE entries from the National Vulnerability Database. This product uses the NVD API but is not endorsed or certified by the NVD.</description>
-        <lastBuildDate>Mon, 24 Aug 2026 12:16:56 GMT</lastBuildDate>
+        <lastBuildDate>Mon, 24 Aug 2026 14:17:06 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>National Vulnerability Database - NIST</copyright>
         <item>
-            <title><![CDATA[CVE-2026-78337 [CVSS:4.0 4.8 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78337</link>
-            <guid isPermaLink="false">CVE-2026-78337</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:56 GMT</pubDate>
-            <description><![CDATA[Unrestricted Upload of File with Dangerous Type in the company logo upload in Roskus Prospero Flow CRM before 5.15.13 allows an authenticated user holding the create company and update company permissions to execute arbitrary JavaScript in the application origin via an SVG document containing an embedded script element.
+            <title><![CDATA[CVE-2026-78386 [CVSS:4.0 8.7 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78386</link>
+            <guid isPermaLink="false">CVE-2026-78386</guid>
+            <pubDate>Mon, 24 Aug 2026 14:17:06 GMT</pubDate>
+            <description><![CDATA[RansomLook exposed sensitive operator-side scraping configuration through multiple unauthenticated API responses. Location records associated with ransomware groups and markets were returned largely verbatim to unauthenticated callers whenever the location itself was not marked as private.
 
-Score: 4.8 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:A/VC:N/VI:L/VA:N/SC:N/SI:L/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+
+These records could contain internal fields such as header, which may include authentication headers, session cookies, or other credentials used to access monitored websites; init_script, which may contain logic used to bypass CAPTCHA, anti-bot protections, or paywalls; and browser, which discloses details about the scraping environment.
+
+
+An unauthenticated remote attacker could query the affected API endpoints and obtain these values. Leaked authentication material could potentially be replayed against the monitored service, while disclosure of scraping and bypass logic could allow site operators or other attackers to identify and defeat RansomLook's collection mechanisms.
+
+
+The patch introduces an explicit allowlist of fields permitted in public location records and strips all operator-side fields before returning data to unauthenticated users.
+
+
+The accompanying change from <string:postname> to <path:postname> appears to be a functional correction allowing legitimate post titles containing / and does not, based on this patch alone, represent the security issue.
+
+Score: 8.7 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:N/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-78323 [CVSS:3.1 6.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78323</link>
-            <guid isPermaLink="false">CVE-2026-78323</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:56 GMT</pubDate>
-            <description><![CDATA[A flaw was found in JSS (Java Security Services). The JSSTrustManager class does not verify NSS trust flags when validating CA certificates, allowing certificates present in the NSS database without TRUSTED_CA flags to be accepted as trust anchors for TLS connections. In non-default configurations where certificate revocation checking is disabled, this could allow a man-in-the-middle attacker to forge certificates accepted by PKI client connections.
+            <title><![CDATA[CVE-2026-78385 [CVSS:4.0 8.2 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78385</link>
+            <guid isPermaLink="false">CVE-2026-78385</guid>
+            <pubDate>Mon, 24 Aug 2026 14:17:05 GMT</pubDate>
+            <description><![CDATA[RansomLook contains insufficient resource validation in the analysis PDF generation functionality. Analysis documents are converted from Markdown to HTML and passed to WeasyPrint for PDF rendering. Prior to the fix, WeasyPrint used its default URL fetcher, allowing resource references contained in an analysis to be resolved without restrictions.
 
-Score: 6.5 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:L/A:N]]></description>
+An authenticated attacker able to create or modify an analysis could embed crafted resource references using schemes such as file:// or http://. When the analysis was subsequently rendered as PDF, WeasyPrint would process these references with the privileges and network access of the RansomLook server.
+
+A malicious file:// reference could cause the renderer to access arbitrary files readable by the RansomLook process, potentially exposing sensitive configuration, credentials, or other local data through rendered resources. Network URLs could cause the server to initiate requests to localhost, internal network services, or external systems, resulting in server-side request forgery (SSRF) and potentially bypassing network-level access restrictions.
+
+The patch introduces a dedicated WeasyPrint URL fetcher that permits only data: resources, the RansomLook report logo, and files contained within the analysis asset directory. Network resources and filesystem paths outside these explicitly permitted locations are rejected.
+
+Score: 8.2 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:H/UI:N/VC:H/VI:N/VA:N/SC:H/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-78291 [CVSS:3.1 5.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78291</link>
-            <guid isPermaLink="false">CVE-2026-78291</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:56 GMT</pubDate>
-            <description><![CDATA[Unauthenticated Broken Access Control in RepairBuddy <= 4.1223 versions.
+            <title><![CDATA[CVE-2026-78381 [CVSS:4.0 8.2 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78381</link>
+            <guid isPermaLink="false">CVE-2026-78381</guid>
+            <pubDate>Mon, 24 Aug 2026 14:17:05 GMT</pubDate>
+            <description><![CDATA[RansomLook contains a path traversal vulnerability in the handling of the screen field associated with group posts. The GroupPost.get API handler concatenates the database-controlled screen value directly with the application's source/ directory and opens the resulting path without verifying that the resolved file remains within the intended directory.
 
-Score: 5.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N]]></description>
+Because the screen field is free-form and can be populated either through the administrative post editor or through data imported from a remote RansomLook instance, a malicious upstream instance can provide traversal sequences such as ../config/generic.json. When the affected post is subsequently retrieved through the API, RansomLook resolves and reads the attacker-controlled path and returns the contents of the referenced file Base64-encoded in the API response.
+
+This can allow an attacker (being admin) controlling imported post data to read arbitrary files accessible to the RansomLook process, potentially exposing sensitive configuration data, API credentials, password hashes, or other application secrets. The attack does not require the malicious upstream to possess an account on the affected RansomLook instance.
+
+The vulnerability is addressed by resolving screen paths with os.path.realpath() and verifying that the resolved path remains beneath the application's source/ directory. Validation is performed both when values are written and immediately before files are read. Using canonical paths also prevents traversal through symbolic links that would bypass purely lexical path normalization checks.
+
+Score: 8.2 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:H/UI:N/VC:H/VI:N/VA:N/SC:H/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-78290 [CVSS:3.1 6.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78290</link>
-            <guid isPermaLink="false">CVE-2026-78290</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:55 GMT</pubDate>
-            <description><![CDATA[Contributor Cross Site Scripting (XSS) in Magazine Blocks <= 1.8.6 versions.
+            <title><![CDATA[CVE-2026-78380 [CVSS:4.0 8.7 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78380</link>
+            <guid isPermaLink="false">CVE-2026-78380</guid>
+            <pubDate>Mon, 24 Aug 2026 14:17:05 GMT</pubDate>
+            <description><![CDATA[RansomLook fails to enforce the privacy status of ransomware groups and markets when distributing newly collected victim posts to external notification channels. The post-processing logic checks whether an individual post is marked private but does not verify whether the group or market to which the post belongs is configured as private.
 
-Score: 6.5 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:R/S:C/C:L/I:L/A:L]]></description>
+As a result, newly parsed victim information associated with a private group or market may be automatically published through enabled Rocket.Chat, Mastodon, Bluesky, and e-mail notification channels despite the entity being explicitly configured to prevent public disclosure.
+
+A similar issue affects the public MISP feed. The feed previously determined privacy using groupinfo(), which only queries the group database. Consequently, victim information associated with private markets could be added to the public MISP feed because the corresponding market privacy flag was not evaluated.
+
+An attacker or other unauthorized party able to access these public notification channels or the MISP feed may obtain victim information that was intended to remain private. Depending on the collected data, this may disclose victim names, ransomware activity, incident information, or other information associated with privately monitored groups and markets.
+
+The fix introduces a common is_private_entity() check covering both groups and markets and prevents private entity posts from being distributed through external notification channels or the public MISP feed. Internal storage and dashboard alerting remain unaffected.
+
+Score: 8.7 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:N/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-78280 [CVSS:3.1 4.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78280</link>
-            <guid isPermaLink="false">CVE-2026-78280</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:55 GMT</pubDate>
-            <description><![CDATA[Unauthenticated Cross Site Request Forgery (CSRF) in Hash Form <= 1.4.0 versions.
+            <title><![CDATA[CVE-2026-78378 [CVSS:4.0 6.9 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78378</link>
+            <guid isPermaLink="false">CVE-2026-78378</guid>
+            <pubDate>Mon, 24 Aug 2026 14:17:05 GMT</pubDate>
+            <description><![CDATA[Ransomlook contains a Redis glob pattern injection vulnerability caused by insufficient neutralization of user-controlled input before it is incorporated into Redis SCAN MATCH patterns.
 
-Score: 4.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:L/A:N]]></description>
+
+The /api/health/<name> endpoint attempted to resolve the supplied name to a known group or market, but when resolution failed it fell back to using the attacker-controlled value directly in a Redis key pattern. An unauthenticated attacker could therefore supply Redis glob metacharacters such as *, ?, [ or ] to broaden the SCAN operation beyond the intended group. For example, requesting /api/health/* could enumerate health information, mirror slugs, and uptime series belonging to all groups and markets, including entities marked as private.
+
+
+Similar unsafe interpolation was present in /api/crypto/chain/<chain> and in the delete_manual_torrent() function. The latter represents a potentially destructive sink because a crafted infohash containing glob metacharacters could cause the scan to match torrent-health keys belonging to other torrents if attacker-controlled input can reach that function.
+
+
+The patch removes the unsafe fallback from the health endpoint and introduces glob escaping for user-controlled values before they are incorporated into Redis SCAN MATCH expressions.
+
+Score: 6.9 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-78279 [CVSS:3.1 5.4 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78279</link>
-            <guid isPermaLink="false">CVE-2026-78279</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:55 GMT</pubDate>
-            <description><![CDATA[Unauthenticated Cross Site Request Forgery (CSRF) in Fluent Support Pro <= 2.3.1 versions.
+            <title><![CDATA[CVE-2026-78376 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78376</link>
+            <guid isPermaLink="false">CVE-2026-78376</guid>
+            <pubDate>Mon, 24 Aug 2026 14:17:05 GMT</pubDate>
+            <description><![CDATA[A flaw was found in WebKitGTK. Processing malicious web content can cause a use-after-free issue due to improper memory handling and result in memory corruption.
 
-Score: 5.4 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:L/A:N]]></description>
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-78278 [CVSS:3.1 5.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78278</link>
-            <guid isPermaLink="false">CVE-2026-78278</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:55 GMT</pubDate>
-            <description><![CDATA[Subscriber Insecure Direct Object References (IDOR) in Fluent Boards Pro <= 2.0.11 versions.
+            <title><![CDATA[CVE-2026-78372 [CVSS:4.0 9.2 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78372</link>
+            <guid isPermaLink="false">CVE-2026-78372</guid>
+            <pubDate>Mon, 24 Aug 2026 14:17:05 GMT</pubDate>
+            <description><![CDATA[RansomLook does not consistently 
+enforce authorization checks when accessing groups, markets, and ransom 
+notes marked as private. An unauthenticated or otherwise unauthorized 
+remote attacker can access information associated with private entities 
+through several web views and API endpoints.
 
-Score: 5.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N]]></description>
+
+The affected functionality can 
+disclose private group or market names, ransom-note content, and 
+metadata associated with private groups. The /compare
+ functionality can also be queried directly with the name of a private 
+entity, allowing an unauthorized user to retrieve information such as 
+post counts, mirror totals, and uptime even when the entity is excluded 
+from the normal user interface. The patch explicitly adds a privacy 
+check before returning this information. 
+
+
+Ransom-note views, search results, 
+and API endpoints were similarly missing consistent filtering. The fix 
+introduces normalized private-group identifiers and alias handling, then
+ rejects or filters notes associated with private groups before 
+returning them to unauthorized callers.  
+
+
+An attacker can exploit the issue 
+remotely without authentication or user interaction, resulting in 
+disclosure of information that was explicitly intended to be restricted 
+to authorized users.
+
+Score: 9.2 (CRITICAL)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:N/VA:N/SC:H/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-78277 [CVSS:3.1 4.9 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78277</link>
-            <guid isPermaLink="false">CVE-2026-78277</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:55 GMT</pubDate>
-            <description><![CDATA[Subscriber Server Side Request Forgery (SSRF) in FluentCRM Pro <= 3.1.12 versions.
+            <title><![CDATA[CVE-2026-78370 [CVSS:4.0 9.2 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78370</link>
+            <guid isPermaLink="false">CVE-2026-78370</guid>
+            <pubDate>Mon, 24 Aug 2026 14:17:05 GMT</pubDate>
+            <description><![CDATA[RansomLook contains an authorization flaw in its legacy database export functionality that can allow unauthenticated remote users to retrieve information intended to remain private.
 
-Score: 4.9 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:C/C:L/I:L/A:N]]></description>
+The /export/<database> endpoint permits selected internal databases to be exported without requiring authentication. While limited filtering is performed for some entity databases, other exportable databases are returned directly without consistently applying the application's private-entity access restrictions. As a result, information associated with groups, markets, posts, or other records marked as private may be included in an export accessible to an unauthenticated requester.
+
+An attacker able to reach the RansomLook web application can request the affected export endpoint and retrieve data that should only be available to authorized users. Depending on the contents of the instance, this may disclose private ransomware intelligence, victim information, internal tracking data, or other information deliberately excluded from public views.
+
+The patch removes the legacy unauthenticated export route and introduces centralized authorization handling that distinguishes ordinary authenticated API access from authorization to view private entries. API keys must now be explicitly granted private-data access, while existing keys do not automatically receive this privilege. The same private-data filtering is also applied consistently across API responses and database exports.
+
+Score: 9.2 (CRITICAL)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:N/VA:N/SC:H/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-78272 [CVSS:3.1 5.4 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78272</link>
-            <guid isPermaLink="false">CVE-2026-78272</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:55 GMT</pubDate>
-            <description><![CDATA[Subscriber Broken Access Control in Fluent Support Pro <= 2.3.1 versions.
+            <title><![CDATA[CVE-2026-78369 [CVSS:4.0 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78369</link>
+            <guid isPermaLink="false">CVE-2026-78369</guid>
+            <pubDate>Mon, 24 Aug 2026 14:17:04 GMT</pubDate>
+            <description><![CDATA[RansomLook contains a missing authentication vulnerability in the /admin/crypto/group/new endpoint. While the endpoint provides an administrative function for creating new crypto group entries, it was not protected by the application's authentication mechanism.
 
-Score: 5.4 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:N]]></description>
+An unauthenticated remote attacker able to access the RansomLook web interface could therefore submit requests to this endpoint and create crypto group entries without possessing a valid authenticated session or administrative credentials.
+
+Successful exploitation allows an attacker to make unauthorized modifications to data that should only be manageable by authenticated administrators. Depending on how crypto group information is subsequently consumed by RansomLook, malicious or fraudulent entries could also affect the integrity of information presented or processed by the application.
+
+The vulnerability is addressed by applying the flask_login.login_required decorator to the /admin/crypto/group/new route, ensuring that only authenticated users can access the functionality.
+
+Score: 8.8 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:L/VA:H/SC:N/SI:L/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-78270 [CVSS:3.1 7.6 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78270</link>
-            <guid isPermaLink="false">CVE-2026-78270</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:55 GMT</pubDate>
-            <description><![CDATA[Author SQL Injection in FluentCRM Pro <= 3.1.12 versions.
+            <title><![CDATA[CVE-2026-78367 [CVSS:3.1 7 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78367</link>
+            <guid isPermaLink="false">CVE-2026-78367</guid>
+            <pubDate>Mon, 24 Aug 2026 14:17:04 GMT</pubDate>
+            <description><![CDATA[A flaw was found in rpmbuild. When rpmbuild processes a crafted tarball in tarball mode, a specially designed tar member name can lead to macro injection. This vulnerability allows a remote attacker to execute arbitrary code on the system by convincing a user to build a malicious tarball.
 
-Score: 7.6 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:C/C:H/I:N/A:L]]></description>
+Score: 7 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-78365 [CVSS:4.0 9.3 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78365</link>
+            <guid isPermaLink="false">CVE-2026-78365</guid>
+            <pubDate>Mon, 24 Aug 2026 14:17:04 GMT</pubDate>
+            <description><![CDATA[Authorization Bypass Through User-Controlled Key in the supplier API in Roskus Prospero Flow CRM 4.0.0 through 5.3.1 allows any authenticated user to read and modify another company's supplier record, and to reassign it to their own company, via a PUT request to /api/supplier/{id} setting company_id in the body.
+
+Score: 9.3 (CRITICAL)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
         </item>
         <item>
             <title><![CDATA[CVE-2026-78269 [CVSS:3.1 6.4 MEDIUM]]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78269</link>
             <guid isPermaLink="false">CVE-2026-78269</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:54 GMT</pubDate>
+            <pubDate>Mon, 24 Aug 2026 14:17:04 GMT</pubDate>
             <description><![CDATA[Contributor Server Side Request Forgery (SSRF) in Shared Files <= 1.7.69 versions.
 
 Score: 6.4 (MEDIUM)
@@ -123,109 +213,528 @@ Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:L/I:L/A:N]]></description>
             <title><![CDATA[CVE-2026-78258 [CVSS:3.1 5.3 MEDIUM]]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78258</link>
             <guid isPermaLink="false">CVE-2026-78258</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:54 GMT</pubDate>
+            <pubDate>Mon, 24 Aug 2026 14:17:04 GMT</pubDate>
             <description><![CDATA[Unauthenticated Broken Access Control in Booking and Rental Manager <= 2.7.5 versions.
 
 Score: 5.3 (MEDIUM)
 Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-78246 [CVSS:4.0 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78246</link>
-            <guid isPermaLink="false">CVE-2026-78246</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:54 GMT</pubDate>
-            <description><![CDATA[A vulnerability has been found in itsourcecode Online Clinic Management System 1.0. This vulnerability affects unknown code of the file success/login.php of the component Admin Login. The manipulation of the argument Username leads to sql injection. Remote exploitation of the attack is possible. The exploit has been disclosed to the public and may be used.
+            <title><![CDATA[CVE-2026-78250 [CVSS:4.0 2.1 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78250</link>
+            <guid isPermaLink="false">CVE-2026-78250</guid>
+            <pubDate>Mon, 24 Aug 2026 14:17:04 GMT</pubDate>
+            <description><![CDATA[A vulnerability was identified in bytebot-ai bytebot 0.0.1. The affected element is an unknown function of the component Agent Execution Workflow. Such manipulation leads to infinite loop. The attack may be performed from remote. The exploit is publicly available and might be used. This vulnerability only affects products that are no longer supported by the maintainer.
+
+Score: 2.1 (LOW)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-78248 [CVSS:4.0 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78248</link>
+            <guid isPermaLink="false">CVE-2026-78248</guid>
+            <pubDate>Mon, 24 Aug 2026 14:17:04 GMT</pubDate>
+            <description><![CDATA[A vulnerability was determined in SourceCodester Simple Online Food Ordering System 1.0. Impacted is an unknown function of the file /fos/admin/ajax.php?action=save_settings. This manipulation of the argument Name causes sql injection. The attack is possible to be carried out remotely. The exploit has been publicly disclosed and may be utilized.
 
 Score: 5.5 (MEDIUM)
 Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-71226 [CVSS:3.1 7.3 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-71226</link>
-            <guid isPermaLink="false">CVE-2026-71226</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:54 GMT</pubDate>
-            <description><![CDATA[Memory Corruption via Uncanceled AIO Requests on Error: libkcapi's one-shot AIO path can return an error before all submitted IOCBs are drained, allowing later kernel writes into caller-owned output buffers.
+            <title><![CDATA[CVE-2026-78245 [CVSS:4.0 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78245</link>
+            <guid isPermaLink="false">CVE-2026-78245</guid>
+            <pubDate>Mon, 24 Aug 2026 14:17:03 GMT</pubDate>
+            <description><![CDATA[A flaw has been found in itsourcecode Online Pharmacy System 1.0. This affects the function move_uploaded_file of the file all_users/register.php of the component User Registration. Executing a manipulation of the argument photo can lead to unrestricted upload. The attack may be launched remotely. The exploit has been published and may be used.
 
-Score: 7.3 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:H]]></description>
+Score: 5.5 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-6732 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-6732</link>
-            <guid isPermaLink="false">CVE-2026-6732</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:54 GMT</pubDate>
-            <description><![CDATA[A flaw was found in libxml2. This vulnerability occurs when the library processes a specially crafted XML Schema Definition (XSD) validated document that includes an internal entity reference. An attacker could exploit this by providing a malicious document, leading to a type confusion error that causes the application to crash. This results in a denial of service (DoS), making the affected system or application unavailable.
+            <title><![CDATA[CVE-2026-78169 [CVSS:4.0 8.6 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78169</link>
+            <guid isPermaLink="false">CVE-2026-78169</guid>
+            <pubDate>Mon, 24 Aug 2026 14:17:03 GMT</pubDate>
+            <description><![CDATA[A vulnerability was detected in UTT HiPER 1250GW up to 3.2.7-210907-180535. This impacts the function strcpy of the file /goform/aspRemoteApConfTempSend of the component HTTP Request Handler. Performing a manipulation of the argument Profile results in stack-based buffer overflow. The attack is possible to be carried out remotely. The exploit is now public and may be used.
 
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
+Score: 8.6 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-6017 [CVSS:4.0 7.1 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-6017</link>
-            <guid isPermaLink="false">CVE-2026-6017</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:54 GMT</pubDate>
-            <description><![CDATA[Firmware in KAON PG5298A and PG5298B routers allow an unauthenticated user to query a specific endpoint and acquire sensitive information such as a password to the administrative portal.   
-This vulnerability has been fixed in firmware version: 3.0.82 for PG5298A and 4.0.82 for PG5298B.
+            <title><![CDATA[CVE-2026-78155 [CVSS:3.1 9.9 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78155</link>
+            <guid isPermaLink="false">CVE-2026-78155</guid>
+            <pubDate>Mon, 24 Aug 2026 14:17:03 GMT</pubDate>
+            <description><![CDATA[privilege escalation in StackGres operator allows a low-privilege tenant who owns a database to gain administrator privileges
+
+Score: 9.9 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-78136 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78136</link>
+            <guid isPermaLink="false">CVE-2026-78136</guid>
+            <pubDate>Mon, 24 Aug 2026 14:17:03 GMT</pubDate>
+            <description><![CDATA[chirpmyradio CHIRP before 39178db allows eval injection via crafted CSV data. This occurs in _clean_tmode in drivers/kenwood_itm.py.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-77995 [CVSS:4.0 10 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-77995</link>
+            <guid isPermaLink="false">CVE-2026-77995</guid>
+            <pubDate>Mon, 24 Aug 2026 14:17:03 GMT</pubDate>
+            <description><![CDATA[Joomla Extension - miniorange.com - Arbitrary account takeover in miniOrange OAuth Client < 3.2.0 - The manipulation of a cookie value allows actors to login as arbitrary accounts, including admins.
+
+Score: 10 (CRITICAL)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-77992 [CVSS:4.0 9.5 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-77992</link>
+            <guid isPermaLink="false">CVE-2026-77992</guid>
+            <pubDate>Mon, 24 Aug 2026 14:17:03 GMT</pubDate>
+            <description><![CDATA[Joomla Extension - fabrikar.com - heredoc terminator breakout in the calc element in Fabrik < 4.7.2 - The onUpdateComment endpoint did not perform any access checks.
+
+Score: 9.5 (CRITICAL)
+Vector: CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-77027 [CVSS:4.0 8.6 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-77027</link>
+            <guid isPermaLink="false">CVE-2026-77027</guid>
+            <pubDate>Mon, 24 Aug 2026 14:17:03 GMT</pubDate>
+            <description><![CDATA[Joomla Extension - fabrikar.com - Unauthenticated stored XSS in Fabrik < 4.7.2 - The handling of user supplied input in the jsactions feature leads to an stored XSS vector.
+
+Score: 8.6 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:A/VC:H/VI:H/VA:L/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-76848 [CVSS:4.0 8.7 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-76848</link>
+            <guid isPermaLink="false">CVE-2026-76848</guid>
+            <pubDate>Mon, 24 Aug 2026 14:17:03 GMT</pubDate>
+            <description><![CDATA[TypeORM's SelectQueryBuilder.distinctOn accepts an array of strings and stores it on the expression map without validation. For PostgreSQL-family drivers, createSelectDistinctExpression in src/query-builder/SelectQueryBuilder.ts joins that array and interpolates the result into the generated statement as SELECT DISTINCT ON (values), with no escaping, quoting, identifier validation or allowlist, and without routing the values through replacePropertyNames or the driver's escape helper. Because the interpolation point is a parenthesized SQL expression list rather than an identifier-only position, a supplied element may carry arbitrary expressions, including correlated subqueries. An application that forwards a client-controlled value into distinctOn, for instance to let a caller choose a deduplication column, allows that client to read data anywhere the application's database role can reach through boolean or time-based inference, independently of the entity being queried. validateOrderByCondition, the allowlist check guarding the orderBy family in the same class, is not applied to this path.
+
+Score: 8.7 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:N/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-76847 [CVSS:4.0 8.7 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-76847</link>
+            <guid isPermaLink="false">CVE-2026-76847</guid>
+            <pubDate>Mon, 24 Aug 2026 14:17:02 GMT</pubDate>
+            <description><![CDATA[act starts an HTTP Artifacts V4 backend whenever a workflow uses actions/upload-artifact@v4 or actions/download-artifact@v4. The control-plane RPCs of that backend, including CreateArtifact, GetSignedArtifactURL, ListArtifacts, FinalizeArtifact and DeleteArtifact, accept a caller-supplied workflow_run_backend_id and never check that it belongs to the requester: validateRunIDV4 in pkg/artifacts/artifacts_v4.go parses the value and returns it with the comparison against the requesting task's run ID left commented out. The signed URLs the backend issues are authenticated by an HMAC whose key is hardcoded to the four bytes 0xba 0xdb 0xee 0xf0, identical in every build, computed over a concatenation of endpoint, expiry, artifact name and task ID with no length prefix or delimiter, so signatures are both forgeable and ambiguous between differing artifact name and task ID pairs. The --artifact-server-addr flag defaults to the host's outbound address rather than loopback, leaving the backend reachable from the surrounding network. Any client that can reach it may read, overwrite or delete the artifacts of a concurrently running job with no credentials, exposing build outputs such as secrets and deployment credentials and permitting their replacement before the owning job consumes them.
+
+Score: 8.7 (HIGH)
+Vector: CVSS:4.0/AV:A/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-76845 [CVSS:4.0 6.8 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-76845</link>
+            <guid isPermaLink="false">CVE-2026-76845</guid>
+            <pubDate>Mon, 24 Aug 2026 14:17:02 GMT</pubDate>
+            <description><![CDATA[adm-zip 0.5.9 through 0.6.0 follows symbolic links at the extraction destination. Utils.sanitize in util/utils.js enforces containment by comparing only the string form of an archive entry name against the resolved extraction root, and Utils.writeFileTo opens the computed destination with fs.openSync(path, "w", 0o666), which resolves symbolic links and carries neither O_NOFOLLOW nor a pre-write fs.lstatSync check. When a path component at the destination already exists as a symbolic link pointing outside the extraction root, extractAllTo, extractAllToAsync and extractEntryTo write the entry contents through that link and then chmod its target, placing attacker-controlled content in a file outside the root without any traversal sequence appearing in the archive. Reaching the write requires overwrite to be enabled, because the preceding fs.existsSync check also resolves the link and otherwise declines. An attacker able to create a symbolic link inside a shared, reused or predictable extraction directory, such as a temporary directory or a continuous integration workspace, can overwrite any file the extracting process is permitted to write.
+
+Score: 6.8 (MEDIUM)
+Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:N/VC:N/VI:H/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-76844 [CVSS:4.0 8.3 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-76844</link>
+            <guid isPermaLink="false">CVE-2026-76844</guid>
+            <pubDate>Mon, 24 Aug 2026 14:17:02 GMT</pubDate>
+            <description><![CDATA[webpack-dev-middleware resolves a request to a local file in getFilenameFromUrl by testing the request pathname against a traversal guard and then slicing it at a fixed character offset. The guard, UP_PATH_REGEXP applied to path.normalize(`./${pathname}`), only matches ".." that stands as a whole path segment, while the containment test is the string comparison pathname.startsWith(publicPathPathname) and the file path is built as path.join(outputPath, pathname.slice(publicPathPathname.length)). When the configured publicPath has no trailing slash, a request such as GET /assets../.env against publicPath /assets yields the pathname /assets../.env, whose only dot-dot sits inside the segment "assets.." and so passes the guard, but the offset slice cuts within that segment and hands "../.env" to path.join, resolving one directory above outputPath. Reading a file from that path requires the middleware to be backed by the physical filesystem, which happens when writeToDisk is true or a custom outputFileSystem is supplied, since the default memfs volume holds only build output. Traversal depth is limited to a single directory because a separately delimited dot-dot segment is collapsed during URL parsing before the guard runs. The default publicPath value of "auto" resolves to "/" and is not affected. This is an incomplete fix for CVE-2024-29180: the guard and offset slice were introduced by that fix and are present in every release from 5.3.4, 6.1.2 and 7.1.0 onward.
+
+Score: 8.3 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:P/VC:H/VI:N/VA:N/SC:H/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-76843 [CVSS:4.0 8.4 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-76843</link>
+            <guid isPermaLink="false">CVE-2026-76843</guid>
+            <pubDate>Mon, 24 Aug 2026 14:17:02 GMT</pubDate>
+            <description><![CDATA[The official Flair wheels for 0.15.0 and 0.15.1 still contain flair/models/clustering.py, whose ClusteringModel.load static method returns pickle.loads(joblib.load(str(model_file))) and so executes arbitrary Python while loading a model file. Loading a model supplied by an attacker therefore runs that attacker's code with the privileges of the loading process. This is the same sink and the same file as CVE-2024-10073, which records 0.15.0 as the fixed version on the basis that clustering support was dropped in that release; the module was removed from the documented API but remains present in the distributed artifact and reachable by importing flair.models.clustering directly, so the earlier record's fixed version does not hold for the shipped package.
+
+Score: 8.4 (HIGH)
+Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:N/UI:A/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-76842 [CVSS:4.0 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-76842</link>
+            <guid isPermaLink="false">CVE-2026-76842</guid>
+            <pubDate>Mon, 24 Aug 2026 14:17:01 GMT</pubDate>
+            <description><![CDATA[The Mercado Pago Node.js SDK interpolates caller-supplied identifiers into API request paths without percent-encoding them, so characters that are structural in a URL survive into the outgoing request. The payment (get, capture, cancel), paymentRefund (create, total, list, get), advancedPayment (get, capture, cancel, update, updateReleaseDate) and disbursementRefund (create, createAll, listAll) clients build their path as a template literal, for example RestClient.fetch(`/v1/payments/${id}`, ...) in src/clients/payment/get/index.ts. A dot-dot or slash sequence in the identifier is normalised by the WHATWG URL parser and redirects the request to a different endpoint, and a question mark appends attacker-chosen query parameters, in both cases carrying the merchant's own access token. An application that forwards an identifier influenced by an untrusted party into one of these methods without an ownership check therefore allows that party to reach other resources within the merchant's token scope. The repository already contains the intended helper, encodePathParam in src/utils/path.ts, which pull request 451 applied to roughly 29 other clients while leaving these unchanged.
+
+Score: 8.8 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:L/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-76841 [CVSS:4.0 8.7 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-76841</link>
+            <guid isPermaLink="false">CVE-2026-76841</guid>
+            <pubDate>Mon, 24 Aug 2026 14:17:01 GMT</pubDate>
+            <description><![CDATA[Xinference loads models with Hugging Face remote code execution unconditionally enabled, and before version 2.12.0 exposes no setting to disable it. Six loader call sites pass trust_remote_code=True as a literal or as an unconditional default: RerankModel._get_tokenizer in xinference/model/rerank/core.py, SentenceTransformerRerankModel.load in xinference/model/rerank/sentence_transformers/core.py, SentenceTransformerEmbeddingModel.load in xinference/model/embedding/sentence_transformers/core.py, FlagEmbeddingModel.load in xinference/model/embedding/flag/core.py, and two sites in xinference/model/llm/transformers/core.py where PytorchModel._sanitize_model_config and PytorchModel._get_components default the value to True. Because a caller with model launch access can register a model whose type is unknown and supply an arbitrary model path, the server reaches _auto_detect_type and then AutoTokenizer.from_pretrained, which imports and executes Python declared by the model directory's own tokenizer_config.json auto_map, running attacker-supplied code with the privileges of the worker process. Version 2.12.0 gates every site behind allow_trust_remote_code and the XINFERENCE_TRUST_REMOTE_CODE setting, permitting remote code only for bundled built-in models.
+
+Score: 8.7 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-76840 [CVSS:4.0 8.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-76840</link>
+            <guid isPermaLink="false">CVE-2026-76840</guid>
+            <pubDate>Mon, 24 Aug 2026 14:17:01 GMT</pubDate>
+            <description><![CDATA[RustDesk's Windows clipboard redirection copies a peer-supplied length into a fixed-size caller buffer without an upper bound check. When an OLE paste consumer such as explorer.exe calls IStream::Read with a buffer of cb bytes, CliprdrStream_Read in libs/clipboard/src/windows/wf_cliprdr.c requests that many bytes of a remote file through cliprdr_send_request_filecontents and then executes CopyMemory(pv, clipboard->req_fdata, clipboard->req_fsize), where req_fsize is taken verbatim from the peer's CLIPRDR FileContentsResponse by wf_cliprdr_server_file_contents_response (req_fsize = fileContentsResponse->cbRequested) and is never clamped to cb anywhere in the chain. The function's only length comparison, req_fsize < cb, handles the short-read case and is evaluated after the copy has already occurred. A malicious or compromised peer that answers a small file-contents read with an oversized response therefore writes attacker-chosen data past the end of the paste consumer's heap buffer when the local user pastes clipboard file contents offered by the remote side. The file is a fork of FreeRDP's client/Windows/wf_cliprdr.c, where the same defect is CVE-2026-68579, fixed in FreeRDP 3.30.0.
+
+Score: 8.5 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:P/VC:N/VI:N/VA:H/SC:L/SI:H/SA:H/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-76609 [CVSS:4.0 6.9 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-76609</link>
+            <guid isPermaLink="false">CVE-2026-76609</guid>
+            <pubDate>Mon, 24 Aug 2026 14:17:01 GMT</pubDate>
+            <description><![CDATA[Joomla Extension - fabrikar.com - Unauthenticated modification of any comment in Fabrik < 4.7.2 - The onUpdateComment endpoint did not perform any access checks.
+
+Score: 6.9 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:L/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-76608 [CVSS:4.0 6.9 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-76608</link>
+            <guid isPermaLink="false">CVE-2026-76608</guid>
+            <pubDate>Mon, 24 Aug 2026 14:17:01 GMT</pubDate>
+            <description><![CDATA[Joomla Extension - fabrikar.com - Unauthenticated disclosure of any commenter's email address in Fabrik < 4.7.2 - The onGetEmail endpoint did not perform any access checks.
+
+Score: 6.9 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:L/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-76607 [CVSS:4.0 10 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-76607</link>
+            <guid isPermaLink="false">CVE-2026-76607</guid>
+            <pubDate>Mon, 24 Aug 2026 14:17:01 GMT</pubDate>
+            <description><![CDATA[Joomla Extension - fabrikar.com - Missing ACL check in download element in Fabrik < 4.7.2.
+
+Score: 10 (CRITICAL)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-76606 [CVSS:4.0 10 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-76606</link>
+            <guid isPermaLink="false">CVE-2026-76606</guid>
+            <pubDate>Mon, 24 Aug 2026 14:17:01 GMT</pubDate>
+            <description><![CDATA[Joomla Extension - fabrikar.com - Path Traversal via image element in Fabrik < 4.7.2.
+
+Score: 10 (CRITICAL)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-76605 [CVSS:4.0 10 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-76605</link>
+            <guid isPermaLink="false">CVE-2026-76605</guid>
+            <pubDate>Mon, 24 Aug 2026 14:17:00 GMT</pubDate>
+            <description><![CDATA[Joomla Extension - fabrikar.com - Remote code execution via image element in Fabrik < 4.7.2.
+
+Score: 10 (CRITICAL)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-76604 [CVSS:4.0 10 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-76604</link>
+            <guid isPermaLink="false">CVE-2026-76604</guid>
+            <pubDate>Mon, 24 Aug 2026 14:17:00 GMT</pubDate>
+            <description><![CDATA[Joomla Extension - fabrikar.com - Unauthenticated remote code execution via PHP form element in Fabrik < 4.7.2 - The PHP form element is vulnerable to the execution of user provided codes.
+
+Score: 10 (CRITICAL)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-76602 [CVSS:4.0 9.3 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-76602</link>
+            <guid isPermaLink="false">CVE-2026-76602</guid>
+            <pubDate>Mon, 24 Aug 2026 14:17:00 GMT</pubDate>
+            <description><![CDATA[Joomla Extension - fabrikar.com - Unauthenticated SQL injection in ORDER BY in Fabrik < 4.7.2 - The order parameter in list models is used in queries without validation, allowing read SQLi vectors.
+
+Score: 9.3 (CRITICAL)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-76601 [CVSS:4.0 6.9 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-76601</link>
+            <guid isPermaLink="false">CVE-2026-76601</guid>
+            <pubDate>Mon, 24 Aug 2026 14:17:00 GMT</pubDate>
+            <description><![CDATA[Joomla Extension - fabrikar.com - Unauthenticated row reordering in Fabrik < 4.7.2 - The order plugin did not perform any access checks.
+
+Score: 6.9 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:L/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-76600 [CVSS:4.0 6.9 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-76600</link>
+            <guid isPermaLink="false">CVE-2026-76600</guid>
+            <pubDate>Mon, 24 Aug 2026 14:17:00 GMT</pubDate>
+            <description><![CDATA[Joomla Extension - fabrikar.com - Unauthenticated deletion of any comment in Fabrik < 4.7.2 - The DeleteComment endpoint did not perform any access checks.
+
+Score: 6.9 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:L/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-76598 [CVSS:4.0 8.7 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-76598</link>
+            <guid isPermaLink="false">CVE-2026-76598</guid>
+            <pubDate>Mon, 24 Aug 2026 14:17:00 GMT</pubDate>
+            <description><![CDATA[Joomla Extension - fabrikar.com - Unauthenticated arbitrary directory listing via onAjax_getFolders in Fabrik < 4.7.2 - The onAjax_getFolders method of the elements model allows arbitrary directory listings.
+
+Score: 8.7 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:H/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-76597 [CVSS:4.0 8.7 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-76597</link>
+            <guid isPermaLink="false">CVE-2026-76597</guid>
+            <pubDate>Mon, 24 Aug 2026 14:17:00 GMT</pubDate>
+            <description><![CDATA[Joomla Extension - fabrikar.com - Unauthenticated arbitrary file upload to web root via list email plugin in Fabrik < 4.7.2 - The list email plugin controller allows to upload non-executable files to the webroot.
+
+Score: 8.7 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:H/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-76596 [CVSS:4.0 8.7 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-76596</link>
+            <guid isPermaLink="false">CVE-2026-76596</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:59 GMT</pubDate>
+            <description><![CDATA[Joomla Extension - fabrikar.com - Unauthenticated table truncation via list.doempty in Fabrik < 4.7.2- The list controllers doemtpy endpoints lacks ACL gates, a plain GET empties the target list's table
+
+Score: 8.7 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:H/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-76074 [CVSS:3.1 4.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-76074</link>
+            <guid isPermaLink="false">CVE-2026-76074</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:59 GMT</pubDate>
+            <description><![CDATA[The AutomatorWP – Automator plugin for no-code automations, webhooks & custom integrations in WordPress plugin for WordPress is vulnerable to authorization bypass in all versions up to, and including, 5.8.4. This is due to the plugin not properly verifying that a user is authorized to perform an action. This makes it possible for authenticated attackers, with subscriber-level access and above, to retrieve the site's configured Campaign Monitor mailing list catalog, including all list IDs and names, that should be restricted to users with the plugin's manager capability. The required nonce is emitted unconditionally on every WordPress admin page via wp_localize_script, meaning any subscriber visiting /wp-admin/profile.php can obtain it without any elevated access.
+
+Score: 4.3 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-76057 [CVSS:3.1 4.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-76057</link>
+            <guid isPermaLink="false">CVE-2026-76057</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:59 GMT</pubDate>
+            <description><![CDATA[The AutomatorWP – Automator plugin for no-code automations, webhooks & custom integrations in WordPress plugin for WordPress is vulnerable to authorization bypass in all versions up to, and including, 5.8.4. This is due to the plugin not properly verifying that a user is authorized to perform an action. This makes it possible for authenticated attackers, with subscriber-level access and above, to retrieve all ConvertKit form data configured by the site's manager account, exposing integration details intended to be restricted to plugin managers. The required nonce is localized on every admin page load, making it accessible to any authenticated user who can reach /wp-admin.
+
+Score: 4.3 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-75027 [CVSS:3.1 5.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-75027</link>
+            <guid isPermaLink="false">CVE-2026-75027</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:59 GMT</pubDate>
+            <description><![CDATA[The Themify Builder plugin for WordPress is vulnerable to authorization bypass in all versions up to, and including, 7.8.0. This is due to the plugin not properly verifying that a user is authorized to perform an action. This makes it possible for unauthenticated attackers to modify the stored Themify Builder styling data (padding and margin properties) of arbitrary posts, including private and draft posts, by supplying an attacker-controlled post ID and JSON styling payload. The nonce required by the handler is automatically emitted to all frontend pages rendered by the builder via wp_localize_script, meaning any unauthenticated visitor can trivially retrieve a valid nonce from page source and satisfy the only access control in place.
+
+Score: 5.3 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-74019 [CVSS:3.1 7.1 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-74019</link>
+            <guid isPermaLink="false">CVE-2026-74019</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:59 GMT</pubDate>
+            <description><![CDATA[Unauthenticated Broken Access Control in EPROLO Dropshipping <= 2.4.2 versions.
 
 Score: 7.1 (HIGH)
-Vector: CVSS:4.0/AV:A/AC:L/AT:N/PR:N/UI:N/VC:H/VI:N/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:L/A:N]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-66671 [CVSS:3.1 8.1 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-66671</link>
-            <guid isPermaLink="false">CVE-2026-66671</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:53 GMT</pubDate>
-            <description><![CDATA[Unauthenticated Local File Inclusion in Verdure Core <= 1.2 versions.
+            <title><![CDATA[CVE-2026-71049 [CVSS:3.1 8.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-71049</link>
+            <guid isPermaLink="false">CVE-2026-71049</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:59 GMT</pubDate>
+            <description><![CDATA[Vulnerability in the Oracle Product Lifecycle Analytics product of Oracle Supply Chain (component: Installation Issues).   The supported version that is affected is 3.6.1. Easily exploitable vulnerability allows low privileged attacker with network access via Oracle Net to compromise Oracle Product Lifecycle Analytics.  While the vulnerability is in Oracle Product Lifecycle Analytics, attacks may significantly impact additional products (scope change).  Successful attacks of this vulnerability can result in  unauthorized access to critical data or complete access to all Oracle Product Lifecycle Analytics accessible data as well as  unauthorized update, insert or delete access to some of Oracle Product Lifecycle Analytics accessible data. CVSS 3.1 Base Score 8.5 (Confidentiality and Integrity impacts).  CVSS Vector: (CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:L/A:N).
 
-Score: 8.1 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+Score: 8.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:L/A:N]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-66670 [CVSS:3.1 8.1 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-66670</link>
-            <guid isPermaLink="false">CVE-2026-66670</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:53 GMT</pubDate>
-            <description><![CDATA[Unauthenticated Local File Inclusion in Måne <= 1.7 versions.
+            <title><![CDATA[CVE-2026-69238 [CVSS:3.1 3.5 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-69238</link>
+            <guid isPermaLink="false">CVE-2026-69238</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:59 GMT</pubDate>
+            <description><![CDATA[There is an HTML injection vulnerability in Esri Portal for ArcGIS versions 11.5 and prior that allows a remote, highly priviliged attacker to insert arbitrary HTML into the Portal for ArcGIS Home application. Users working with ArcGIS Enterprise 11.1, 11.3, and 11.5 are encouraged to patch. All users are advised to upgrade to the latest long-term support release.
 
-Score: 8.1 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+Score: 3.5 (LOW)
+Vector: CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:U/C:L/I:L/A:N]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-66650 [CVSS:3.1 9.8 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-66650</link>
-            <guid isPermaLink="false">CVE-2026-66650</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:53 GMT</pubDate>
-            <description><![CDATA[Unauthenticated PHP Object Injection in FreightCo <= 1.1.15 versions.
+            <title><![CDATA[CVE-2026-69237 [CVSS:3.1 3.8 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-69237</link>
+            <guid isPermaLink="false">CVE-2026-69237</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:58 GMT</pubDate>
+            <description><![CDATA[There is an HTML injection vulnerability in Esri Portal for ArcGIS versions 11.3 and prior that allows a remote attacker with administrative privileges to insert arbitrary HTML into an administrative API. Users working with ArcGIS Enterprise 11.1, and 11.3 are encouraged to patch. All users are advised to upgrade to the latest long-term support release.
 
-Score: 9.8 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+Score: 3.8 (LOW)
+Vector: CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:L/I:L/A:N]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-66648 [CVSS:3.1 9.8 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-66648</link>
-            <guid isPermaLink="false">CVE-2026-66648</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:53 GMT</pubDate>
-            <description><![CDATA[Unauthenticated Privilege Escalation in Jawn <= 1.4.2 versions.
+            <title><![CDATA[CVE-2026-69236 [CVSS:3.1 6.1 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-69236</link>
+            <guid isPermaLink="false">CVE-2026-69236</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:58 GMT</pubDate>
+            <description><![CDATA[There is a stored cross site scripting issue in Esri Portal for ArcGIS versions 12.1 and prior that may allow a remote, privileged attacker to inject malicious code that could potentially execute arbitrary JavaScript in a victim’s browser. Users working with ArcGIS Enterprise 11.1, 11.3, 11.5, 12.0 or 12.1 are encouraged to patch. All users are advised to upgrade to the latest long-term support release and apply the patch.
 
-Score: 9.8 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+Score: 6.1 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-69235 [CVSS:3.1 6.1 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-69235</link>
+            <guid isPermaLink="false">CVE-2026-69235</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:58 GMT</pubDate>
+            <description><![CDATA[There is a stored cross site scripting issue in Esri Portal for ArcGIS versions 11.5 and prior that may allow a remote, privileged attacker to inject malicious code that could potentially execute arbitrary in a victim’s browser. Users working with ArcGIS Enterprise 11.1, 11.3, and 11.5 are encouraged to patch. All users are advised to upgrade to the latest long-term support release.
+
+Score: 6.1 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-69234 [CVSS:3.1 6.1 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-69234</link>
+            <guid isPermaLink="false">CVE-2026-69234</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:58 GMT</pubDate>
+            <description><![CDATA[There is a reflected cross site scripting vulnerability in Esri Portal for ArcGIS versions 11.5 and prior which may allow a remote, unauthenticated attacker to create a crafted link which when clicked could potentially execute arbitrary JavaScript code in the victim’s browser. Users working with ArcGIS Enterprise 11.1, 11.3, and 11.5 are encouraged to patch. All users are advised to upgrade to the latest long-term support release. Users working with ArcGIS Web App Builder developer edition are advised to migrate to ArcGIS Experience Builder, as ArcGIS Web App Builder developer edition is unsupported when this CVE is assigned.
+
+Score: 6.1 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-69233 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-69233</link>
+            <guid isPermaLink="false">CVE-2026-69233</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:58 GMT</pubDate>
+            <description><![CDATA[There is a stored cross site scripting issue in Esri Portal for ArcGIS versions 11.5 and prior that may allow a remote, administratively privileged attacker to inject malicious code that could potentially execute arbitrary in a victim’s browser. Users working with ArcGIS Enterprise 11.1, 11.3, and 11.5 are encouraged to patch. All users are advised to upgrade to the latest long-term support release.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:C/C:L/I:L/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-69232 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-69232</link>
+            <guid isPermaLink="false">CVE-2026-69232</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:58 GMT</pubDate>
+            <description><![CDATA[There is a stored cross site scripting issue in Esri Portal for ArcGIS versions 11.5 and prior that may allow a remote, privileged attacker to inject malicious code that could potentially execute arbitrary JavaScript in a victim’s browser. Users working with ArcGIS Enterprise 11.1, 11.3, 11.5 are encouraged to patch. All users are advised to upgrade to the latest long-term support release.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:C/C:L/I:L/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-69231 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-69231</link>
+            <guid isPermaLink="false">CVE-2026-69231</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:58 GMT</pubDate>
+            <description><![CDATA[There is a stored cross site scripting issue in Esri Portal for ArcGIS versions 11.5 and prior that may allow a remote, privileged attacker to inject malicious code that could potentially execute arbitrary JavaScript in a victim’s browser. Users working with ArcGIS Enterprise 11.1, 11.3, 11.5 are encouraged to patch. All users are advised to upgrade to the latest long-term support release.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:C/C:L/I:L/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-69230 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-69230</link>
+            <guid isPermaLink="false">CVE-2026-69230</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:58 GMT</pubDate>
+            <description><![CDATA[There is a stored cross site scripting issue in Esri Portal for ArcGIS versions 11.5 and prior that may allow a remote, administratively privileged attacker to inject malicious code that could potentially execute arbitrary in a victim’s browser. Users working with ArcGIS Enterprise 11.1, 11.3, and 11.5 are encouraged to patch. All users are advised to upgrade to the latest long-term support release.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:C/C:L/I:L/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-69229 [CVSS:3.1 5.4 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-69229</link>
+            <guid isPermaLink="false">CVE-2026-69229</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:57 GMT</pubDate>
+            <description><![CDATA[There is an HTML injection vulnerability in Esri Portal for ArcGIS versions 12.0 and prior that allows a remote, authenticated attacker to insert arbitrary HTML into the Portal for ArcGIS Home application. Users working with ArcGIS Enterprise 11.1, 11.3, 11.5 and 12.0 are encouraged to patch. All users are advised to upgrade to the latest long-term support release.
+
+Score: 5.4 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-69228 [CVSS:3.1 5.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-69228</link>
+            <guid isPermaLink="false">CVE-2026-69228</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:57 GMT</pubDate>
+            <description><![CDATA[There is a missing authentication vulnerability in Esri Portal for ArcGIS versions 12.0 and prior that may allow a remote, unauthenticated attacker to access a specific resource (not user content) that should only be accessible by authenticated users. Users working with ArcGIS Enterprise 11.1, 11.3, 11.5, or 12.0 are encouraged to patch. All users are advised to upgrade to the latest long-term support release.
+
+Score: 5.3 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-69225 [CVSS:3.1 5.9 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-69225</link>
+            <guid isPermaLink="false">CVE-2026-69225</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:57 GMT</pubDate>
+            <description><![CDATA[There is an information disclosure vulnerability in Esri Portal for ArcGIS versions 11.5 through 12.0 and earlier that may allow a remote, unauthenticated attacker to reflect sensitive information in a http response body.
+
+Score: 5.9 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-69224 [CVSS:3.1 5.9 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-69224</link>
+            <guid isPermaLink="false">CVE-2026-69224</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:57 GMT</pubDate>
+            <description><![CDATA[There is an information disclosure vulnerability in Esri Portal for ArcGIS versions 12.0 and earlier that may under difficult to reproduce circumstances allow a remote, unauthenticated attacker to reflect sensitive information in a http response body.
+
+Score: 5.9 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-67602 [CVSS:4.0 9.3 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-67602</link>
+            <guid isPermaLink="false">CVE-2026-67602</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:57 GMT</pubDate>
+            <description><![CDATA[phpIPAM before 1.8.2 contains an authentication bypass vulnerability in the REST API that allows unauthenticated attackers to gain full API access by exploiting an insecure object cache keying mechanism. The cache is keyed by lookup value alone without including the searched column, enabling an entry written during an app_id lookup to satisfy a subsequent app_code lookup, allowing attackers to use the numeric database row identifier as an API token to read, write, and delete all IP address management records.
+
+Score: 9.3 (CRITICAL)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-66917 [CVSS:4.0 8.6 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-66917</link>
+            <guid isPermaLink="false">CVE-2026-66917</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:57 GMT</pubDate>
+            <description><![CDATA[Joomla Extension - joomgalleryfriends.net - Stored XSS in JoomGallery < 4.4.0 - An authenticated, privileged can store an XSS payload in any image causing JS execution in every visitor's browser.
+
+Score: 8.6 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:H/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-66897 [CVSS:3.1 9.9 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-66897</link>
+            <guid isPermaLink="false">CVE-2026-66897</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:57 GMT</pubDate>
+            <description><![CDATA[A path traversal vulnerability in LXD's instance template processing allows an attacker with container edit permissions, or any user launching a crafted image, to overwrite arbitrary files on the host system as root. When processing target template paths specified in metadata.yaml, LXD validates the path against a confined os.Root directory handle but subsequently opens and creates the file using os.Create with an unconfined string path. This discrepancy between path resolution checks and file creation allows an attacker to escape directory confinement, overwrite root-owned host files, and achieve host root code execution.
+
+Score: 9.9 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H]]></description>
         </item>
         <item>
             <title><![CDATA[CVE-2026-66623 [CVSS:3.1 7.1 HIGH]]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-66623</link>
             <guid isPermaLink="false">CVE-2026-66623</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:53 GMT</pubDate>
+            <pubDate>Mon, 24 Aug 2026 14:16:56 GMT</pubDate>
             <description><![CDATA[Unauthenticated Cross Site Scripting (XSS) in Social Media & Share Icons <= 2.9.9 versions.
 
 Score: 7.1 (HIGH)
 Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:L]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-66610 [CVSS:3.1 7.1 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-66610</link>
-            <guid isPermaLink="false">CVE-2026-66610</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:53 GMT</pubDate>
-            <description><![CDATA[Unauthenticated Cross Site Scripting (XSS) in Urna <= 2.6.2 versions.
+            <title><![CDATA[CVE-2026-66607 [CVSS:3.1 7.1 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-66607</link>
+            <guid isPermaLink="false">CVE-2026-66607</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:56 GMT</pubDate>
+            <description><![CDATA[Unauthenticated Cross Site Scripting (XSS) in Advance Product Search <= 1.4.8 versions.
 
 Score: 7.1 (HIGH)
 Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:L]]></description>
@@ -234,804 +743,365 @@ Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:L]]></description>
             <title><![CDATA[CVE-2026-66599 [CVSS:3.1 7.1 HIGH]]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-66599</link>
             <guid isPermaLink="false">CVE-2026-66599</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:52 GMT</pubDate>
+            <pubDate>Mon, 24 Aug 2026 14:16:56 GMT</pubDate>
             <description><![CDATA[Unauthenticated Cross Site Scripting (XSS) in WPComplete <= 2.9.5.6 versions.
 
 Score: 7.1 (HIGH)
 Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:L]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-66587 [CVSS:3.1 9.8 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-66587</link>
-            <guid isPermaLink="false">CVE-2026-66587</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:52 GMT</pubDate>
-            <description><![CDATA[Unauthenticated Local File Inclusion in WP Cafe Pro < 3.0.15 versions.
+            <title><![CDATA[CVE-2026-5093 [CVSS:3.1 4.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-5093</link>
+            <guid isPermaLink="false">CVE-2026-5093</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:56 GMT</pubDate>
+            <description><![CDATA[The GreenShift – Animation and Page Builder Blocks plugin for WordPress is vulnerable to unauthorized modification of data in versions up to, and including, 12.8.9. This is due to a missing capability check on the 'gspb_update_global_wp_settings' function that only verifies the 'edit_posts' capability instead of requiring administrative privileges. This makes it possible for authenticated attackers, with contributor-level access and above, to modify global WordPress theme color settings site-wide, leading to site defacement.
 
-Score: 9.8 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+Score: 4.3 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:N]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-66585 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-66585</link>
-            <guid isPermaLink="false">CVE-2026-66585</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:52 GMT</pubDate>
-            <description><![CDATA[Unauthenticated Sensitive Data Exposure in WP Cafe Pro < 3.0.15 versions.
+            <title><![CDATA[CVE-2026-59654 [CVSS:4.0 6.8 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-59654</link>
+            <guid isPermaLink="false">CVE-2026-59654</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:56 GMT</pubDate>
+            <description><![CDATA[Missing Release of Resource after Effective Lifetime vulnerability in Apache CloudStack's scoped global configuration functionality. It affects different modules and plugins of the CloudStack management server, including Quota, Host-HA, etc., and may lead to eventual denial of service (DoS) scenario for the management server.
 
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N]]></description>
+This issue affects Apache CloudStack: from 4.7.0 through 4.20.3.0 and from 4.21.0.0 through 4.22.1.0.
+
+Users are recommended to upgrade to version 4.20.3.1 or 4.22.1.1 or later, which fixes the issue.
+
+Score: 6.8 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:P/PR:L/UI:A/VC:N/VI:N/VA:H/SC:N/SI:N/SA:H/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-66584 [CVSS:3.1 7.1 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-66584</link>
-            <guid isPermaLink="false">CVE-2026-66584</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:52 GMT</pubDate>
-            <description><![CDATA[Unauthenticated Cross Site Scripting (XSS) in 12 Step Meeting List <= 3.19.16 versions.
+            <title><![CDATA[CVE-2026-59568 [CVSS:3.1 9.1 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-59568</link>
+            <guid isPermaLink="false">CVE-2026-59568</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:56 GMT</pubDate>
+            <description><![CDATA[Multiple vulnerabilities on affected versions of Zscaler Client Connector allow remote code execution, giving an unauthenticated, unprivileged user the ability to execute arbitrary code in the ZCC context.
 
-Score: 7.1 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:L]]></description>
+Score: 9.1 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-55653 [CVSS:3.1 6.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-55653</link>
-            <guid isPermaLink="false">CVE-2026-55653</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:52 GMT</pubDate>
-            <description><![CDATA[A flaw was found in OpenSSH. A malicious SSH server can exploit a double free vulnerability in the Diffie-Hellman Group Exchange (DH-GEX) client path. This occurs during FIPS (Federal Information Processing Standards) mode known-group validation when the client processes attacker-controlled DH-GEX group parameters. Successful exploitation leads to client-side process termination, resulting in a Denial of Service (DoS).
-
-Score: 6.5 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-48864 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-48864</link>
-            <guid isPermaLink="false">CVE-2026-48864</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:52 GMT</pubDate>
-            <description><![CDATA[A flaw was found in libsolv. This heap buffer overflow occurs during the decompression of attacker-controlled compressed data within `.solv` files due to insufficient input validation. An attacker can provide a specially crafted `.solv` file, which, when processed by a vulnerable application, can lead to out-of-bounds memory access. This could result in information disclosure, alteration of program execution, or a denial of service.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-32558 [CVSS:3.1 9.8 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-32558</link>
-            <guid isPermaLink="false">CVE-2026-32558</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:51 GMT</pubDate>
-            <description><![CDATA[Unauthenticated Privilege Escalation in Affiliate Pro - Affiliate Program for WooCommerce & WordPress <= 8.9.1 versions.
-
-Score: 9.8 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-32551 [CVSS:3.1 9.3 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-32551</link>
-            <guid isPermaLink="false">CVE-2026-32551</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:51 GMT</pubDate>
-            <description><![CDATA[Unauthenticated SQL Injection in Woo Essential <= 4.3.0 versions.
-
-Score: 9.3 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:N/A:L]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-32478 [CVSS:3.1 8.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-32478</link>
-            <guid isPermaLink="false">CVE-2026-32478</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:51 GMT</pubDate>
-            <description><![CDATA[Subscriber SQL Injection in WP Project Manager Pro <= 4.0.1 versions.
-
-Score: 8.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:N/A:L]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-32477 [CVSS:3.1 8.6 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-32477</link>
-            <guid isPermaLink="false">CVE-2026-32477</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:51 GMT</pubDate>
-            <description><![CDATA[Unauthenticated Arbitrary File Deletion in ShopBuilder Pro – Elementor WooCommerce Builder Addons <= 2.2.0 versions.
-
-Score: 8.6 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:N/I:N/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-32476 [CVSS:3.1 7.1 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-32476</link>
-            <guid isPermaLink="false">CVE-2026-32476</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:51 GMT</pubDate>
-            <description><![CDATA[Unauthenticated Cross Site Scripting (XSS) in Brave Conversion Engine (PRO) <= 0.8.6 versions.
-
-Score: 7.1 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:L]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-32471 [CVSS:3.1 8.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-32471</link>
-            <guid isPermaLink="false">CVE-2026-32471</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:51 GMT</pubDate>
-            <description><![CDATA[Subscriber SQL Injection in ProLancer Element <= 1.4.8 versions.
-
-Score: 8.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:N/A:L]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-28190 [CVSS:3.1 7.1 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-28190</link>
-            <guid isPermaLink="false">CVE-2026-28190</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:51 GMT</pubDate>
-            <description><![CDATA[Subscriber Broken Access Control in ProLancer Element <= 1.4.8 versions.
-
-Score: 7.1 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:H/A:L]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-28171 [CVSS:3.1 8.6 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-28171</link>
-            <guid isPermaLink="false">CVE-2026-28171</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:50 GMT</pubDate>
-            <description><![CDATA[Unauthenticated Arbitrary File Deletion in WooCommerce File Approval <= 10.7 versions.
-
-Score: 8.6 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:N/I:N/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-28167 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-28167</link>
-            <guid isPermaLink="false">CVE-2026-28167</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:50 GMT</pubDate>
-            <description><![CDATA[Unauthenticated Arbitrary File Download in Super Forms <= 6.3.315 versions.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-28166 [CVSS:3.1 7.1 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-28166</link>
-            <guid isPermaLink="false">CVE-2026-28166</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:50 GMT</pubDate>
-            <description><![CDATA[Unauthenticated Cross Site Scripting (XSS) in Tourmaster <= 5.4.9 versions.
-
-Score: 7.1 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:L]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-28165 [CVSS:3.1 9.8 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-28165</link>
-            <guid isPermaLink="false">CVE-2026-28165</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:50 GMT</pubDate>
-            <description><![CDATA[Unauthenticated Privilege Escalation in Digits <= 9.2 versions.
-
-Score: 9.8 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-28162 [CVSS:3.1 7.1 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-28162</link>
-            <guid isPermaLink="false">CVE-2026-28162</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:50 GMT</pubDate>
-            <description><![CDATA[Unauthenticated Cross Site Scripting (XSS) in Events Made Easy <= 3.2.5 versions.
-
-Score: 7.1 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:L]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-28153 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-28153</link>
-            <guid isPermaLink="false">CVE-2026-28153</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:50 GMT</pubDate>
-            <description><![CDATA[Unauthenticated Broken Access Control in Notification Master &#8211; Real-Time WordPress Notifications With Email, SMS, Webhooks &amp; More <= 1.7.1 versions.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-28152 [CVSS:3.1 8.1 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-28152</link>
-            <guid isPermaLink="false">CVE-2026-28152</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:50 GMT</pubDate>
-            <description><![CDATA[Unauthenticated Local File Inclusion in Tonda Core < 2.6 versions.
-
-Score: 8.1 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-28151 [CVSS:3.1 8.1 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-28151</link>
-            <guid isPermaLink="false">CVE-2026-28151</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:50 GMT</pubDate>
-            <description><![CDATA[Unauthenticated Local File Inclusion in Tonda < 2.6 versions.
-
-Score: 8.1 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-19264 [CVSS:4.0 9.3 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19264</link>
-            <guid isPermaLink="false">CVE-2026-19264</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:49 GMT</pubDate>
-            <description><![CDATA[Postiz is an open-source social media scheduling tool. The route that serves locally stored media joins URL-supplied path segments onto the upload directory and streams the file without normalising the path or confining it to that directory, and the route requires no authentication. Raw dot-segments are collapsed before routing, but URL-encoded separators survive route matching and are decoded only once they reach the handler, restoring the traversal at the filesystem call. An unauthenticated remote attacker can therefore read any file readable by the application process, including the process environment, which exposes the JWT signing secret, the database connection string, and connected provider and billing secrets. Because session tokens are signed with that secret and carry no expiry, this allows forging a non-expiring session as any user, including an administrator, without a password.
-
-Score: 9.3 (CRITICAL)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-16313 [CVSS:3.1 7.6 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-16313</link>
-            <guid isPermaLink="false">CVE-2026-16313</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:49 GMT</pubDate>
-            <description><![CDATA[A flaw was found in sg3_utils. The sg_inq command, when invoked with the --export option, outputs device identification data without sanitizing control characters in SCSI name string fields. A newline character embedded in a device-supplied name string can inject arbitrary properties into the udev device database. This could allow an attacker who can present a crafted SCSI device to execute arbitrary commands as root when the device is disconnected.
-
-Score: 7.6 (HIGH)
-Vector: CVSS:3.1/AV:P/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-15816 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-15816</link>
-            <guid isPermaLink="false">CVE-2026-15816</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:49 GMT</pubDate>
-            <description><![CDATA[A flaw was found in dracut. The die() error-handling function writes its message into a shell script under the initramfs emergency-hook directory without properly shell-quoting it. When the message contains data derived from the DHCP ROOT_PATH option, an attacker on the adjacent network who controls a rogue DHCP server can inject a command-substitution sequence that executes as root the next time dracut sources its emergency hook scripts during standard boot-failure handling.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:A/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-15567 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-15567</link>
-            <guid isPermaLink="false">CVE-2026-15567</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:49 GMT</pubDate>
-            <description><![CDATA[A flaw was found in Wildfly. A remote unauthenticated attacker can trigger OutOfMemoryError as CSIv2Util's GSS token decoder reads an attacker-controlled length field without bounds checking and attempts to allocate a byte array of that size.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-15565 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-15565</link>
-            <guid isPermaLink="false">CVE-2026-15565</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:49 GMT</pubDate>
-            <description><![CDATA[A flaw was found in Undertow. A remote attacker can cause Out of Memory on websockets endpoint without authentication on any @ServerEndpoint class that has any @OnMessage method. This allows an attacker to cause Denial of Service attack without authentication and using only a standard WebSocket handshake.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-15563 [CVSS:3.1 7.4 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-15563</link>
-            <guid isPermaLink="false">CVE-2026-15563</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:49 GMT</pubDate>
-            <description><![CDATA[A flaw was found in EAP's IIOP. The listener's NameService would accept bind operations without authentication, allowing an attacker to hijack JNDI lookups and binding them to a malicious ORB, achieving MITM or DoS on further invocations.
-
-Score: 7.4 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-15562 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-15562</link>
-            <guid isPermaLink="false">CVE-2026-15562</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:49 GMT</pubDate>
-            <description><![CDATA[A flaw was found in EAP's jboss-remoting. A remote unauthenticated attacker who can reach :8080 (or :9990, or :4447) and complete an Upgrade: jboss-remoting handshake can cause OOM errors that degrade requests server-wide, leading to denial of service.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-15561 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-15561</link>
-            <guid isPermaLink="false">CVE-2026-15561</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:48 GMT</pubDate>
-            <description><![CDATA[A flaw was found in EAP's undertow http/1.1 chunked-transfer decoder. missing limits on size and count would allow an attacker to use an unauthenticated connection to drive the JVM to an OutOfMemory error, stopping all deployments on the listener, and achieving Denial of Service.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-15556 [CVSS:3.1 8.1 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-15556</link>
-            <guid isPermaLink="false">CVE-2026-15556</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:48 GMT</pubDate>
-            <description><![CDATA[A flaw was found in Picketlink's SP signature validation; a SAML response containing zero assertion elements matching the signature check can allow an attacker to forge a SAML response and auth as any principal with any roles on the protected application.
-
-Score: 8.1 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-15555 [CVSS:3.1 8.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-15555</link>
-            <guid isPermaLink="false">CVE-2026-15555</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:48 GMT</pubDate>
-            <description><![CDATA[A flaw was found in JBoss marshalling. The Infinispan session replication path deserializes replicated session data via the JBoss Marshalling River unmarshaller with no class filtering — enabling RCE via deserialization gadget chains on every cluster node.
+            <title><![CDATA[CVE-2026-59567 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-59567</link>
+            <guid isPermaLink="false">CVE-2026-59567</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:56 GMT</pubDate>
+            <description><![CDATA[Multiple vulnerabilities on affected versions of Zscaler Client Connector allow local privilege escalation, giving an unprivileged user the ability to execute arbitrary code in a privileged context.
 
 Score: 8.8 (HIGH)
-Vector: CVSS:3.1/AV:A/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-15554 [CVSS:3.1 7.4 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-15554</link>
-            <guid isPermaLink="false">CVE-2026-15554</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:48 GMT</pubDate>
-            <description><![CDATA[the Undertow AJP listener honours forged ssl_cert and is_ssl AJP attributes without requiring any shared-secret authentication. This enables an unauthenticated attacker with direct TCP access to port 8009 to bypass CLIENT-CERT authentication by injecting a forged X.509 certificate via the AJP protocol.
+            <title><![CDATA[CVE-2026-59566 [CVSS:3.1 8.4 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-59566</link>
+            <guid isPermaLink="false">CVE-2026-59566</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:55 GMT</pubDate>
+            <description><![CDATA[A locally exploitable buffer overflow bug can cause a local denial-of-service attack on affected versions of Zscaler Client Connector on Android and ChromeOS.
 
-Score: 7.4 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N]]></description>
+Score: 8.4 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2025-63080 [CVSS:4.0 8.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-63080</link>
-            <guid isPermaLink="false">CVE-2025-63080</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:47 GMT</pubDate>
-            <description><![CDATA[Firmware in KAON PG5298A and PG5298B routers allow an authenticated user to send crafted JSON-RPC requests and perform operations not possible via GUI, e.g. system file read or command execution.   
-This vulnerability has been fixed in firmware version: 3.0.82 for PG5298A and 4.0.82 for PG5298B.
+            <title><![CDATA[CVE-2026-59565 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-59565</link>
+            <guid isPermaLink="false">CVE-2026-59565</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:55 GMT</pubDate>
+            <description><![CDATA[A remotely exploitable buffer overflow bug can cause a local and kernel denial-of-service attack on affected versions of Zscaler Client Connector on Windows.
 
-Score: 8.5 (HIGH)
-Vector: CVSS:4.0/AV:A/AC:L/AT:N/PR:H/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2025-5318 [CVSS:3.1 5.4 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-5318</link>
-            <guid isPermaLink="false">CVE-2025-5318</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:47 GMT</pubDate>
-            <description><![CDATA[A flaw was found in the libssh library in versions less than 0.11.2. An out-of-bounds read can be triggered in the sftp_handle function due to an incorrect comparison check that permits the function to access memory beyond the valid handle list and to return an invalid pointer, which is used in further processing. This vulnerability allows an authenticated remote attacker to potentially read unintended memory regions, exposing sensitive information or affect service behavior.
+            <title><![CDATA[CVE-2026-59564 [CVSS:3.1 9.1 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-59564</link>
+            <guid isPermaLink="false">CVE-2026-59564</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:55 GMT</pubDate>
+            <description><![CDATA[An authentication bypass issue exists in communications between affected versions of the Zscaler Client Connector and the Zscaler Client Connector Portal.
 
-Score: 5.4 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:N]]></description>
+Score: 9.1 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2025-11234 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-11234</link>
-            <guid isPermaLink="false">CVE-2025-11234</guid>
-            <pubDate>Mon, 24 Aug 2026 12:16:46 GMT</pubDate>
-            <description><![CDATA[A flaw was found in QEMU. If the QIOChannelWebsock object is freed while it is waiting to complete a handshake, a GSource is leaked. This can lead to the callback firing later on and triggering a use-after-free in the use of the channel. This can be abused by a malicious client with network access to the VNC WebSocket port to cause a denial of service during the WebSocket handshake prior to the VNC client authentication.
+            <title><![CDATA[CVE-2026-4703 [CVSS:3.1 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-4703</link>
+            <guid isPermaLink="false">CVE-2026-4703</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:55 GMT</pubDate>
+            <description><![CDATA[The WS Form LITE – Drag & Drop Contact Form Builder plugin for WordPress is vulnerable to PHP Object Injection in all versions up to, and including, 1.10.80 via deserialization of untrusted input from form submission meta values. This makes it possible for unauthenticated attackers to inject a PHP Object. No known POP chain is present in the vulnerable software, which means this vulnerability has no impact unless another plugin or theme containing a POP chain is installed on the site. If a POP chain is present via an additional plugin or theme installed on the target system, it may allow the attacker to perform actions like delete arbitrary files, retrieve sensitive data, or execute code depending on the POP chain present.
+
+Score: 9.8 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-4561 [CVSS:3.1 6.4 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-4561</link>
+            <guid isPermaLink="false">CVE-2026-4561</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:55 GMT</pubDate>
+            <description><![CDATA[The MC4WP: Mailchimp for WordPress plugin for WordPress is vulnerable to Stored Cross-Site Scripting via the form response message post meta fields (e.g., 'text_subscribed', 'text_error') in all versions up to, and including, 4.12.0 due to insufficient input sanitization and output escaping. This makes it possible for authenticated attackers, with Author-level access and above, to inject arbitrary web scripts in pages that will execute whenever a user accesses an injected page.
+
+Score: 6.4 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:L/I:L/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-4244 [CVSS:3.1 4.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-4244</link>
+            <guid isPermaLink="false">CVE-2026-4244</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:55 GMT</pubDate>
+            <description><![CDATA[The Post Duplicator plugin for WordPress is vulnerable to unauthorized modification of data due to a missing capability check on the `duplicate_post()` function in all versions up to, and including, 3.0.11. This is due to the function not verifying that the user has `edit_others_posts` capability before accepting a `selectedAuthorId` parameter via the `duplicate-post` REST endpoint. This makes it possible for authenticated attackers, with Contributor-level access and above, to create duplicated posts attributed to any user, including administrators.
+
+Score: 4.3 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-47895 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-47895</link>
+            <guid isPermaLink="false">CVE-2026-47895</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:55 GMT</pubDate>
+            <description><![CDATA[In strongSwan before 6.0.7, identity parsing/cloning is mishandled. Parsed EAP-Identities that result in an empty but non-NULL encoding are not correctly cloned and trigger a double-free once the duplicates are destroyed.
+
+Score: 7.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-42010 [CVSS:3.1 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-42010</link>
+            <guid isPermaLink="false">CVE-2026-42010</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:54 GMT</pubDate>
+            <description><![CDATA[A flaw was found in gnutls. Servers configured with RSA-PSK (Rivest–Shamir–Adleman – Pre-Shared Key) wrongfully matched usernames containing a NUL character with truncated usernames. A remote attacker could exploit this by sending a specially crafted username, leading to an authentication bypass. This vulnerability allows an attacker to gain unauthorized access by circumventing the authentication process.
+
+Score: 9.8 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-42009 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-42009</link>
+            <guid isPermaLink="false">CVE-2026-42009</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:54 GMT</pubDate>
+            <description><![CDATA[A flaw was found in gnutls. A remote attacker could exploit an issue in the Datagram Transport Layer Security (DTLS) packet reordering logic. The comparator function, responsible for ordering DTLS packets by sequence numbers, did not correctly handle packets with duplicate sequence numbers. This could lead to unstable packet ordering or undefined behavior, resulting in a denial of service.
 
 Score: 7.5 (HIGH)
 Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-78245 [CVSS:4.0 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78245</link>
-            <guid isPermaLink="false">CVE-2026-78245</guid>
-            <pubDate>Mon, 24 Aug 2026 11:16:41 GMT</pubDate>
-            <description><![CDATA[A flaw has been found in itsourcecode Online Pharmacy System 1.0. This affects the function move_uploaded_file of the file all_users/register.php of the component User Registration. Executing a manipulation of the argument photo can lead to unrestricted upload. The attack may be launched remotely. The exploit has been published and may be used.
-
-Score: 5.5 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+            <title><![CDATA[CVE-2026-30512]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-30512</link>
+            <guid isPermaLink="false">CVE-2026-30512</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:53 GMT</pubDate>
+            <description><![CDATA[A local privilege escalation vulnerability in Entevo HMI V2 R5 P0 M4 allows attackers to escape Kiosk Mode by opening the application manual in an external PDF viewer and abusing the Print functionality to access Windows Explorer and execute arbitrary commands with administrative privileges.]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-78244 [CVSS:4.0 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78244</link>
-            <guid isPermaLink="false">CVE-2026-78244</guid>
-            <pubDate>Mon, 24 Aug 2026 11:16:40 GMT</pubDate>
-            <description><![CDATA[A vulnerability was detected in itsourcecode Real Estate Management System 1.0. Affected by this issue is some unknown functionality of the file search.php. Performing a manipulation of the argument search/delivery_type/search_price/property_type results in sql injection. The attack may be initiated remotely. The exploit is now public and may be used.
-
-Score: 5.5 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-76172 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-76172</link>
-            <guid isPermaLink="false">CVE-2026-76172</guid>
-            <pubDate>Mon, 24 Aug 2026 11:16:40 GMT</pubDate>
-            <description><![CDATA[fast-uri is a URI parser for Node.js. During parsing it runs a legacy decoding pass over the scheme component and never re-escapes the result, and serialization writes the scheme back out verbatim, unlike the host component which is re-escaped. As a result an input whose scheme carries percent-encoded slashes parses as a scheme with no authority, so the parsed host and error are both undefined, yet resolving or normalizing that same input emits a network-path reference whose authority is attacker-chosen and re-parses to that host. An application that allowlists on the parsed host, or treats a reference with no authority as safe to resolve against its base, gets the opposite of what it checked, giving an off-site redirect, server-side request forgery, or address-policy bypass. The legacy decoder also expands non-standard escape forms, widening the issue past upstream filters, and control characters in the scheme can reach the output as raw carriage return and line feed. The affected versions are 2.3.1 up to but not including 2.4.5, 3.0.0 up to but not including 3.1.6, and 4.0.0 up to but not including 4.1.3. The issue is fixed in 2.4.5, 3.1.6, and 4.1.3, which reject a scheme that is not valid after decoding. Users should upgrade to a patched version.
+            <title><![CDATA[CVE-2026-2996 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-2996</link>
+            <guid isPermaLink="false">CVE-2026-2996</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:53 GMT</pubDate>
+            <description><![CDATA[The Advanced Product Fields (Product Addons) for WooCommerce plugin for WordPress is vulnerable to Improper Input Validation in all versions up to, and including, 1.6.21. This is due to a logic flaw in the 'validate_cart_data' function. This makes it possible for unauthenticated attackers to bypass required paid addons and complete purchases at the base product price only, effectively stealing products by paying a fraction of the intended total. The vulnerability was partially patched in version 1.6.19.
 
 Score: 7.5 (HIGH)
 Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-72830 [CVSS:4.0 8.7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72830</link>
-            <guid isPermaLink="false">CVE-2026-72830</guid>
-            <pubDate>Mon, 24 Aug 2026 11:16:40 GMT</pubDate>
-            <description><![CDATA[Grav API plugin versions before 1.0.13 fail to enforce API key scope caps in ConfigController super-scope gates, allowing scoped keys to write scheduler configuration. The scope cap is applied only inside requirePermission(), while the scheduler and backups gates use a bare isSuperAdmin() check that never consults api_key_scopes. An attacker holding an API key scoped to api.config.write that was minted on a super account can therefore inject arbitrary commands into scheduler.custom_jobs, which Job::run() passes to a Symfony Process, achieving operating system command execution as the web server user.
+            <title><![CDATA[CVE-2026-21756 [CVSS:3.1 7.2 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-21756</link>
+            <guid isPermaLink="false">CVE-2026-21756</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:52 GMT</pubDate>
+            <description><![CDATA[HCL Hive is affected by a broken access control vulnerability which could allow an attacker or unauthorized user to introduce unverified, malicious, or broken code directly into production environments.
 
-Score: 8.7 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+Score: 7.2 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-72829 [CVSS:4.0 8.7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72829</link>
-            <guid isPermaLink="false">CVE-2026-72829</guid>
-            <pubDate>Mon, 24 Aug 2026 11:16:40 GMT</pubDate>
-            <description><![CDATA[The Grav API plugin (getgrav/grav-plugin-api) before 1.0.13 contains an API-key scope-cap bypass in UsersController's create() and update() methods. These methods enforce the scope cap only for api.users.write, but gate super-privilege grants on a bare isSuperAdmin() check that reads access.api.super directly without consulting the key's scopes. As a result, an api.users.write-scoped key minted on a super account can set access.api.super or assign a super-granting group to mint or promote a full super account, then authenticate as that account for uncapped administrative privileges.
+            <title><![CDATA[CVE-2026-21751 [CVSS:3.1 7.4 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-21751</link>
+            <guid isPermaLink="false">CVE-2026-21751</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:52 GMT</pubDate>
+            <description><![CDATA[HCL Hive is affected by a cryptographic primitive with a risky implementation which could allow an attacker unauthorized lateral compromise or widespread credential leakage if a single internal component is breached.
 
-Score: 8.7 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+Score: 7.4 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-72826 [CVSS:4.0 8.7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72826</link>
-            <guid isPermaLink="false">CVE-2026-72826</guid>
-            <pubDate>Mon, 24 Aug 2026 11:16:40 GMT</pubDate>
-            <description><![CDATA[The getgrav/grav-plugin-api plugin before 1.0.13 fails to validate that the scopes of a newly created API key are a subset of the caller's scopes in createApiKey. The self-target path of requireApiKeyPermission() requires only the baseline api.access scope, and the new key's scopes are read directly from the request body with no subset check. An attacker holding a minimal-scope API key on a super account can submit an empty scopes array to mint an unscoped, full-access super key, bypassing scope restrictions (and enabling further chains such as configuration write to RCE).
+            <title><![CDATA[CVE-2026-19883 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19883</link>
+            <guid isPermaLink="false">CVE-2026-19883</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:51 GMT</pubDate>
+            <description><![CDATA[The WPeMatico RSS Feed Fetcher plugin for WordPress is vulnerable to unauthorized modification of data that can lead to privilege escalation due to a missing capability check on the wpematico_import_settings function in all versions up to, and including, 2.8.24. This makes it possible for authenticated attackers, with subscriber-level access and above, to update arbitrary options on the WordPress site. This can be leveraged to update the default role for registration to administrator and enable user registration for attackers to gain administrative user access.
 
-Score: 8.7 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-72824 [CVSS:4.0 8.7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72824</link>
-            <guid isPermaLink="false">CVE-2026-72824</guid>
-            <pubDate>Mon, 24 Aug 2026 11:16:40 GMT</pubDate>
-            <description><![CDATA[The Grav API plugin (getgrav/grav-plugin-api) before 1.0.13 contains an API key scope-cap bypass in PagesController::guardTwigContent(). The Twig-toggle check uses a bare isSuperAdmin() gate that does not consult api_key_scopes, so a least-privilege API key scoped only to api.pages.write and minted on a super account can enable process.twig on a page save even though admin.pages_twig is intentionally outside the api.pages scope. When security.twig_content.process_enabled=true and editor_enabled=false, this allows Twig-in-content to execute server-side, resulting in server-side template injection (SSTI) and remote code execution.
+            <title><![CDATA[CVE-2026-18027 [CVSS:3.1 6.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-18027</link>
+            <guid isPermaLink="false">CVE-2026-18027</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:50 GMT</pubDate>
+            <description><![CDATA[The WebToffee WooCommerce PDF Invoices, Packing Slips, Delivery Notes & Shipping Labels plugin for WordPress is vulnerable to Directory Traversal in all versions up to, and including, 4.9.8 via the get_image_src_in_base64 function. This makes it possible for authenticated attackers, with subscriber-level access and above, to read the contents of arbitrary files on the server, which can contain sensitive information. The base64-encoded file contents are embedded into the cached invoice HTML and served directly to the attacker via the plugin's own Print/Download invoice endpoints, which require only a valid nonce and access key.
 
-Score: 8.7 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+Score: 6.5 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-72822 [CVSS:4.0 8.7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-72822</link>
-            <guid isPermaLink="false">CVE-2026-72822</guid>
-            <pubDate>Mon, 24 Aug 2026 11:16:40 GMT</pubDate>
-            <description><![CDATA[The getgrav/grav-plugin-api Composer package before 1.0.13 (affected <= 1.0.12) fails to enforce API key scope caps on the disable2fa endpoint. Unlike the sibling generate2fa endpoint, disable2fa authorizes the admin (non-self) path solely via ACL reads (isSuperAdmin/hasPermission) and never invokes requirePermission(), so the api_key_scopes cap is never applied. As a result, a holder of a narrow-scope API key on a super account, or a non-super account whose ACL includes api.users.write, can force-disable two-factor authentication on any non-super target account via POST /api/v1/users/{user}/2fa/disable without providing a TOTP code, facilitating account takeover.
+            <title><![CDATA[CVE-2026-17033 [CVSS:3.1 6.8 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17033</link>
+            <guid isPermaLink="false">CVE-2026-17033</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:50 GMT</pubDate>
+            <description><![CDATA[An authenticated attacker with Editor access or alert.instances.external:write can submit an external Alertmanager alert containing a controlled generatorURL. The attacker is authorized to create the alert, but not to execute script in another user's Grafana session.
 
-Score: 8.7 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+Grafana renders alert.generatorURL directly as the Alert Details See source LinkButton href without URL-scheme sanitization or a safe-protocol allowlist. The click interceptor's :// heuristic can be bypassed by placing :// inside a JavaScript comment. When a user with read access clicks See source, the browser executes attacker-controlled JavaScript in the Grafana origin with the clicking user's permissions.
+
+Score: 6.8 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:R/S:U/C:H/I:L/A:L]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-67340 [CVSS:4.0 8.6 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-67340</link>
-            <guid isPermaLink="false">CVE-2026-67340</guid>
-            <pubDate>Mon, 24 Aug 2026 11:16:39 GMT</pubDate>
-            <description><![CDATA[ArcadeDB before 26.7.2 (arcadedb-engine) allows trigger scripts to look up host classes in java.lang.* (via Java.type) because ScriptTriggerExecutor adds java.lang.* to the allowed packages. An authenticated user with UPDATE_SCHEMA permission can create a JavaScript trigger that invokes java.lang.Runtime.getRuntime().exec() (or ProcessBuilder), achieving OS command execution when the trigger fires.
+            <title><![CDATA[CVE-2026-12505 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-12505</link>
+            <guid isPermaLink="false">CVE-2026-12505</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:50 GMT</pubDate>
+            <description><![CDATA[A flaw was found in the cifs-utils package where the cifs.upcall helper fails to securely drop its root privileges before looking up user information inside a user-controlled environment. A local, low privileged attacker can exploit this by using a crafted request_key payload to trick the root-owned helper into entering a custom environment (namespace) containing a malicious NSS module. This forces the system to load the attacker's controlled NSS Module and configuration, allowing them to execute arbitrary commands as the root user, elevating their privileges and fully compromising the system.
 
-Score: 8.6 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:H/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-59295 [CVSS:3.1 5.9 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-59295</link>
-            <guid isPermaLink="false">CVE-2026-59295</guid>
-            <pubDate>Mon, 24 Aug 2026 11:16:39 GMT</pubDate>
-            <description><![CDATA[Micrometer-instrumented Apache HttpAsyncClient (4.x or 5.x) usage via MicrometerHttpClientInterceptor can leak memory unboundedly when asynchronous requests fail before receiving a response (e.g. connection resets or timeouts). Tracking state for these requests remains in memory indefinitely, and sustained failures lead to heap exhaustion and OutOfMemoryError crashes.
+            <title><![CDATA[CVE-2026-11841 [CVSS:3.1 9.4 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-11841</link>
+            <guid isPermaLink="false">CVE-2026-11841</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:50 GMT</pubDate>
+            <description><![CDATA[An attacker may perform unauthenticated read and write operations on sensitive filesystem areas via the AppEngine Fileaccess over HTTP due to improper access restrictions. A critical filesystem directory was unintentionally exposed through the HTTP-based file access feature, allowing access without authentication. This includes device parameter files, enabling an attacker to read and modify application settings, including customer-defined passwords. Additionally, exposure of the custom application directory may allow execution of arbitrary Lua code within the sandboxed AppEngine environment.
 
-Score: 5.9 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
+Score: 9.4 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:L]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-39910 [CVSS:4.0 8.7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-39910</link>
-            <guid isPermaLink="false">CVE-2026-39910</guid>
-            <pubDate>Mon, 24 Aug 2026 11:16:39 GMT</pubDate>
-            <description><![CDATA[STACKIT IaaS API contains a missing authorization check vulnerability that allows authenticated, low-privileged attackers to escalate privileges to full organization compromise by attaching arbitrary service accounts to virtual machines they control. Attackers can exploit the unvalidated PUT servers service-accounts endpoint to attach high-privileged service accounts and query the Instance Metadata Service to retrieve OAuth2 tokens, bypassing tenant boundaries and gaining unauthorized control over the entire organization environment.
-
-Score: 8.7 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-34105 [CVSS:4.0 8.7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-34105</link>
-            <guid isPermaLink="false">CVE-2026-34105</guid>
-            <pubDate>Mon, 24 Aug 2026 11:16:39 GMT</pubDate>
-            <description><![CDATA[Guardian language-system passes the id GET parameter directly into an unsanitized SQL query in translate_text.php (line 15): SELECT id, filename, extension, type FROM files where id = '\".$_GET['id'].\"'. An authenticated attacker can perform error-based SQL injection to extract database contents.
-
-Score: 8.7 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-34104 [CVSS:4.0 8.7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-34104</link>
-            <guid isPermaLink="false">CVE-2026-34104</guid>
-            <pubDate>Mon, 24 Aug 2026 11:16:39 GMT</pubDate>
-            <description><![CDATA[Guardian language-system passes the name GET parameter directly into an unsanitized SQL query in designer.php (line 124): SELECT * FROM complex WHERE name='\".$_GET['name'].\"'. An authenticated attacker can perform error-based SQL injection to extract database contents.
-
-Score: 8.7 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-34103 [CVSS:4.0 8.7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-34103</link>
-            <guid isPermaLink="false">CVE-2026-34103</guid>
-            <pubDate>Mon, 24 Aug 2026 11:16:39 GMT</pubDate>
-            <description><![CDATA[Guardian language-system passes the id GET parameter directly into an unsanitized SQL query in subtitles.php (line 16): SELECT id, filename, extension, type FROM files where id = '\".$_GET['id'].\"'. An authenticated attacker can perform error-based SQL injection to extract database contents.
-
-Score: 8.7 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-34102 [CVSS:4.0 8.7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-34102</link>
-            <guid isPermaLink="false">CVE-2026-34102</guid>
-            <pubDate>Mon, 24 Aug 2026 11:16:39 GMT</pubDate>
-            <description><![CDATA[Guardian language-system passes the id GET parameter directly into an unsanitized SQL query in job_info_get.php (line 16): SELECT * FROM jobs where input1 = '\".$_GET['id'].\"'. An authenticated attacker can perform error-based SQL injection to extract database contents.
-
-Score: 8.7 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-34101 [CVSS:4.0 8.7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-34101</link>
-            <guid isPermaLink="false">CVE-2026-34101</guid>
-            <pubDate>Mon, 24 Aug 2026 11:16:38 GMT</pubDate>
-            <description><![CDATA[Guardian language-system passes the id GET parameter directly into an unsanitized SQL query in text_file.php (line 17): SELECT id, filename, extension, type, duration, owner, private FROM files where id = '\".$_GET['id'].\"'. An authenticated attacker can perform error-based SQL injection to extract database contents.
-
-Score: 8.7 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-34100 [CVSS:4.0 8.7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-34100</link>
-            <guid isPermaLink="false">CVE-2026-34100</guid>
-            <pubDate>Mon, 24 Aug 2026 11:16:38 GMT</pubDate>
-            <description><![CDATA[Guardian language-system passes the id GET parameter directly into an unsanitized SQL query in media.php (line 17): SELECT id, filename, extension, type, duration, owner, private FROM files where id = '\".$_GET['id'].\"'. An authenticated attacker can perform error-based SQL injection to extract database contents.
-
-Score: 8.7 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-26369 [CVSS:4.0 8.7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-26369</link>
-            <guid isPermaLink="false">CVE-2026-26369</guid>
-            <pubDate>Mon, 24 Aug 2026 11:16:38 GMT</pubDate>
-            <description><![CDATA[eNet SMART HOME server 2.2.1 and 2.3.1 contains a privilege escalation vulnerability due to insufficient authorization checks in the setUserGroup JSON-RPC method. A low-privileged user (UG_USER) can send a crafted POST request to /jsonrpc/management specifying their own username to elevate their account to the UG_ADMIN group, bypassing intended access controls and gaining administrative capabilities such as modifying device configurations, network settings, and other smart home system functions.
-
-Score: 8.7 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-12080 [CVSS:3.1 7.3 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-12080</link>
-            <guid isPermaLink="false">CVE-2026-12080</guid>
-            <pubDate>Mon, 24 Aug 2026 11:16:38 GMT</pubDate>
-            <description><![CDATA[A flaw was found in the QEMU Guest Agent (qga). A local unprivileged user can exploit a vulnerability in the guest-ssh-add-authorized-keys command handler by manipulating symbolic links. This can occur either through a deterministic directory-symlink bypass or a Time-of-Check to Time-of-Use (TOCTOU) file-symlink race. Successful exploitation allows the attacker to gain ownership of arbitrary root-owned files or directories, leading to root access. This vulnerability requires an external management layer (e.g., libvirt) to trigger the affected code path.
+            <title><![CDATA[CVE-2026-11837 [CVSS:3.1 7.3 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-11837</link>
+            <guid isPermaLink="false">CVE-2026-11837</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:50 GMT</pubDate>
+            <description><![CDATA[A local privilege escalation vulnerability was found in the ansible.posix authorized_key module. The module's keyfile() function uses os.chown() instead of os.lchown() and opens files without O_NOFOLLOW when managing SSH authorized keys. An unprivileged local user can pre-stage symbolic links in their ~/.ssh directory to redirect file ownership changes to arbitrary system paths when an operator runs the authorized_key task as root, leading to local privilege escalation.
 
 Score: 7.3 (HIGH)
 Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:R/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-10618 [CVSS:4.0 4.8 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-10618</link>
-            <guid isPermaLink="false">CVE-2026-10618</guid>
-            <pubDate>Mon, 24 Aug 2026 11:16:38 GMT</pubDate>
-            <description><![CDATA[Hugo's default fenced-code-block renderer writes attribute values taken from the code-fence info string into the rendered HTML without escaping them. New in markup/internal/attributes/attributes.go converts every attribute value from a byte slice to a string as it is stored, deliberately dropping the escaping that used to happen there, and RenderAttributes in the same file escapes only values that are still byte slices, so its escaping branch is never reached and every value is written verbatim. The function's documentation states that it performs HTML escaping of string attributes, which it does not. A quote inside an attribute value in the info string therefore terminates the attribute and allows a further attribute, including an event handler, to be placed on the wrapper element, and the script runs for every visitor who loads the page. This path is reached under the default configuration, with code fences enabled and without goldmark's unsafe setting or any custom render hook. Attribute names beginning with on are filtered when the attributes are parsed, so injection is achieved through the value rather than the name.
+            <title><![CDATA[CVE-2026-10053 [CVSS:3.1 8.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-10053</link>
+            <guid isPermaLink="false">CVE-2026-10053</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:49 GMT</pubDate>
+            <description><![CDATA[GitLab has remediated an issue in GitLab CE/EE affecting all versions from 18.8 before 19.0.6, 19.1 before 19.1.4, and 19.2 before 19.2.2 that under certain conditions could have allowed an authenticated user to achieve remote code execution due to a path traversal vulnerability in the package registry.
 
-Score: 4.8 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:A/VC:L/VI:L/VA:N/SC:L/SI:L/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+Score: 8.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:C/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-10582 [CVSS:4.0 8.3 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-10582</link>
-            <guid isPermaLink="false">CVE-2026-10582</guid>
-            <pubDate>Mon, 24 Aug 2026 11:16:38 GMT</pubDate>
-            <description><![CDATA[Hugo's security.http.urls allowlist is the only control on outbound fetches made by resources.GetRemote, and it inspects the URL text alone. CheckAllowedHTTPURL in config/security/securityConfig.go applies the configured pattern list and then re-checks a canonicalised form of an integer, hex or octal IPv4 host, but it never resolves the hostname and never inspects the address the HTTP client actually connects to. The client constructed in resources/resource_factories/create/create.go installs no dial-time hook, so no check occurs at connection time either. A hostname that resolves to a loopback, private or cloud-metadata address therefore satisfies the policy, and the response body is embedded in the generated site. An attacker who can supply a URL through content, for example a front-matter field or a CMS field, can make the build fetch an internal endpoint and publish the response in the static output, so the build artifact itself carries the data out.
-
-Score: 8.3 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:P/VC:H/VI:N/VA:N/SC:H/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2025-9566 [CVSS:3.1 8.1 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-9566</link>
-            <guid isPermaLink="false">CVE-2025-9566</guid>
-            <pubDate>Mon, 24 Aug 2026 11:16:37 GMT</pubDate>
-            <description><![CDATA[There's a vulnerability in podman where an attacker may use the kube play command to overwrite host files when the kube file container a Secrete or a ConfigMap volume mount and such volume contains a symbolic link to a host file path. In a successful attack, the attacker can only control the target file to be overwritten but not the content to be written into the file.
-
-Binary-Affected: podman
-Upstream-version-introduced: v4.0.0
-Upstream-version-fixed: v5.6.1
-
-Score: 8.1 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2025-59060 [CVSS:3.1 5.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-59060</link>
-            <guid isPermaLink="false">CVE-2025-59060</guid>
-            <pubDate>Mon, 24 Aug 2026 11:16:37 GMT</pubDate>
-            <description><![CDATA[Hostname verification bypass issue in Apache Ranger NiFiRegistryClient is reported in Apache Ranger versions <= 2.7.0.
-
-Users are recommended to upgrade to version 2.8.0, which fixes this issue.
+            <title><![CDATA[CVE-2025-68833 [CVSS:3.1 5.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-68833</link>
+            <guid isPermaLink="false">CVE-2025-68833</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:49 GMT</pubDate>
+            <description><![CDATA[HCL Hive Keycloak IAM Instance is affected by insufficient granularity of access control which could allow an attacker unauthorized access to resources.
 
 Score: 5.3 (MEDIUM)
 Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2025-49796 [CVSS:3.1 9.1 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-49796</link>
-            <guid isPermaLink="false">CVE-2025-49796</guid>
-            <pubDate>Mon, 24 Aug 2026 11:16:36 GMT</pubDate>
-            <description><![CDATA[A vulnerability was found in libxml2. Processing certain sch:name elements from the input XML file can trigger a memory corruption issue. This flaw allows an attacker to craft a malicious XML input file that can lead libxml to crash, resulting in a denial of service or other possible undefined behavior due to sensitive data being corrupted in memory.
-
-Score: 9.1 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2025-49794 [CVSS:3.1 9.1 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-49794</link>
-            <guid isPermaLink="false">CVE-2025-49794</guid>
-            <pubDate>Mon, 24 Aug 2026 11:16:36 GMT</pubDate>
-            <description><![CDATA[A use-after-free vulnerability was found in libxml2. This issue occurs when parsing XPath elements under certain circumstances when the XML schematron has the <sch:name path="..."/> schema elements. This flaw allows a malicious actor to craft a malicious XML document used as input for libxml, resulting in the program's crash using libxml or other possible undefined behaviors.
-
-Score: 9.1 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-78317 [CVSS:3.1 8.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78317</link>
-            <guid isPermaLink="false">CVE-2026-78317</guid>
-            <pubDate>Mon, 24 Aug 2026 10:16:40 GMT</pubDate>
-            <description><![CDATA[SQL Injection in Delta DIAEnergie v1.11.00.002 allows attacker to 
-remote code execution.
-
-Score: 8.8 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-78316 [CVSS:3.1 8.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78316</link>
-            <guid isPermaLink="false">CVE-2026-78316</guid>
-            <pubDate>Mon, 24 Aug 2026 10:16:40 GMT</pubDate>
-            <description><![CDATA[SQL Injection in Delta DIAEnergie v1.11.00.002 allows attacker to 
-remote code execution.
-
-Score: 8.8 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-78315 [CVSS:3.1 8.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78315</link>
-            <guid isPermaLink="false">CVE-2026-78315</guid>
-            <pubDate>Mon, 24 Aug 2026 10:16:40 GMT</pubDate>
-            <description><![CDATA[SQL Injection in Delta DIAEnergie v1.11.00.002 allows attacker to 
-remote code execution.
-
-Score: 8.8 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-78314 [CVSS:3.1 8.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78314</link>
-            <guid isPermaLink="false">CVE-2026-78314</guid>
-            <pubDate>Mon, 24 Aug 2026 10:16:40 GMT</pubDate>
-            <description><![CDATA[SQL Injection in Delta DIAEnergie v1.11.00.002 allows attacker to 
-remote code execution.
-
-Score: 8.8 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-75975 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-75975</link>
-            <guid isPermaLink="false">CVE-2026-75975</guid>
-            <pubDate>Mon, 24 Aug 2026 10:16:40 GMT</pubDate>
-            <description><![CDATA[fast-uri is a URI parser for Node.js. Its custom parser for bracketed IPv6 literals does not validate the complete IPv6 grammar, so invalid trailing text in an authority can be silently discarded and a malformed attacker-controlled host is turned into a different valid IPv6 destination. For example, a bracketed literal with invalid trailing characters is normalized to the unspecified address, which a Node HTTP client then connects to a local service over loopback, and other malformed literals collapse to private-range addresses. No error is set on the parsed result, so an application checking the error field cannot detect the rewrite. An application that normalizes untrusted URLs before outbound requests, redirects, proxy routing, or address-policy enforcement can be redirected to a local or private IPv6 target, giving a server-side request forgery and address-policy bypass primitive. The affected versions are 2.3.1 up to but not including 2.4.5, 3.0.0 up to but not including 3.1.6, and 4.0.0 up to but not including 4.1.3. The issue is fixed in 2.4.5, 3.1.6, and 4.1.3, which validate bracketed IP literals against the full grammar and mark malformed literals as authority errors. Users should upgrade to a patched version.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-75931 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-75931</link>
-            <guid isPermaLink="false">CVE-2026-75931</guid>
-            <pubDate>Mon, 24 Aug 2026 10:16:40 GMT</pubDate>
-            <description><![CDATA[fast-uri is a URI parser for Node.js. It canonicalizes a host to its ASCII form only when the input carries an explicit scheme, so a scheme-relative reference such as a host preceded by two slashes is returned with its host verbatim and no error set. As a result fast-uri's own entry points disagree with each other: parse, resolve, normalize, and equal can yield different hosts for the same input depending only on whether a scheme is written out, and equal can return opposite verdicts for the same pair of hosts. An application that extracts a host with fast-uri to check it against a policy list and then resolves the same reference can make its decision on one host while the destination is another, enabling host confusion and policy bypass. The affected versions are 2.4.2 up to but not including 2.4.5, 3.1.3 up to but not including 3.1.6, and 4.0.1 up to but not including 4.1.3. The issue is fixed in 2.4.5, 3.1.6, and 4.1.3, which canonicalize the host consistently across the resolve path. Users should upgrade to a patched version.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-75899 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-75899</link>
-            <guid isPermaLink="false">CVE-2026-75899</guid>
-            <pubDate>Mon, 24 Aug 2026 10:16:39 GMT</pubDate>
-            <description><![CDATA[fast-uri is a URI parser for Node.js. It decodes percent escapes in a hostname during parsing and then decodes the parsed hostname a second time during authority recomposition, so a single call to normalize or resolve can turn nested percent-encoded input into a different network destination such as a loopback hostname or address. For example, a doubly encoded host that spells out a loopback name decodes to that live host in one operation, which contradicts RFC 3986 section 2.4 that an implementation must not decode the same string more than once. An application that normalizes or resolves an untrusted HTTP-family URI before outbound routing, redirect validation, or a host-policy check can receive a destination different from the one the original encoded host represented, giving a server-side request forgery and host-policy bypass primitive. This is an incomplete-fix variant of CVE-2026-6322. The affected versions are 2.4.1 up to but not including 2.4.5, 3.1.2 up to but not including 3.1.6, and 4.0.0 up to but not including 4.1.3. The issue is fixed in 2.4.5, 3.1.6, and 4.1.3, which normalize percent escapes once and preserve encoded percent signs. Users should upgrade to a patched version.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-66897 [CVSS:3.1 9.9 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-66897</link>
-            <guid isPermaLink="false">CVE-2026-66897</guid>
-            <pubDate>Mon, 24 Aug 2026 10:16:39 GMT</pubDate>
-            <description><![CDATA[A path traversal vulnerability in LXD's instance template processing allows an attacker with container edit permissions, or any user launching a crafted image, to overwrite arbitrary files on the host system as root. When processing target template paths specified in metadata.yaml, LXD validates the path against a confined os.Root directory handle but subsequently opens and creates the file using os.Create with an unconfined string path. This discrepancy between path resolution checks and file creation allows an attacker to escape directory confinement, overwrite root-owned host files, and achieve host root code execution.
-
-Score: 9.9 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-64612 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64612</link>
-            <guid isPermaLink="false">CVE-2026-64612</guid>
-            <pubDate>Mon, 24 Aug 2026 10:16:39 GMT</pubDate>
-            <description><![CDATA[A flaw was found in libcupsfilters and cups-filters. The PNG image reading function creates a libpng reader without installing an error recovery handler, causing the CUPS image filter process to abort when processing a malformed PNG file. An unauthenticated attacker could exploit this by submitting a specially crafted PNG print job, leading to denial of service of the in-flight print job.
+            <title><![CDATA[CVE-2025-61258 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-61258</link>
+            <guid isPermaLink="false">CVE-2025-61258</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:49 GMT</pubDate>
+            <description><![CDATA[Outsystems Platform Server 11.18.1.37828 allows attackers to cause a denial of service via a crafted content-length value mismatching the body length. NOTE: the Supplier indicates that they are unable to reproduce this.
 
 Score: 7.5 (HIGH)
 Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-4878 [CVSS:3.1 7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-4878</link>
-            <guid isPermaLink="false">CVE-2026-4878</guid>
-            <pubDate>Mon, 24 Aug 2026 10:16:38 GMT</pubDate>
-            <description><![CDATA[A flaw was found in libcap. A local unprivileged user can exploit a Time-of-check-to-time-of-use (TOCTOU) race condition in the `cap_set_file()` function. This allows an attacker with write access to a parent directory to redirect file capability updates to an attacker-controlled file. By doing so, capabilities can be injected into or stripped from unintended executables, leading to privilege escalation.
-
-Score: 7 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-48914 [CVSS:3.1 6.7 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-48914</link>
-            <guid isPermaLink="false">CVE-2026-48914</guid>
-            <pubDate>Mon, 24 Aug 2026 10:16:38 GMT</pubDate>
-            <description><![CDATA[A flaw was found in QEMU's virtio-blk device. The issue arises because the device does not properly validate the size of input descriptors before writing data. A malicious guest with high privileges could exploit this vulnerability by submitting a malformed virtio-blk SCSI request, leading to an out-of-bounds write in the host heap memory and a potential denial of service (DoS) for the QEMU process.
-
-Score: 6.7 (MEDIUM)
-Vector: CVSS:3.1/AV:L/AC:L/PR:H/UI:N/S:C/C:N/I:L/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-16249]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-16249</link>
-            <guid isPermaLink="false">CVE-2026-16249</guid>
-            <pubDate>Mon, 24 Aug 2026 10:16:38 GMT</pubDate>
-            <description><![CDATA[Rejected reason: This CVE ID is a duplicate of CVE-2026-15303 and was never published. Both IDs were assigned to the same vulnerability in the 6Storage Rentals WordPress plugin. All CVE users should reference CVE-2026-15303 instead of this ID.]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-14164 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-14164</link>
-            <guid isPermaLink="false">CVE-2026-14164</guid>
-            <pubDate>Mon, 24 Aug 2026 10:16:38 GMT</pubDate>
-            <description><![CDATA[A double free issue has been identified in libarchive's RAR5 reader. During parsing of a specially crafted RAR5 archive, the filtered_buf pointer may remain stale after being freed during unpacking state reinitialization. Subsequent processing of another archive entry can trigger a second free of the same memory region, resulting in a double-free condition. Successful exploitation may cause applications using the vulnerable libarchive API to terminate unexpectedly, leading to a denial of service.
+            <title><![CDATA[CVE-2024-34046 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2024-34046</link>
+            <guid isPermaLink="false">CVE-2024-34046</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:48 GMT</pubDate>
+            <description><![CDATA[The O-RAN E2T I-Release Prometheus metric Increment function can crash in sctpThread.cpp for message.peerInfo->sctpParams->e2tCounters[IN_SUCC][MSG_COUNTER][ProcedureCode_id_RICsubscription]->Increment().
 
 Score: 7.5 (HIGH)
 Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-12725 [CVSS:3.1 5.9 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-12725</link>
-            <guid isPermaLink="false">CVE-2026-12725</guid>
-            <pubDate>Mon, 24 Aug 2026 10:16:38 GMT</pubDate>
-            <description><![CDATA[A heap-based buffer overflow was found in dnsmasq. When DNSSEC validation and
-query logging are both enabled, logging of DS or DNSKEY replies containing
-unsupported algorithm or digest types can cause dnsmasq to write past the end
-of an internal logging buffer. A remote attacker able to supply such a DNS
-response may crash the dnsmasq process, resulting in denial of service.
+            <title><![CDATA[CVE-2024-34045 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2024-34045</link>
+            <guid isPermaLink="false">CVE-2024-34045</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:48 GMT</pubDate>
+            <description><![CDATA[The O-RAN E2T I-Release Prometheus metric Increment function can crash in sctpThread.cpp for message.peerInfo->counters[IN_INITI][MSG_COUNTER][ProcedureCode_id_E2setup]->Increment().
 
-Score: 5.9 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
+Score: 7.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2025-7195 [CVSS:3.1 6.4 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-7195</link>
-            <guid isPermaLink="false">CVE-2025-7195</guid>
-            <pubDate>Mon, 24 Aug 2026 10:16:36 GMT</pubDate>
-            <description><![CDATA[Early versions of Operator-SDK provided an insecure method to allow operator containers to run in environments that used a random UID. Operator-SDK before 0.15.2 provided a script, user_setup, which modifies the permissions of the /etc/passwd file to 664 during build time. Developers who used Operator-SDK before 0.15.2 to scaffold their operator may still be impacted by this if the insecure user_setup script is still being used to build new container images. 
+            <title><![CDATA[CVE-2024-33775 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2024-33775</link>
+            <guid isPermaLink="false">CVE-2024-33775</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:48 GMT</pubDate>
+            <description><![CDATA[An issue with the Autodiscover component in Nagios XI 2024R1.01 allows a remote attacker to escalate privileges via a crafted Dashlet.
 
-In affected images, the /etc/passwd file is created during build time with group-writable permissions and a group ownership of root (gid=0). An attacker who can execute commands within an affected container, even as a non-root user, may be able to leverage their membership in the root group to modify the /etc/passwd file. This could allow the attacker to add a new user with any arbitrary UID, including UID 0, leading to full root privileges within the container.
-
-Score: 6.4 (MEDIUM)
-Vector: CVSS:3.1/AV:L/AC:H/PR:H/UI:N/S:U/C:H/I:H/A:H]]></description>
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-78321 [CVSS:4.0 6 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78321</link>
-            <guid isPermaLink="false">CVE-2026-78321</guid>
-            <pubDate>Mon, 24 Aug 2026 09:16:47 GMT</pubDate>
-            <description><![CDATA[The HTTP media server on DJI drones does not enforce sufficient limits on incoming connections or request rates. An attacker with access to the drone's internal network can exhaust the server's connection pool by repeatedly requesting a stored media file, preventing the server from handling legitimate requests and causing a denial of service that prevents the DJI Fly application from retrieving photos and videos from the aircraft in QuickTransfer mode.
+            <title><![CDATA[CVE-2024-31828 [CVSS:3.1 6.1 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2024-31828</link>
+            <guid isPermaLink="false">CVE-2024-31828</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:48 GMT</pubDate>
+            <description><![CDATA[Cross Site Scripting vulnerability in Lavalite CMS v.10.1.0 allows attackers to execute arbitrary code and obtain sensitive information via a crafted payload to the URL.
 
-Affected models are DJI Neo until 01.00.0400, DJI Neo 2 until 01.00.0500, DJI Flip until 01.00.1200, DJI Air 3 until 01.00.1600, DJI Air 3S until 01.00.1400, DJI Avata 2 until 01.00.0400, DJI Avata 360 until 01.00.0300, DJI Mavic 3 until 01.00.1400, DJI Mavic 3 Classic until 01.00.0800, DJI Mavic 3 Pro until 01.01.0700, DJI Mavic 4 Pro until 01.00.0500, DJI Mini 2 until 01.07.0200, DJI Mini 3 until 01.00.0500, DJI Mini 3 Pro until 01.00.0900, DJI Mini 4 Pro until 01.00.1100, and DJI Mini 5 Pro until 01.00.0600.
-
-Remediation requires a firmware update from the vendor.
-
-Score: 6 (MEDIUM)
-Vector: CVSS:4.0/AV:A/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+Score: 6.1 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-78306 [CVSS:4.0 8.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78306</link>
-            <guid isPermaLink="false">CVE-2026-78306</guid>
-            <pubDate>Mon, 24 Aug 2026 09:16:47 GMT</pubDate>
-            <description><![CDATA[DJI drones expose an unauthenticated DUML command interface over Bluetooth that allows an attacker within Bluetooth range to modify Wi-Fi configuration parameters, including the SSID, PSK, MAC address, regulatory country code, and wireless channel. An attacker can overwrite the Wi-Fi PSK with a known value and connect to the drone's internal Wi-Fi network, potentially gaining access to the flight control interface and issuing flight commands. Crafted DUML commands can also disable or restart the Wi-Fi and Bluetooth interfaces, disconnect Wi-Fi clients, or reset wireless configuration, resulting in a denial-of-service condition that can disrupt the operator's wireless control, video, and telemetry connections during flight.
-
-Affected models are DJI Neo until 01.00.0400, DJI Neo 2 until 01.00.0500, DJI Flip until 01.00.1200, DJI Air 3 until 01.00.1600, DJI Air 3S until 01.00.1400, DJI Avata 2 until 01.00.0400, DJI Avata 360 until 01.00.0300, DJI Mavic 3 until 01.00.1400, DJI Mavic 3 Classic until 01.00.0800, DJI Mavic 3 Pro until 01.01.0700, DJI Mavic 4 Pro until 01.00.0500, DJI Mini 2 until 01.07.0200, DJI Mini 3 until 01.00.0500, DJI Mini 3 Pro until 01.00.0900, DJI Mini 4 Pro until 01.00.1100, and DJI Mini 5 Pro until 01.00.0600.
-
-
-Remediation requires a firmware update from the vendor.
-
-Score: 8.5 (HIGH)
-Vector: CVSS:4.0/AV:A/AC:L/AT:N/PR:N/UI:N/VC:N/VI:H/VA:H/SC:N/SI:H/SA:H/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-74990 [CVSS:3.1 9.8 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-74990</link>
-            <guid isPermaLink="false">CVE-2026-74990</guid>
-            <pubDate>Mon, 24 Aug 2026 09:16:47 GMT</pubDate>
-            <description><![CDATA[Internally found bugs present in Firefox ESR 115.38, Firefox ESR 140.13, Firefox ESR 153.0 and Firefox 153. Some of these bugs showed evidence of memory corruption or another security-relevant defect and we presume that with enough effort some of these could have been exploited. This vulnerability was fixed in Firefox 154, Firefox ESR 115.39, Firefox ESR 140.14, Firefox ESR 153.1, Thunderbird 154, Thunderbird 140.14, and Thunderbird 153.1.
+            <title><![CDATA[CVE-2024-31823 [CVSS:3.1 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2024-31823</link>
+            <guid isPermaLink="false">CVE-2024-31823</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:48 GMT</pubDate>
+            <description><![CDATA[An issue in Ecommerce-CodeIgniter-Bootstrap commit v. d22b54e8915f167a135046ceb857caaf8479c4da allows a remote attacker to execute arbitrary code via the removeSecondaryImage method of the Publish.php component.
 
 Score: 9.8 (CRITICAL)
 Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2024-22373 [CVSS:3.1 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2024-22373</link>
+            <guid isPermaLink="false">CVE-2024-22373</guid>
+            <pubDate>Mon, 24 Aug 2026 14:16:48 GMT</pubDate>
+            <description><![CDATA[An out-of-bounds write vulnerability exists in the JPEG2000Codec::DecodeByStreamsCommon functionality of Mathieu Malaterre Grassroot DICOM 3.0.23. A specially crafted DICOM file can lead to a heap buffer overflow. An attacker can provide a malicious file to trigger this vulnerability.
+
+Score: 9.8 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-9804 [CVSS:3.1 7.7 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-9804</link>
+            <guid isPermaLink="false">CVE-2026-9804</guid>
+            <pubDate>Mon, 24 Aug 2026 13:19:22 GMT</pubDate>
+            <description><![CDATA[A flaw was found in KubeVirt's virt-exportserver component. An attacker with specific namespace-level access can exploit a path traversal vulnerability in the VMExport directory endpoint. By placing a symbolic link (symlink) within an exported filesystem Persistent Volume Claim (PVC) that points outside its designated mount root, the attacker can read arbitrary files from the exporter pod's filesystem. This leads to information disclosure, potentially exposing sensitive data.
+
+Score: 7.7 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-9697 [CVSS:3.1 7.4 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-9697</link>
+            <guid isPermaLink="false">CVE-2026-9697</guid>
+            <pubDate>Mon, 24 Aug 2026 13:19:21 GMT</pubDate>
+            <description><![CDATA[Impact:
+undici's ProxyAgent silently drops the requestTls option when configured with a SOCKS5 proxy URI (socks5:// or socks://). The target HTTPS connection through the SOCKS5 tunnel falls back to Node's default trust store, ignoring user-configured ca, cert, key, rejectUnauthorized, and servername settings.
+
+Applications that pin to an internal or corporate CA via requestTls.ca will, when their proxy URI is SOCKS5, get the default Mozilla CA bundle as the trust anchor instead. Any cert signed by any publicly-trusted CA for the target hostname is accepted, breaking the intended pin and enabling MITM read and tamper of the HTTPS exchange.
+
+Affected applications are those that use undici's ProxyAgent (or Socks5ProxyAgent directly) with SOCKS5 AND rely on requestTls for TLS scope restriction. The bug was introduced in undici 7.23.0 when SOCKS5 support was added.
+
+Patches:
+Upgrade to undici v7.28.0 or v8.5.0.
+
+Workarounds:
+No workaround is available within the SOCKS5 path. If a SOCKS5 proxy with TLS scope restriction is required and an upgrade is not yet possible, route the traffic through an HTTP-proxy ProxyAgent instead, where requestTls is honored correctly.
+
+Score: 7.4 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N]]></description>
         </item>
     </channel>
 </rss>
