@@ -4,11 +4,326 @@
         <title>NVD CVE Feed</title>
         <link>https://github.com/TasukuKuchinomachi/NVD-RSS-feed</link>
         <description>Latest CVE entries from the National Vulnerability Database. This product uses the NVD API but is not endorsed or certified by the NVD.</description>
-        <lastBuildDate>Tue, 08 Sep 2026 22:21:17 GMT</lastBuildDate>
+        <lastBuildDate>Wed, 09 Sep 2026 00:17:31 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>National Vulnerability Database - NIST</copyright>
+        <item>
+            <title><![CDATA[CVE-2026-53939 [CVSS:3.1 9.1 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-53939</link>
+            <guid isPermaLink="false">CVE-2026-53939</guid>
+            <pubDate>Wed, 09 Sep 2026 00:17:31 GMT</pubDate>
+            <description><![CDATA[OpenIDC/cjose is a C library implementing the Javascript Object Signing and Encryption (JOSE). In versions 0.6.1 through 0.6.2.5, when cjose encrypts a JWE using an AES-CBC-HMAC content-encryption algorithm (`A128CBC-HS256`, `A192CBC-HS384`, or `A256CBC-HS512`) together with any key-management algorithm that generates a fresh content-encryption key (CEK), the CEK is all zero bytes instead of being randomly generated. The resulting JWE is therefore encrypted and authenticated under a fixed, publicly known key, so anyone who obtains the JWE can recover the plaintext and forge or modify the content. This is fixed in version 0.6.2.6 by `_cjose_jwe_set_cek_aes_cbc()` generating the CEK from `RAND_bytes`. A regression test asserts that the `encrypted_key` differs across two encryptions for each AES-CBC-HMAC variant. Until upgrading, for data encrypted with cjose, three options are available. Use an AES-GCM `enc` (`A128GCM` / `A192GCM` / `A256GCM`) instead of an AES-CBC-HMAC `enc`,  use `alg=dir` with a caller-supplied CEK, or avoid using cjose for JWE encryption with the affected algorithm pair. These are mitigations for new ciphertexts only; data already encrypted under the zero key remains compromised and should be re-encrypted (and any secrets it contained rotated).
+
+Score: 9.1 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-53938 [CVSS:3.1 8.2 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-53938</link>
+            <guid isPermaLink="false">CVE-2026-53938</guid>
+            <pubDate>Wed, 09 Sep 2026 00:17:31 GMT</pubDate>
+            <description><![CDATA[OpenIDC/cjose is a C library implementing the Javascript Object Signing and Encryption (JOSE). Prior to version 0.6.2.5, cjose's JWE decryption path for the AES Key Wrap key-management algorithms (`alg` = `A128KW`, `A192KW`, `A256KW`) does not validate the length of the attacker-supplied `encrypted_key` (JWE Encrypted Key) before unwrapping it into a fixed-size, heap-allocated Content Encryption Key (CEK) buffer. A remote, unauthenticated attacker who can submit a crafted JWE to an application that decrypts it with an AES-KW symmetric key can trigger an out-of-bounds heap write, corrupting the heap. This leads at minimum to a crash (denial of service) and, depending on the heap layout and allocator, may be leverageable for further memory-corruption impact. `cjose_jwe_import()` / `cjose_jwe_decrypt()` are pre-authentication entry points: they parse and process fully attacker-controlled input. Upgrade to cjose 0.6.2.5 to receive a patch. If upgrading is not immediately possible, reject the AES Key Wrap algorithms (`A128KW`/`A192KW`/`A256KW`) for untrusted JWEs at the application layer.
+
+Score: 8.2 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-53937 [CVSS:3.1 6.2 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-53937</link>
+            <guid isPermaLink="false">CVE-2026-53937</guid>
+            <pubDate>Wed, 09 Sep 2026 00:17:31 GMT</pubDate>
+            <description><![CDATA[MCP Kotlin SDK is the Kotlin Multiplatform software development kit for the Model Context Protocol. In versions 0.7.0 through 0.12.0, `ReadBuffer.append` in `kotlin-sdk-core/src/commonMain/kotlin/io/modelcontextprotocol/kotlin/sdk/shared/ReadBuffer.kt` writes every chunk of bytes received from the stdio transport into a `kotlinx.io.Buffer` with no size cap. Frames are extracted from that buffer only when a `\n` (0x0a) byte is observed. A peer that streams bytes without ever sending a newline causes the internal buffer to grow indefinitely until the JVM (or the surrounding host process) is OOM-killed. The leak is amplified by `StdioServerTransport` and `StdioClientTransport`, which both queue raw chunks through a `kotlinx.coroutines.channels.Channel<ByteArray>(Channel.UNLIMITED)` and then call `readBuffer.append(chunk)` without backpressure or size guard. This is a remote-pre-auth denial of service whenever an SDK stdio server's stdin is fed by an untrusted or attacker-controlled producer (for example: a host program that exec's the MCP server as a subprocess and pipes through bytes received from a network peer, or a sidecar wrapper that proxies bytes from an HTTP endpoint to the stdio transport). Version 0.13.0 fixes the issue.
+
+Score: 6.2 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-47297 [CVSS:3.1 8.1 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-47297</link>
+            <guid isPermaLink="false">CVE-2026-47297</guid>
+            <pubDate>Wed, 09 Sep 2026 00:17:31 GMT</pubDate>
+            <description><![CDATA[Deserialization of untrusted data in SQL Server allows an unauthorized attacker to execute code over a network.
+
+Score: 8.1 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-19201 [CVSS:4.0 6.6 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19201</link>
+            <guid isPermaLink="false">CVE-2026-19201</guid>
+            <pubDate>Wed, 09 Sep 2026 00:17:30 GMT</pubDate>
+            <description><![CDATA[An uncontrolled recursion vulnerability in the Windows SIPA event log parser of Google go-attestation versions up to and including 0.6.1 allows an attacker to cause a denial of service (DoS). The (*WinEvents).readELAMAggregation function recurses for every nested elamAggregation sub-event without enforcing a maximum recursion depth limit, while the size guard is bypassed on recursive execution paths. By submitting a crafted Windows event log containing deeply nested elamAggregation headers, an attacker can exhaust the goroutine call stack, triggering an unrecoverable fatal runtime error (stack overflow) that immediately crashes the verifier application.
+
+Score: 6.6 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N/E:U/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-86564 [CVSS:3.1 3.3 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-86564</link>
+            <guid isPermaLink="false">CVE-2026-86564</guid>
+            <pubDate>Tue, 08 Sep 2026 23:17:30 GMT</pubDate>
+            <description><![CDATA[A flaw was found in DPDK lib/vhost. Missing length validation before reading command_data in the virtio-net control-queue handler can cause an out-of-bounds read and a host process crash.
+
+Score: 3.3 (LOW)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:L]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-85630]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-85630</link>
+            <guid isPermaLink="false">CVE-2026-85630</guid>
+            <pubDate>Tue, 08 Sep 2026 23:17:29 GMT</pubDate>
+            <description><![CDATA[HTML::FormHandler versions before 0.410002 for Perl render field attributes into HTML without escaping using the process_attrs method.
+
+Any application with fields or field labels where some attributes are built from data rather than literals allows attacker-influenced text in an attribute value that can override the field attributes or embed JavaScript in rendered pages.
+
+For example, the RadioGroup widget uses the process_attrs method via the render_option and wrap_radio methods.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-85484]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-85484</link>
+            <guid isPermaLink="false">CVE-2026-85484</guid>
+            <pubDate>Tue, 08 Sep 2026 23:17:29 GMT</pubDate>
+            <description><![CDATA[HTML::FormHandler versions before 0.410002 for Perl render option group labels and radio button labels into HTML without escaping.
+
+The Select, RadioGroup, CheckboxGroup and HorizCheckboxGroup widgets render a group label unescaped, Select into a label attribute and the other three into element content. RadioGroup also renders each radio button's own label unescaped.
+
+Any application whose option list is built from data rather than literals, using options_from, an options_fieldname method, or the DBIC model, allows attacker-influenced text in a label that can override the options or embed JavaScript in rendered pages.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-80093 [CVSS:3.1 7 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-80093</link>
+            <guid isPermaLink="false">CVE-2026-80093</guid>
+            <pubDate>Tue, 08 Sep 2026 23:17:29 GMT</pubDate>
+            <description><![CDATA[Use after free in Windows Cloud Files Mini Filter Driver allows an authorized attacker to elevate privileges locally.
+
+Score: 7 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-78701 [CVSS:3.1 6.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78701</link>
+            <guid isPermaLink="false">CVE-2026-78701</guid>
+            <pubDate>Tue, 08 Sep 2026 23:17:29 GMT</pubDate>
+            <description><![CDATA[A flaw was found in 389-ds-base. A remote, authenticated attacker could exploit a vulnerability in the Simple Authentication and Security Layer (SASL) UNBIND process. By sending a specially crafted request, the attacker can cause a connection to stall, leading to resource exhaustion and a Denial of Service (DoS) for the server.
+
+Score: 6.5 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-58015 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-58015</link>
+            <guid isPermaLink="false">CVE-2026-58015</guid>
+            <pubDate>Tue, 08 Sep 2026 23:17:28 GMT</pubDate>
+            <description><![CDATA[A flaw was found in GLib. The D-Bus client-side implementation of the DBUS_COOKIE_SHA1 SASL authentication mechanism does not validate the cookie_context parameter received from the server. A malicious D-Bus server can supply a cookie_context containing path traversal sequences, causing the client to read an arbitrary file and exfiltrate sensitive data by verifying guessed file contents against a generated hash.
+
+Score: 7.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-58014 [CVSS:3.1 8.6 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-58014</link>
+            <guid isPermaLink="false">CVE-2026-58014</guid>
+            <pubDate>Tue, 08 Sep 2026 23:17:28 GMT</pubDate>
+            <description><![CDATA[A flaw was found in GLib. An off-by-one error can occur in the g_key_file_get_locale_string_list function in the gkeyfile.c file when loading a key file with an empty value. This flaw can cause an out-of-bounds access of 1 byte or a denial of service when the out-of-bounds access crosses a page boundary.
+
+Score: 8.6 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-58013 [CVSS:3.1 8.2 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-58013</link>
+            <guid isPermaLink="false">CVE-2026-58013</guid>
+            <pubDate>Tue, 08 Sep 2026 23:17:27 GMT</pubDate>
+            <description><![CDATA[A flaw was found in GLib. A buffer over-read can occur in g_io_channel_read_line_backend() in the giochannel.c file when a custom line terminator with a length greater than one is set, causing memcmp to read past the GString buffer. This vulnerability can cause a minor information disclosure of 7 bytes or a denial of service when the buffer over-read crosses a page boundary.
+
+Score: 8.2 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-58012 [CVSS:3.1 8.2 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-58012</link>
+            <guid isPermaLink="false">CVE-2026-58012</guid>
+            <pubDate>Tue, 08 Sep 2026 23:17:26 GMT</pubDate>
+            <description><![CDATA[A flaw was found in GLib. A buffer over-read can occur in the g_regex_replace function when used with the `G_REGEX_RAW` compile flag and case-change replacement escapes because the string_append function processes matched substrings using UTF-8 functions that assume valid UTF-8 input, even when the string is treated as raw bytes. This vulnerability can cause a minor information disclosure of 1-5 bytes and a denial of service when the buffer over-read crosses a page boundary.
+
+Score: 8.2 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-58011 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-58011</link>
+            <guid isPermaLink="false">CVE-2026-58011</guid>
+            <pubDate>Tue, 08 Sep 2026 23:17:26 GMT</pubDate>
+            <description><![CDATA[A flaw was found in GLib. An out-of-bounds read of only 2 bytes can occur in the g_date_time_get_ymd function in the glib/gdatetime.c file when an invalid GDateTime object produced by the g_date_time_add_full function is processed. This flaw can corrupt the date output and potentially cause logic errors that may lead to a denial of service.
+
+Score: 7.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-58010 [CVSS:3.1 8.2 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-58010</link>
+            <guid isPermaLink="false">CVE-2026-58010</guid>
+            <pubDate>Tue, 08 Sep 2026 23:17:25 GMT</pubDate>
+            <description><![CDATA[A flaw was found in GLib. An off-by-one error can occur in the gvs_tuple_is_normal function in the glib/gvariant-serialiser.c file when doing an alignment padding check because the bounds check uses > instead of >=, causing an out-of-bounds read of only 1 byte. This issue can cause a minor information disclosure of 1 byte and a denial of service when the out-of-bounds read crosses a page boundary.
+
+Score: 8.2 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-55250 [CVSS:4.0 8.7 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-55250</link>
+            <guid isPermaLink="false">CVE-2026-55250</guid>
+            <pubDate>Tue, 08 Sep 2026 23:17:25 GMT</pubDate>
+            <description><![CDATA[Maravel, a PHP framework oriented towards dependency injection, prior to version 10.74.0 has a high-severity Token Replay Vulnerability arising from a structural lifecycle mismatch between stateless token validation engines and high-performance relational caching layers. Any application with low cache memory that causes premature eviction to free up memory and applications running macropay-solutions/maravel-framework that utilize tymon/jwt-auth for API token authentication and blacklist management or any other package that does the same may be affected. This architectural risk might also impact native Laravel applications utilizing cache tags under specific volatile or eviction-capped environments. tymon/jwt-auth automatically probes for cache tag support. If found, it forcefully wraps 14-day token blacklist entries (jti) inside a relational tymon.jwt tag. In environments where the O(1) Atomic Lazy Eviction model is active — either natively inside Maravel-Framework v20.x or manually backported into v10.x via the explicit DI container singletons provided in PR #104 (App\Cache\TaggedCache and App\Cache\TagSet) — a strict global tracking ceiling (Container::TAGGED_CACHE_TTL_CAP_SECONDS) of 7,200 seconds (2 hours) is enforced to secure the system against memory index bloat. This ceiling forcefully truncates the 14-day blacklist lifespan down to a maximum of 2 hours, after which individual tracking keys naturally expire and disappear from the active cache window. Furthermore, because the optimized engine implements a generational version matrix to achieve O(1) flush speeds, any programmatic or manual invocation of a tag flush or reset (e.g., Cache::tags([...])->flush()) instantly bumps the internal atomic master version pointer. This shifts the computed cryptographic composite hash (sha1($this->tags->getNamespace())) for all overlapping components, rendering the entire existing index immediately unreachable. Consequently, through either natural 2-hour expiration or an intervening tag flush execution (like the cache naturally cleaning old values to free up memory), the invalidation state records are entirely wiped out. Because the tokens' physical cryptographic signatures remain structurally valid for up to 14 days, stolen, hijacked, or legitimately logged-out tokens are instantly and silently resurrected across the entire API gateway, leaving the application critically vulnerable to widespread Token Replay Attacks. Because this issue is caused by an upstream architectural assumption within the tymon/jwt-auth package rather than a core defect inside the framework, there is no direct framework version upgrade that can safely bypass this lifecycle collision without breaking business cache recycling bounds. Maravel version 10.74.0 introduced a way to backport the new fixed tagged cache from 20.x into 10.x by resolving TagSet and TaggedCache from DI, which is how this latent architectural lifecycle vulnerability was discovered. Users must apply the decoupled configuration workaround outlined below. As a workaround, make sure that cache memory size does not generate early natural evictions from cache to free up space, deleting blacklisted jwt ids before they expire. Applications must decouple flat authentication vectors from the relational tagging subsystem. This forces token identifiers to write directly to the primary cache keyspace as flat, un-tagged key-value pairs where they securely retain their unclipped 14-day lifecycle.
+
+Score: 8.7 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:H/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-53704 [CVSS:3.1 7.1 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-53704</link>
+            <guid isPermaLink="false">CVE-2026-53704</guid>
+            <pubDate>Tue, 08 Sep 2026 23:17:25 GMT</pubDate>
+            <description><![CDATA[A flaw was found in GStreamer's RealMedia demuxer in the gst-plugins-ugly package. When processing a RealMedia file containing a specially crafted FILEINFO metadata section, the demuxer parses variable-name and variable-value pairs using re_skip_pascal_string() without validating that offsets remain within the mapped buffer. Additionally, the element count controlling the parsing loop is read from attacker-controlled data without validation, which can cause an infinite loop. A crafted RealMedia file can cause the application to crash, hang, or potentially read limited adjacent memory contents.
+
+Score: 7.1 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-53639 [CVSS:4.0 6.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-53639</link>
+            <guid isPermaLink="false">CVE-2026-53639</guid>
+            <pubDate>Tue, 08 Sep 2026 23:17:24 GMT</pubDate>
+            <description><![CDATA[Sylius is an Open Source eCommerce Framework on Symfony. Starting in version 2.0.0 and prior to version 2.0.18, 2.1.15, and 2.2.6, the `GET /api/v2/shop/payment-requests/{hash}` and `PUT /api/v2/shop/payment-requests/{hash}` endpoints look up the payment request solely by the hash from the URL. No ownership check is performed against the authenticated customer or the underlying order. An attacker who obtains a payment request hash can read the payment request and, through the `payment` IRI in the response, recover the underlying order's `tokenValue` (which itself grants access to the full order, items, addresses, customer email, totals); and/or update the payment request payload (e.g. `target_path`, `after_path`). These fields are used by the front-end controller to redirect the user after the payment, so an attacker can flip them to an attacker-controlled URL and intercept the buyer. The hash is a UUID, so it has to be obtained out-of-band (logs, shared links, referrer headers, a co-located client), but once it is known no other credential is required, neither authentication nor knowledge of the order token. The creation endpoint `POST /api/v2/shop/orders/{tokenValue}/payment-requests` shares the same flaw: it resolves the target order solely from the `tokenValue` in the URL without verifying that the caller owns the order. The issue is fixed in versions 2.0.18, 2.1.15, and 2.2.6. As a workaround, add a query extension that filters the `GET` operation; decorate the `PUT` state provider, guard the `POST` creation endpoint with a command-bus middleware, and wire the services.
+
+Score: 6.3 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:L/VI:L/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-53638 [CVSS:3.1 4.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-53638</link>
+            <guid isPermaLink="false">CVE-2026-53638</guid>
+            <pubDate>Tue, 08 Sep 2026 23:17:24 GMT</pubDate>
+            <description><![CDATA[Sylius is an Open Source eCommerce Framework on Symfony. Starting in version 2.0.0 and prior to version 2.0.18, 2.1.15, and 2.2.6, an authorization bypass vulnerability exists in the shop account API. The `PATCH /api/v2/shop/account/orders/{tokenValue}/payments/{paymentId}` endpoint, used by an authenticated shop customer to change the payment method of an order that has been placed but not yet paid (state `STATE_NEW`), does not validate that the chosen payment method is enabled for the order's channel. The equivalent checkout endpoint (`PATCH /api/v2/shop/orders/{tokenValue}/payments/{paymentId}`) correctly rejects out-of-channel payment methods with `HTTP 422`; the account endpoint silently accepts them and returns `HTTP 200`. An authenticated customer can therefore assign any globally enabled payment method to their own placed order, including methods that the store operator has explicitly excluded from that channel. The issue is fixed in versions: 2.0.18, 2.1.15, 2.2.6 and above. As a workaround, decorate the `Sylius\Bundle\ApiBundle\Changer\PaymentMethodChangerInterface` service in the application.
+
+Score: 4.3 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-53637 [CVSS:3.1 6.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-53637</link>
+            <guid isPermaLink="false">CVE-2026-53637</guid>
+            <pubDate>Tue, 08 Sep 2026 23:17:24 GMT</pubDate>
+            <description><![CDATA[Sylius is an Open Source eCommerce Framework on Symfony. Versions 2.0.0 through 2.0.17, 2.1.0 through 2.1.14, and 2.2.0 through 2.2.5 contain an improper workflow enforcement vulnerability in the cart `FormComponent`. When an order is completed while its cart page remains open, the stale LiveComponent does not detect the order’s changed state and continues to permit cart actions, allowing an authenticated customer to modify or permanently delete an already completed order. Versions 2.0.18, 2.1.15, and 2.2.6 contain a patch. As a workaround, deployments can copy the patched `FormComponent` into the application's `src/` directory and override the `sylius_shop.twig.component.cart.form` service definition to use that class.
+
+Score: 6.5 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:H/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-53581 [CVSS:3.1 9 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-53581</link>
+            <guid isPermaLink="false">CVE-2026-53581</guid>
+            <pubDate>Tue, 08 Sep 2026 23:17:24 GMT</pubDate>
+            <description><![CDATA[OPNsense is a FreeBSD based firewall and routing platform. Prior to version 26.1.9 of opnsense/core and version 26.4_20 of BE/opnsense/core, a path traversal vulnerability in the NTP configuration module allows an attacker to overwrite arbitrary files on the system as the root user. By manipulating the GPS or PPS serial port parameter, an attacker with access to the NTP configuration can escape the intended directory and force the system to write user-controlled data to any file on the filesystem. Version 26.1.9 of opnsense/core and version 26.4_20 of BE/opnsense/core patch the issue.
+
+Score: 9 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:C/C:H/I:L/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-47680 [CVSS:4.0 5.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-47680</link>
+            <guid isPermaLink="false">CVE-2026-47680</guid>
+            <pubDate>Tue, 08 Sep 2026 23:17:24 GMT</pubDate>
+            <description><![CDATA[The source-controller is a Kubernetes operator, specialised in artifacts acquisition from external sources such as Git, OCI, Helm repositories and S3-compatible buckets. In versions 0.0.17 through 1.8.4, an actor with the ability to influence the contents of a bucket referenced by a `Bucket` resource can cause source-controller to write fetched object data to paths outside the per-reconciliation working directory. The corruption surface is bounded by source-controller's own and downstream Flux controllers' digest verification: source-controller verifies stored artifact digests during reconciliation and rebuilds on divergence; consumers (kustomize-controller, helm-controller) verify the digest of fetched artifacts and reject mismatches. These checks prevent a manipulated artifact from reaching the cluster, but an attacker can still write files anywhere the source-controller pod has permission to write. Separately, a user with permission to create or update `GitRepository` resources can cause source-controller to test for the existence of paths outside the cloned repository. Because the result is exposed via the resource's status, this allows limited enumeration of file paths on the controller pod. This surface exists only on source-controller v1.6.0 and later, where the sparse-checkout feature was introduced. This vulnerability was fixed in source-controller v1.8.5. There is no in-product workaround. Users should upgrade to a patched version. As a defense-in-depth measure for the GitRepository sparse-checkout surface, a `ValidatingAdmissionPolicy` (or a third-party policy engine such as Kyverno or OPA Gatekeeper) can be deployed to reject `GitRepository` resources whose `.spec.sparseCheckout` entries contain `..` or absolute path segments.
+
+Score: 5.3 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:N/VI:L/VA:L/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-19872]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19872</link>
+            <guid isPermaLink="false">CVE-2026-19872</guid>
+            <pubDate>Tue, 08 Sep 2026 23:17:24 GMT</pubDate>
+            <description><![CDATA[HTML::FormHandler versions before 0.410000 for Perl allow cross-site scripting via a submitted value rendered unescaped in an error message.
+
+The wrappers and renderers that emit a form's errors interpolate the error string straight into HTML with no escaping. Two of the library's own messages, no_match and not_allowed, splice the submitted value into that string, and a failing type constraint puts the rejected value into the message it builds, which _apply_actions hands to add_error.
+
+A field declared with a check regexp, a check list or a type constraint reaches those messages, with no custom validator and no non-default configuration. Errors rendered through an application's own escaping template layer rather than the library's rendering roles are not affected.
+
+A request over the network that submits markup to such a field gets it back live inside the error span, running script in the victim's origin. Re-rendering a rejected value later gives the stored variant.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-18743 [CVSS:3.1 2.5 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-18743</link>
+            <guid isPermaLink="false">CVE-2026-18743</guid>
+            <pubDate>Tue, 08 Sep 2026 23:17:23 GMT</pubDate>
+            <description><![CDATA[A flaw was found in popt. This vulnerability allows an attacker to provide specially crafted configuration content to a host, which, when loaded, can lead to a small memory corruption issue. This occurs because of an error in how the `poptConfigFileToString` function reallocates memory for buffers. Successful exploitation could result in heap metadata corruption, potentially causing the affected process to become unavailable (denial of service).
+
+Score: 2.5 (LOW)
+Vector: CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:N/I:N/A:L]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-18620 [CVSS:3.1 7.1 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-18620</link>
+            <guid isPermaLink="false">CVE-2026-18620</guid>
+            <pubDate>Tue, 08 Sep 2026 23:17:23 GMT</pubDate>
+            <description><![CDATA[A flaw was found in Data Science Pipelines. A restricted user, or tenant, can exploit an improper authorization vulnerability in the setDefaultServiceAccount function. By specifying a more privileged ServiceAccount (SA) during a CreateRun request, an attacker can bypass authorization checks. This allows the tenant to run their containers with elevated privileges, potentially leading to the disclosure of sensitive information (secrets) and the ability to execute commands within other users' pods.
+
+Score: 7.1 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:L/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-18611 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-18611</link>
+            <guid isPermaLink="false">CVE-2026-18611</guid>
+            <pubDate>Tue, 08 Sep 2026 23:17:22 GMT</pubDate>
+            <description><![CDATA[A flaw was found in the Data Science Pipelines Operator. This vulnerability allows an unauthenticated attacker to derive sensitive credentials, such as MariaDB root/user passwords and MinIO access/secret keys, if they can access the MinIO Route or MariaDB Service. The flaw occurs because the operator uses a cryptographically weak pseudo-random number generator (PRNG) to generate these credentials, making them predictable. Successful exploitation could lead to unauthorized access to all pipeline artifacts and metadata, resulting in significant information disclosure.
+
+Score: 7.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-18090 [CVSS:3.1 6.1 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-18090</link>
+            <guid isPermaLink="false">CVE-2026-18090</guid>
+            <pubDate>Tue, 08 Sep 2026 23:17:22 GMT</pubDate>
+            <description><![CDATA[A flaw was found in gdk-pixbuf. This vulnerability allows a remote attacker to cause a heap out-of-bounds read by providing a specially crafted Apple Icon Image (.icns) file. The uncompress() function, which handles RLE-encoded ICNS icon data, fails to validate the source buffer's boundaries during decompression. This can lead to a denial of service, where the application crashes, or to information disclosure, potentially revealing sensitive data from adjacent memory.
+
+Score: 6.1 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:L/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-15588 [CVSS:3.1 5.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-15588</link>
+            <guid isPermaLink="false">CVE-2026-15588</guid>
+            <pubDate>Tue, 08 Sep 2026 23:17:22 GMT</pubDate>
+            <description><![CDATA[A denial-of-service and resource exhaustion vulnerability exists within the `GDBus` component of GLib. The `gdbusauth` authentication mechanism fails to enforce proper length limitations on data lines read from a client. An unauthenticated local or remote attacker can exploit this lack of input validation by sending excessively long streams of data, causing the application to consume massive amounts of system memory and CPU, potentially leading to a crash or system hang.
+
+Score: 5.3 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:L]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-15154 [CVSS:3.1 6.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-15154</link>
+            <guid isPermaLink="false">CVE-2026-15154</guid>
+            <pubDate>Tue, 08 Sep 2026 23:17:21 GMT</pubDate>
+            <description><![CDATA[A flaw was found in `guardrails-detectors`, a component of Red Hat OpenShift AI. This vulnerability, known as Regular Expression Denial of Service (ReDoS), allows a remote attacker to provide specially crafted regular expressions to the public detection API. This can cause catastrophic backtracking, leading to a worker process consuming 100% CPU indefinitely and resulting in a denial of service for the entire guardrails-mediated LLM pipeline.
+
+Score: 6.5 (MEDIUM)
+Vector: CVSS:3.1/AV:A/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2024-3653 [CVSS:3.1 5.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2024-3653</link>
+            <guid isPermaLink="false">CVE-2024-3653</guid>
+            <pubDate>Tue, 08 Sep 2026 23:17:20 GMT</pubDate>
+            <description><![CDATA[A vulnerability was found in Undertow. This issue requires enabling the learning-push handler in the server's config, which is disabled by default, leaving the maxAge config in the handler unconfigured. The default is -1, which makes the handler vulnerable. If someone overwrites that config, the server is not subject to the attack. The attacker needs to be able to reach the server with a normal HTTP request.
+
+Score: 5.3 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L]]></description>
+        </item>
         <item>
             <title><![CDATA[CVE-2026-19299 [CVSS:3.1 6.5 MEDIUM]]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19299</link>
@@ -703,304 +1018,6 @@ Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N]]></description>
 
 Score: 7.8 (HIGH)
 Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-81989 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-81989</link>
-            <guid isPermaLink="false">CVE-2026-81989</guid>
-            <pubDate>Tue, 08 Sep 2026 21:18:45 GMT</pubDate>
-            <description><![CDATA[Acrobat Reader is affected by a Use After Free vulnerability that could result in arbitrary code execution in the context of the current user. Exploitation of this issue requires user interaction in that a victim must open a malicious file.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-81988 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-81988</link>
-            <guid isPermaLink="false">CVE-2026-81988</guid>
-            <pubDate>Tue, 08 Sep 2026 21:18:45 GMT</pubDate>
-            <description><![CDATA[Acrobat Reader is affected by a Use After Free vulnerability that could result in arbitrary code execution in the context of the current user. Exploitation of this issue requires user interaction in that a victim must open a malicious file.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-81987 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-81987</link>
-            <guid isPermaLink="false">CVE-2026-81987</guid>
-            <pubDate>Tue, 08 Sep 2026 21:18:45 GMT</pubDate>
-            <description><![CDATA[Acrobat Reader is affected by an Integer Overflow or Wraparound vulnerability that could result in arbitrary code execution in the context of the current user. Exploitation of this issue requires user interaction in that a victim must open a malicious file.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-81986 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-81986</link>
-            <guid isPermaLink="false">CVE-2026-81986</guid>
-            <pubDate>Tue, 08 Sep 2026 21:18:45 GMT</pubDate>
-            <description><![CDATA[Acrobat Reader is affected by a Use After Free vulnerability that could result in arbitrary code execution in the context of the current user. Exploitation of this issue requires user interaction in that a victim must open a malicious file.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-81985 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-81985</link>
-            <guid isPermaLink="false">CVE-2026-81985</guid>
-            <pubDate>Tue, 08 Sep 2026 21:18:45 GMT</pubDate>
-            <description><![CDATA[Acrobat Reader is affected by a Use After Free vulnerability that could result in arbitrary code execution in the context of the current user. Exploitation of this issue requires user interaction in that a victim must open a malicious file.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-81984 [CVSS:3.1 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-81984</link>
-            <guid isPermaLink="false">CVE-2026-81984</guid>
-            <pubDate>Tue, 08 Sep 2026 21:18:44 GMT</pubDate>
-            <description><![CDATA[Acrobat Reader is affected by a Use After Free vulnerability that could lead to disclosure of sensitive memory. An attacker could leverage this vulnerability to disclose sensitive information. Exploitation of this issue requires user interaction in that a victim must open a malicious file.
-
-Score: 5.5 (MEDIUM)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-81983 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-81983</link>
-            <guid isPermaLink="false">CVE-2026-81983</guid>
-            <pubDate>Tue, 08 Sep 2026 21:18:44 GMT</pubDate>
-            <description><![CDATA[Acrobat Reader is affected by an out-of-bounds write vulnerability that could result in arbitrary code execution in the context of the current user. Exploitation of this issue requires user interaction in that a victim must open a malicious file.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-81982 [CVSS:3.1 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-81982</link>
-            <guid isPermaLink="false">CVE-2026-81982</guid>
-            <pubDate>Tue, 08 Sep 2026 21:18:44 GMT</pubDate>
-            <description><![CDATA[Acrobat Reader is affected by an out-of-bounds read vulnerability that could lead to disclosure of sensitive memory. An attacker could leverage this vulnerability to disclose sensitive information. Exploitation of this issue requires user interaction in that a victim must open a malicious file.
-
-Score: 5.5 (MEDIUM)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-81981 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-81981</link>
-            <guid isPermaLink="false">CVE-2026-81981</guid>
-            <pubDate>Tue, 08 Sep 2026 21:18:44 GMT</pubDate>
-            <description><![CDATA[Acrobat Reader is affected by an out-of-bounds write vulnerability that could result in arbitrary code execution in the context of the current user. Exploitation of this issue requires user interaction in that a victim must open a malicious file.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-81980 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-81980</link>
-            <guid isPermaLink="false">CVE-2026-81980</guid>
-            <pubDate>Tue, 08 Sep 2026 21:18:44 GMT</pubDate>
-            <description><![CDATA[Acrobat Reader is affected by an out-of-bounds write vulnerability that could result in arbitrary code execution in the context of the current user. Exploitation of this issue requires user interaction in that a victim must open a malicious file.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-81979 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-81979</link>
-            <guid isPermaLink="false">CVE-2026-81979</guid>
-            <pubDate>Tue, 08 Sep 2026 21:18:44 GMT</pubDate>
-            <description><![CDATA[Acrobat Reader is affected by an out-of-bounds write vulnerability that could result in arbitrary code execution in the context of the current user. Exploitation of this issue requires user interaction in that a victim must open a malicious file.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-81978 [CVSS:3.1 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-81978</link>
-            <guid isPermaLink="false">CVE-2026-81978</guid>
-            <pubDate>Tue, 08 Sep 2026 21:18:44 GMT</pubDate>
-            <description><![CDATA[Acrobat Reader is affected by an out-of-bounds read vulnerability that could lead to disclosure of sensitive memory. An attacker could leverage this vulnerability to disclose sensitive information. Exploitation of this issue requires user interaction in that a victim must open a malicious file.
-
-Score: 5.5 (MEDIUM)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-81977 [CVSS:3.1 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-81977</link>
-            <guid isPermaLink="false">CVE-2026-81977</guid>
-            <pubDate>Tue, 08 Sep 2026 21:18:44 GMT</pubDate>
-            <description><![CDATA[Acrobat Reader is affected by an Integer Underflow (Wrap or Wraparound) vulnerability that could lead to disclosure of sensitive memory. An attacker could leverage this vulnerability to disclose sensitive information. Exploitation of this issue requires user interaction in that a victim must open a malicious file.
-
-Score: 5.5 (MEDIUM)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-81976 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-81976</link>
-            <guid isPermaLink="false">CVE-2026-81976</guid>
-            <pubDate>Tue, 08 Sep 2026 21:18:44 GMT</pubDate>
-            <description><![CDATA[Acrobat Reader is affected by a Use After Free vulnerability that could result in arbitrary code execution in the context of the current user. Exploitation of this issue requires user interaction in that a victim must open a malicious file.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-81975 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-81975</link>
-            <guid isPermaLink="false">CVE-2026-81975</guid>
-            <pubDate>Tue, 08 Sep 2026 21:18:43 GMT</pubDate>
-            <description><![CDATA[Acrobat Reader is affected by a Use After Free vulnerability that could result in arbitrary code execution in the context of the current user. Exploitation of this issue requires user interaction in that a victim must open a malicious file.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-81973 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-81973</link>
-            <guid isPermaLink="false">CVE-2026-81973</guid>
-            <pubDate>Tue, 08 Sep 2026 21:18:43 GMT</pubDate>
-            <description><![CDATA[Acrobat Reader is affected by a Use After Free vulnerability that could result in arbitrary code execution in the context of the current user. Exploitation of this issue requires user interaction in that a victim must open a malicious file.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-81381 [CVSS:3.1 6.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-81381</link>
-            <guid isPermaLink="false">CVE-2026-81381</guid>
-            <pubDate>Tue, 08 Sep 2026 21:18:43 GMT</pubDate>
-            <description><![CDATA[Insufficiently protected credentials in GitHub Copilot and Visual Studio Code allows an unauthorized attacker to disclose information over a network.
-
-Score: 6.5 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-81380 [CVSS:3.1 5.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-81380</link>
-            <guid isPermaLink="false">CVE-2026-81380</guid>
-            <pubDate>Tue, 08 Sep 2026 21:18:43 GMT</pubDate>
-            <description><![CDATA[Improper neutralization of special elements used in a command ('command injection') in GitHub Copilot and Visual Studio Code allows an unauthorized attacker to disclose information over a network.
-
-Score: 5.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-81192 [CVSS:3.1 7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-81192</link>
-            <guid isPermaLink="false">CVE-2026-81192</guid>
-            <pubDate>Tue, 08 Sep 2026 21:18:43 GMT</pubDate>
-            <description><![CDATA[`OpenTelemetry.Resources.Host` NuGet package, which provides OpenTelemetry resource detectors for host, is affected by an untrusted search path vulnerability on macOS. Prior to version 1.16.0-beta.2, the `host.id` resource attribute detector launches the `sh` and `ioreg` executables by bare name rather than by absolute path, so both are resolved through the `PATH` environment variable. A local attacker who is less privileged than the host application, and who can influence `PATH` or write to a directory that appears in `PATH` ahead of the system directories, can have an arbitrary binary executed in the application's security context, resulting in local code execution/privilege escalation. This vulnerability only affect macOS hosts - Linux and Windows hosts are unaffected. Version 1.16.0-beta.2 contains a patch. No known workarounds are available.
-
-Score: 7 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-80162 [CVSS:3.1 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-80162</link>
-            <guid isPermaLink="false">CVE-2026-80162</guid>
-            <pubDate>Tue, 08 Sep 2026 21:18:43 GMT</pubDate>
-            <description><![CDATA[Acrobat Reader is affected by a Use After Free vulnerability that could lead to disclosure of sensitive memory. An attacker could leverage this vulnerability to disclose sensitive information. Exploitation of this issue requires user interaction in that a victim must open a malicious file.
-
-Score: 5.5 (MEDIUM)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-80161 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-80161</link>
-            <guid isPermaLink="false">CVE-2026-80161</guid>
-            <pubDate>Tue, 08 Sep 2026 21:18:43 GMT</pubDate>
-            <description><![CDATA[Acrobat Reader is affected by an Access of Resource Using Incompatible Type ('Type Confusion') vulnerability that could result in arbitrary code execution in the context of the current user. An attacker could exploit this vulnerability to execute arbitrary code. Exploitation of this issue requires user interaction in that a victim must open a malicious file.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-80160 [CVSS:3.1 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-80160</link>
-            <guid isPermaLink="false">CVE-2026-80160</guid>
-            <pubDate>Tue, 08 Sep 2026 21:18:43 GMT</pubDate>
-            <description><![CDATA[Acrobat Reader is affected by an out-of-bounds read vulnerability that could lead to disclosure of sensitive memory. An attacker could leverage this vulnerability to disclose sensitive information. Exploitation of this issue requires user interaction in that a victim must open a malicious file.
-
-Score: 5.5 (MEDIUM)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-80159 [CVSS:3.1 4 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-80159</link>
-            <guid isPermaLink="false">CVE-2026-80159</guid>
-            <pubDate>Tue, 08 Sep 2026 21:18:42 GMT</pubDate>
-            <description><![CDATA[Acrobat Reader is affected by an Untrusted Search Path vulnerability that could result in privilege escalation. An attacker with high privileges could leverage this vulnerability to gain elevated access. Exploit depends on conditions beyond the attacker's control. Exploitation of this issue requires user interaction in that a victim must open a malicious file.
-
-Score: 4 (MEDIUM)
-Vector: CVSS:3.1/AV:L/AC:H/PR:H/UI:R/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-7809]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-7809</link>
-            <guid isPermaLink="false">CVE-2026-7809</guid>
-            <pubDate>Tue, 08 Sep 2026 21:18:42 GMT</pubDate>
-            <description><![CDATA[Rejected reason: This CVE ID has been rejected or withdrawn by its CVE Numbering Authority.]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-79910 [CVSS:3.1 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-79910</link>
-            <guid isPermaLink="false">CVE-2026-79910</guid>
-            <pubDate>Tue, 08 Sep 2026 21:18:42 GMT</pubDate>
-            <description><![CDATA[Acrobat Reader is affected by an out-of-bounds read vulnerability that could lead to disclosure of sensitive memory. An attacker could leverage this vulnerability to disclose sensitive information. Exploitation of this issue requires user interaction in that a victim must open a malicious file.
-
-Score: 5.5 (MEDIUM)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-79909 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-79909</link>
-            <guid isPermaLink="false">CVE-2026-79909</guid>
-            <pubDate>Tue, 08 Sep 2026 21:18:42 GMT</pubDate>
-            <description><![CDATA[Acrobat Reader is affected by a Use After Free vulnerability that could result in arbitrary code execution in the context of the current user. Exploitation of this issue requires user interaction in that a victim must open a malicious file.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-79908 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-79908</link>
-            <guid isPermaLink="false">CVE-2026-79908</guid>
-            <pubDate>Tue, 08 Sep 2026 21:18:42 GMT</pubDate>
-            <description><![CDATA[Acrobat Reader is affected by an out-of-bounds write vulnerability that could result in arbitrary code execution in the context of the current user. Exploitation of this issue requires user interaction in that a victim must open a malicious file.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-79907 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-79907</link>
-            <guid isPermaLink="false">CVE-2026-79907</guid>
-            <pubDate>Tue, 08 Sep 2026 21:18:42 GMT</pubDate>
-            <description><![CDATA[Acrobat Reader is affected by a Double Free vulnerability that could result in arbitrary code execution in the context of the current user. Exploitation of this issue requires user interaction in that a victim must open a malicious file.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-79588]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-79588</link>
-            <guid isPermaLink="false">CVE-2026-79588</guid>
-            <pubDate>Tue, 08 Sep 2026 21:18:42 GMT</pubDate>
-            <description><![CDATA[U-speed WIFI4 N300 T1 Pro v1.0.0 is vulnerable to Cleartext transmission of administration credentials over HTTP.]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-78971]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78971</link>
-            <guid isPermaLink="false">CVE-2026-78971</guid>
-            <pubDate>Tue, 08 Sep 2026 21:18:42 GMT</pubDate>
-            <description><![CDATA[In Halo <= 2.25.4, the plugin management feature allows users to install/update malicious plugins, which could let attackers execute any command with Halo process permissions.]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-78742]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78742</link>
-            <guid isPermaLink="false">CVE-2026-78742</guid>
-            <pubDate>Tue, 08 Sep 2026 21:18:42 GMT</pubDate>
-            <description><![CDATA[Silverpeas Core <=6.4.6 is vulnerable to Cross Site Scripting (XSS) via the Multimedia library application introduction.]]></description>
         </item>
     </channel>
 </rss>
