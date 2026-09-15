@@ -4,1311 +4,908 @@
         <title>NVD CVE Feed</title>
         <link>https://github.com/TasukuKuchinomachi/NVD-RSS-feed</link>
         <description>Latest CVE entries from the National Vulnerability Database. This product uses the NVD API but is not endorsed or certified by the NVD.</description>
-        <lastBuildDate>Tue, 15 Sep 2026 09:16:46 GMT</lastBuildDate>
+        <lastBuildDate>Tue, 15 Sep 2026 14:45:28 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>National Vulnerability Database - NIST</copyright>
         <item>
-            <title><![CDATA[CVE-2026-91851 [CVSS:4.0 5.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-91851</link>
-            <guid isPermaLink="false">CVE-2026-91851</guid>
-            <pubDate>Tue, 15 Sep 2026 09:16:46 GMT</pubDate>
-            <description><![CDATA[Affected versions of MISP incorrectly filter dashboard templates that are restricted to a specific permission flag.
-
-
-DashboardsController::listTemplates() allowed a template when either:
-
-
-
- - its restrict_to_permission_flag matched one of the current user’s permission flags, or
-
- - restrict_to_permission_flag equaled integer 0
-
-
-
-
-
-
-However, restrict_to_permission_flag is a varchar. MySQL therefore performed numeric coercion when comparing the column against integer 0. Strings such as perm_site_admin convert numerically to zero, making expressions such as perm_site_admin = 0 evaluate true and causing the “unrestricted” branch to match permission-restricted templates as well.
-
-
-
-Version affected: ≤2.5.45
-
-Score: 5.3 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-91846 [CVSS:4.0 7.1 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-91846</link>
-            <guid isPermaLink="false">CVE-2026-91846</guid>
-            <pubDate>Tue, 15 Sep 2026 09:16:45 GMT</pubDate>
-            <description><![CDATA[Affected versions of MISP allow a collection element to be created from a bare UUID without consistently checking whether the acting user is allowed to access the referenced object.
-
-
-The commit explains that collection elements themselves only store UUIDs, while the collection view later resolves those UUIDs into their underlying objects. Before this fix, the generic add() path could therefore persist a UUID for an Event or Galaxy Cluster that the caller could not normally read. The patch explicitly notes that this made collections a way to reference another organisation’s private data and had caused disclosure of organisation-only events in the beta collection view.
-
-
-The fix centralizes authorization in __assertCanUseElements(). Event UUIDs are validated through Event::fetchSimpleEvent() under the current user’s ACL, while Galaxy Cluster UUIDs are checked through GalaxyCluster::fetchGalaxyClusters(). The check is applied both to the CRUD add() path and to addElementToCollection().
-
-Version affected: ≤2.5.45
-
-Score: 7.1 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:L/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-91826 [CVSS:3.1 4.4 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-91826</link>
-            <guid isPermaLink="false">CVE-2026-91826</guid>
-            <pubDate>Tue, 15 Sep 2026 09:16:45 GMT</pubDate>
-            <description><![CDATA[Stack-based buffer overflow vulnerability in Samsung Opensource rLottie allows attackers to overflow buffers, leading to memory corruption when rendering crafted vector animations.
-
-
-This issue affects rLottie: 480a2ad0c5d2e45458c545b8213279e9e8b71e39.
-
-Score: 4.4 (MEDIUM)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:N/I:L/A:L]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-91825 [CVSS:4.0 7.1 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-91825</link>
-            <guid isPermaLink="false">CVE-2026-91825</guid>
-            <pubDate>Tue, 15 Sep 2026 09:16:45 GMT</pubDate>
-            <description><![CDATA[Affected versions of MISP fail to authorize a submitted sharing group in a specific event-edit path.
-
-
-The vulnerable logic checked whether the acting user could use a sharing_group_id only when the request explicitly supplied distribution = 4. If the attacker instead omitted distribution but supplied a different sharing_group_id, that authorization branch was skipped. Later, MISP’s field-recovery logic restored the existing event distribution from storage. For events already configured with sharing-group distribution, the unauthorized sharing-group ID could therefore be saved.
-
-
-The fix adds authorization checks in both the controller and Event::_edit() whenever a non-empty sharing_group_id is supplied without distribution. The model now calls SharingGroup::checkIfAuthorised() before persisting the change.
-
-
-
-Version affected: ≤2.5.45
-
-Score: 7.1 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:L/VI:H/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-91782 [CVSS:4.0 1.9 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-91782</link>
-            <guid isPermaLink="false">CVE-2026-91782</guid>
-            <pubDate>Tue, 15 Sep 2026 09:16:45 GMT</pubDate>
-            <description><![CDATA[A vulnerability was detected in GNU Binutils 2.47. Affected by this vulnerability is the function elf_x86_allocate_dynrelocs of the file bfd/elfxx-x86.c of the component Dynamic Relocation Allocation. The manipulation results in null pointer dereference. The attack requires a local approach. The exploit is now public and may be used. Upgrading to version 2.48 addresses this issue. The patch is identified as d1268210b6f6/471130b39c0/283d3198bed/0a84e560216/a692a633d40. Upgrading the affected component is recommended.
-
-Score: 1.9 (LOW)
-Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-91781 [CVSS:4.0 1.9 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-91781</link>
-            <guid isPermaLink="false">CVE-2026-91781</guid>
-            <pubDate>Tue, 15 Sep 2026 09:16:45 GMT</pubDate>
-            <description><![CDATA[A security vulnerability has been detected in GNU Binutils 2.47. Affected is the function elf_x86_64_common_section_index of the file bfd/elf64-x86-64.c of the component ELF Section Handler. The manipulation leads to null pointer dereference. The attack needs to be performed locally. The exploit has been disclosed publicly and may be used. Upgrading to version 2.48 is able to address this issue. The identifier of the patch is 7322e9bc30cb282575a701c307851fd3d66fee68. It is suggested to upgrade the affected component.
-
-Score: 1.9 (LOW)
-Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-91780 [CVSS:4.0 1.9 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-91780</link>
-            <guid isPermaLink="false">CVE-2026-91780</guid>
-            <pubDate>Tue, 15 Sep 2026 09:16:44 GMT</pubDate>
-            <description><![CDATA[A weakness has been identified in GNU Binutils 2.47. This impacts the function elf_link_add_object_symbols of the file bfd/elflink.c. Executing a manipulation can lead to null pointer dereference. The attack needs to be launched locally. The exploit has been made available to the public and could be used for attacks. The project was informed of the problem early through a bug report but has not responded yet.
-
-Score: 1.9 (LOW)
-Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-91779 [CVSS:4.0 1.9 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-91779</link>
-            <guid isPermaLink="false">CVE-2026-91779</guid>
-            <pubDate>Tue, 15 Sep 2026 09:16:44 GMT</pubDate>
-            <description><![CDATA[A security flaw has been discovered in GNU Binutils 2.47. This affects the function _bfd_elf_eh_frame_section_offset of the file bfd/elf-eh-frame.c of the component Eh Frame Handler. Performing a manipulation results in null pointer dereference. The attack must be initiated from a local position. The exploit has been released to the public and may be used for attacks. The project was informed of the problem early through a bug report but has not responded yet.
-
-Score: 1.9 (LOW)
-Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-90894 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-90894</link>
-            <guid isPermaLink="false">CVE-2026-90894</guid>
-            <pubDate>Tue, 15 Sep 2026 09:16:44 GMT</pubDate>
-            <description><![CDATA[Parallels Desktop runs prl_disp_service as root. Local clients reach it on the world-writable socket /var/run/prl_disp_service.socket. PrlSrv_LoginLocal accepts peer credentials. No Parallels signature. No admin group.
-
-
-
-After login, PrlSrv_InstallAppliance lets you pick the appliance folder (sVmParentPath). The daemon unpacks with one string, tar -xf "%1" -C "%2", then Qt QProcess::splitCommand chops that string into words. A quote in the folder name closes early. The leftover text becomes extra tar flags. macOS tar --use-compress-program= runs the named program as root.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-87730]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-87730</link>
-            <guid isPermaLink="false">CVE-2026-87730</guid>
-            <pubDate>Tue, 15 Sep 2026 09:16:44 GMT</pubDate>
-            <description><![CDATA[Rejected reason: 相容性]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-86836 [CVSS:4.0 8.4 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-86836</link>
-            <guid isPermaLink="false">CVE-2026-86836</guid>
-            <pubDate>Tue, 15 Sep 2026 09:16:44 GMT</pubDate>
-            <description><![CDATA[In Eclipse Ankaios versions 0.1.0 through 1.0.2, the agent creates workload files and Control Interface named pipes (FIFOs) under a predictable path derived from the agent name and a hash of the workload's runtime configuration. If a directory or FIFO already exists at that path when the agent (re)starts, the agent reuses it based only on an existence and/or file-type check, without validating its owner or permissions. A local, unprivileged user with write access to the same base directory (by default under `$TMPDIR/ankaios`, e.g. shared `/tmp`) can pre-create this path hierarchy, including the two Control Interface FIFOs, before the agent starts. The agent then treats the attacker-owned FIFOs as the legitimate Control Interface for the targeted workload. The attacker can complete the Control Interface handshake and issue requests using that workload's configured `controlInterfaceAccess` permissions, allowing impersonation of the workload and, depending on its configured permissions, unauthorized reading and/or modification of the cluster's desired state.
-
-Score: 8.4 (HIGH)
-Vector: CVSS:4.0/AV:L/AC:L/AT:P/PR:L/UI:N/VC:H/VI:H/VA:N/SC:N/SI:N/SA:H/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-80217 [CVSS:4.0 8.7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-80217</link>
-            <guid isPermaLink="false">CVE-2026-80217</guid>
-            <pubDate>Tue, 15 Sep 2026 09:16:44 GMT</pubDate>
-            <description><![CDATA[Hidden functionality issue exists in FF-RFI079I4 and FF-RFI078I4, which may allow a user who can log in via SSH and access the enable mode on the product to execute arbitrary OS commands.
-
-Score: 8.7 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-77853 [CVSS:4.0 8.7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-77853</link>
-            <guid isPermaLink="false">CVE-2026-77853</guid>
-            <pubDate>Tue, 15 Sep 2026 09:16:44 GMT</pubDate>
-            <description><![CDATA[Improper neutralization of special elements used in an OS command ('OS Command Injection') issue exists in FF-RFI079I4 and FF-RFI078I4. A user who can log in to the product's M-Plane (NETCONF) may execute arbitrary OS commands.
-
-Score: 8.7 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-76159 [CVSS:4.0 7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-76159</link>
-            <guid isPermaLink="false">CVE-2026-76159</guid>
-            <pubDate>Tue, 15 Sep 2026 09:16:43 GMT</pubDate>
-            <description><![CDATA[Incorrect Permission Assignment for Critical Resource in the  configuration loader of Duplicati for Windows versions before v2.4.0.0 allows a local low-privileged attacker to escalate       privileges to NT AUTHORITY\SYSTEM via an attacker-controlled preload.json file.
-
-Score: 7 (HIGH)
-Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:P/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-75092 [CVSS:3.1 7.3 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-75092</link>
-            <guid isPermaLink="false">CVE-2026-75092</guid>
-            <pubDate>Tue, 15 Sep 2026 09:16:43 GMT</pubDate>
-            <description><![CDATA[A privilege escalation flaw was found in the scan_mysql actor of leapp-upgrade-el9toel10 (provided by leapp-repository). During RHEL 9 to RHEL 10 upgrades, the actor runs:
-mysqld --validate-config --log-error-verbosity=2 directly as root in the Leapp actor context, bypassing the packaged MySQL systemd unit that normally starts the daemon as User=mysql.
-
-A process compromised as the mysql OS identity can write a version-2 persisted configuration (mysqld-auto.cnf) and a malicious shared object into /var/lib/mysql (a directory owned by mysql). That persisted map can set plugin_dir to /var/lib/mysql and early_plugin_load (or related loader options such as plugin_load / plugin_load_add) so MySQL loads the attacker-controlled object during configuration validation. Plugin loading can reach dlopen() before MySQL’s runtime-user check and before plugin-symbol validation.
-
-When an administrator subsequently runs the documented Leapp preupgrade or upgrade workflow, attacker-controlled code can execute as UID 0 with a full capability set in an unconfined SELinux domain (unconfined_t). The attack does not require write access to the default system plugin path under /usr; redirecting plugin_dir via mysql-owned persisted state is sufficient. Ordinary SQL privileges alone (including highly privileged SQL accounts) are not a sufficient startpoint — OS-level execution as the mysql service identity is required, plus later administrator invocation of Leapp.
-
-Score: 7.3 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:R/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2025-10012 [CVSS:4.0 2.1 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-10012</link>
-            <guid isPermaLink="false">CVE-2025-10012</guid>
-            <pubDate>Tue, 15 Sep 2026 09:16:43 GMT</pubDate>
-            <description><![CDATA[A security vulnerability has been detected in Portabilis i-Educar up to 2.10. The impacted element is an unknown function of the file educar_historico_escolar_lst.php. Such manipulation of the argument ref_cod_aluno leads to sql injection. The attack can be executed remotely. The exploit has been disclosed publicly and may be used. Upgrading to version 2.12 is sufficient to resolve this issue. It is advisable to upgrade the affected component. The vendor confirms, that "[t]he reported attack vector was tested against the corrected code, and the previously described SQL Injection behavior could no longer be reproduced".
-
-Score: 2.1 (LOW)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-9323 [CVSS:4.0 9.2 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-9323</link>
-            <guid isPermaLink="false">CVE-2026-9323</guid>
-            <pubDate>Tue, 15 Sep 2026 08:17:07 GMT</pubDate>
-            <description><![CDATA[The urwid web display backend (urwid/display/web.py) generates web session identifiers (urwid_id) in Screen.start() by concatenating two random.randrange(10**9) calls that use Python's Mersenne Twister PRNG, which is not cryptographically secure. Each call consumes approximately 30 bits of PRNG state, and the Mersenne Twister internal state is approximately 19,937 bits, so an attacker who observes approximately 334 session IDs (for example via the X-Urwid-ID HTTP response header) can fully reconstruct the internal state and predict all past and future session IDs (Path B). The same identifier is also used as the filename of a FIFO created in the world-listable /tmp directory (for example /tmp/urwid375487765176907690.in), so any local user on the host can list /tmp to enumerate active session tokens directly (Path A). With a valid session ID, an attacker can read the victim's terminal screen via the polling endpoint, inject keystrokes into the victim's session (yielding OS-level code execution with the session owner's privileges if the session runs a shell), and inject exit sequences or flood the FIFO to terminate or crash the session. A prior Bandit S311 warning on this usage was suppressed with # noqa: S311 rather than fixed
-
-Score: 9.2 (CRITICAL)
-Vector: CVSS:4.0/AV:N/AC:H/AT:P/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-91819 [CVSS:4.0 6.9 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-91819</link>
-            <guid isPermaLink="false">CVE-2026-91819</guid>
-            <pubDate>Tue, 15 Sep 2026 08:17:07 GMT</pubDate>
-            <description><![CDATA[Affected versions of MISP rely on CakePHP request-method override processing in a way that can disable CSRF and form-security validation.
-
-CakePHP honors a _method field or X-HTTP-Method-Override header by rewriting the effective request method. For override values outside the normal write verbs POST, PUT, PATCH, and DELETE, CakePHP also clears the parsed request body. MISP’s security component then determines whether to perform _validatePost() and _validateCsrf() based on whether request data remains. With a value such as:
-
-
-_method=GET
-
-the body becomes empty before those checks run, so both protections are skipped. A cross-site form containing only that override can therefore reach actions whose parameters are taken from the URL rather than the request body
-
-Version affected: ≤2.5.45
-
-Score: 6.9 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:P/VC:N/VI:H/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-91778 [CVSS:4.0 7.2 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-91778</link>
-            <guid isPermaLink="false">CVE-2026-91778</guid>
-            <pubDate>Tue, 15 Sep 2026 08:17:07 GMT</pubDate>
-            <description><![CDATA[In affected versions of Octopus Server, users with certain scoped permission sets could execute arbitrary scripts on a worker (including the Octopus Server built-in worker). Incorrect permission validation during script execution would allow the script to execute without the user possessing the required authorisation.
-
-Score: 7.2 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:N/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-91091 [CVSS:4.0 2.1 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-91091</link>
-            <guid isPermaLink="false">CVE-2026-91091</guid>
-            <pubDate>Tue, 15 Sep 2026 08:17:07 GMT</pubDate>
-            <description><![CDATA[A vulnerability was identified in GPAC up to f1219cde. The impacted element is the function gf_node_list_insert_child of the file scenegraph/base_scenegraph.c of the component Node Insertion. Such manipulation leads to memory corruption. The attack can be launched remotely. The exploit is publicly available and might be used. Upgrading to version abi-16.23 is sufficient to resolve this issue. The name of the patch is 49dee5cad329cfed310c1682703df7daa47df31a. It is suggested to upgrade the affected component.
-
-Score: 2.1 (LOW)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:P/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-91090 [CVSS:4.0 0.9 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-91090</link>
-            <guid isPermaLink="false">CVE-2026-91090</guid>
-            <pubDate>Tue, 15 Sep 2026 08:17:06 GMT</pubDate>
-            <description><![CDATA[A vulnerability was determined in GPAC up to f1219cde. The affected element is the function gf_node_activate_ex of the file scenegraph/base_scenegraph.c. This manipulation causes stack-based buffer overflow. It is possible to launch the attack on the local host. The exploit has been publicly disclosed and may be utilized. Upgrading to version abi-16.23 is sufficient to fix this issue. Patch name: 9eb40df4448b88d6a6ce3454657c06f47eff0b24. The affected component should be upgraded.
-
-Score: 0.9 (LOW)
-Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:P/VC:N/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-91089 [CVSS:4.0 2.1 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-91089</link>
-            <guid isPermaLink="false">CVE-2026-91089</guid>
-            <pubDate>Tue, 15 Sep 2026 08:17:06 GMT</pubDate>
-            <description><![CDATA[A vulnerability was found in GPAC up to f1219cde. Impacted is the function gf_node_get_name_and_id of the file scenegraph/base_scenegraph.c. The manipulation results in use after free. It is possible to launch the attack remotely. The exploit has been made public and could be used. Upgrading to version abi-16.23 is recommended to address this issue. The patch is identified as 49dee5cad329cfed310c1682703df7daa47df31a. You should upgrade the affected component.
-
-Score: 2.1 (LOW)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:P/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-19389 [CVSS:3.1 7.1 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19389</link>
-            <guid isPermaLink="false">CVE-2026-19389</guid>
-            <pubDate>Tue, 15 Sep 2026 08:17:05 GMT</pubDate>
-            <description><![CDATA[Multiple integer overflow and underflow vulnerabilities were found in the GStreamer gst-plugins-ugly ASF demuxer (asfdemux) when parsing header objects from crafted ASF, WMV, or WMA files. Insufficient validation of attacker-controlled length and size values can bypass bounds checks and cause out-of-bounds heap reads. This can result in application crash, denial of service, or limited information disclosure when untrusted media is processed.
-
-Score: 7.1 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:N/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-9547 [CVSS:3.1 7.4 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-9547</link>
-            <guid isPermaLink="false">CVE-2026-9547</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:35 GMT</pubDate>
-            <description><![CDATA[When a libcurl-based application performs transfers via `SCP://` or `SFTP://`
-and utilizes the `CURLOPT_SSH_KEYFUNCTION` callback, it may silently accept an
-untrusted server. This vulnerability occurs when a server presents a host key
-type that does not match the specific key type already recorded for that host
-in the `known_hosts` file. Instead of rejecting the mismatch, the callback
-mechanism fails to properly enforce the restriction, allowing the connection
-to succeed without warning and risking a potential man-in-the-middle attack.
-
-Score: 7.4 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-9546 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-9546</link>
-            <guid isPermaLink="false">CVE-2026-9546</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:35 GMT</pubDate>
-            <description><![CDATA[A vulnerability in libcurl caused the HTTP `Referer:` header to persist even
-when explicitly cleared. While the documentation states that passing NULL to
-`CURLOPT_REFERER` suppresses the header, the option failed to clear the
-internal state. As a result, the previous referrer string was erroneously
-reused and sent in subsequent requests, potentially leaking sensitive
-information to unintended servers.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-9545 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-9545</link>
-            <guid isPermaLink="false">CVE-2026-9545</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:34 GMT</pubDate>
-            <description><![CDATA[In this scenario, libcurl first uses a proper HTTP/3 server for the initial
-transfers, and when it makes a second transfer to the same site it has been
-replaced by the attacker's impostor machine - without a valid certificate.
-
-When libcurl returns to the hostname the second time with a cached SSL session
-(`CURLOPT_SSL_SESSIONID_CACHE` is not disabled) and early data enabled (the
-`CURLSSLOPT_EARLYDATA` bit is set in `CURLOPT_SSL_OPTIONS`), libcurl might
-send off the second request's bytes on that new connection *before* enforcing
-the certificate verification failure. Potentially leaking sensitive
-information.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-9080 [CVSS:3.1 7.3 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-9080</link>
-            <guid isPermaLink="false">CVE-2026-9080</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:34 GMT</pubDate>
-            <description><![CDATA[Calling `curl_easy_pause()` within the event-based `CURLMOPT_SOCKETFUNCTION`
-callback triggers a use-after-free vulnerability, where libcurl attempts to
-store a flag using a dangling struct pointer immediately after that pointer's
-memory has been freed.
-
-Score: 7.3 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:L]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-9079 [CVSS:3.1 9.8 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-9079</link>
-            <guid isPermaLink="false">CVE-2026-9079</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:34 GMT</pubDate>
-            <description><![CDATA[libcurl had a flaw that when instructed to clear proxy authentication
-credentials which made it not do so, leaving the old credentials around to get
-used for subsequent transfers that should not know nor use them.
-
-Score: 9.8 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-91088 [CVSS:4.0 2.4 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-91088</link>
-            <guid isPermaLink="false">CVE-2026-91088</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:34 GMT</pubDate>
-            <description><![CDATA[A vulnerability has been found in GPAC up to f1219cde. This issue affects the function gf_url_concatenate_ex of the file utils/url.c of the component URL Handler. The manipulation leads to heap-based buffer overflow. An attack has to be approached locally. Upgrading to version abi-16.23 is capable of addressing this issue. The identifier of the patch is afca1f1181668d85941d51ed1adf647807d5d975. It is advisable to upgrade the affected component.
-
-Score: 2.4 (LOW)
-Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:P/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-91087 [CVSS:4.0 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-91087</link>
-            <guid isPermaLink="false">CVE-2026-91087</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:34 GMT</pubDate>
-            <description><![CDATA[A flaw has been found in GPAC up to f1219cde. This vulnerability affects the function gf_mo_get_od_id of the file compositor/media_object.c of the component Compositor. Executing a manipulation can lead to use after free. The attack may be performed from remote. The exploit has been published and may be used. Upgrading to version abi-16.24 is able to resolve this issue. This patch is called e34f4ba349d55cd1849f0bcf4cf46552732e2db7. Upgrading the affected component is advised.
-
-Score: 5.5 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-91086 [CVSS:4.0 2.1 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-91086</link>
-            <guid isPermaLink="false">CVE-2026-91086</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:34 GMT</pubDate>
-            <description><![CDATA[A security vulnerability has been detected in GPAC up to f1219cde. Affected by this issue is the function mpgviddmx_process of the file filters/reframe_mpgvid.c of the component MPEG Video Reframer. Such manipulation leads to heap-based buffer overflow. The attack can be executed remotely. The exploit has been disclosed publicly and may be used. Upgrading to version abi-16.23 can resolve this issue. The name of the patch is afca1f1181668d85941d51ed1adf647807d5d975. Upgrading the affected component is recommended.
-
-Score: 2.1 (LOW)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:P/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-91005 [CVSS:4.0 2.1 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-91005</link>
-            <guid isPermaLink="false">CVE-2026-91005</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:33 GMT</pubDate>
-            <description><![CDATA[A vulnerability was found in SourceCodester Online Faculty Clearance System 1.0. This affects the function move_uploaded_file of the file production/edit_picture.php of the component Profile Picture Upload. Performing a manipulation of the argument File results in unrestricted upload. The attack is possible to be carried out remotely. The exploit has been made public and could be used.
-
-Score: 2.1 (LOW)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-90711 [CVSS:3.1 9.1 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-90711</link>
-            <guid isPermaLink="false">CVE-2026-90711</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:33 GMT</pubDate>
-            <description><![CDATA[proxy-addr is a Node.js module that determines a request's client address behind trusted reverse proxies, and it backs Express req.ip and req.ips. In versions 1.1.0 through 2.0.7, a trust subnet written in IPv4-mapped IPv6 notation with an IPv4-sized prefix, such as ::ffff:10.0.0.0/8 instead of the correct ::ffff:10.0.0.0/104, is accepted without error but trusts every IPv4 address on the internet rather than the block it names. Because the socket peer then becomes trusted at hop 0, any unauthenticated client can supply an arbitrary X-Forwarded-For header and control the address the application reads, which defeats IP-based access control, rate limiting, geolocation, and audit logging. This is a fail-open regression introduced in version 1.1.0. The issue is fixed in proxy-addr 2.0.8, and users should upgrade to 2.0.8 or later. As a workaround, ensure any IPv4-mapped IPv6 trust subnet uses a prefix length of at least 97, or express the range in plain IPv4 notation.
-
-Score: 9.1 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-8932 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-8932</link>
-            <guid isPermaLink="false">CVE-2026-8932</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:33 GMT</pubDate>
-            <description><![CDATA[libcurl would reuse a previously created connection even when some mTLS config
-related option had been changed that should have prohibited reuse.
-
-libcurl keeps previously used connections in a connection pool for subsequent
-transfers to reuse if one of them matches the setup. However, some TLS
-settings related to client certificates were left out from the configuration
-match checks, making them match too easily. In particular options related to
-the private key.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-8927 [CVSS:3.1 9.1 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-8927</link>
-            <guid isPermaLink="false">CVE-2026-8927</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:33 GMT</pubDate>
-            <description><![CDATA[When reusing a libcurl handle for sequential transfers driven by
-environment-variable proxy configuration, libcurl fails to clear the proxy
-authentication state between requests. Specifically, if the initial transfer
-authenticates against `proxyA` using Digest auth, a subsequent transfer routed
-through `proxyB` erroneously leaks the `Proxy-Authorization:` header intended
-solely for `proxyA`.
-
-Score: 9.1 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-8926 [CVSS:3.1 9.1 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-8926</link>
-            <guid isPermaLink="false">CVE-2026-8926</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:32 GMT</pubDate>
-            <description><![CDATA[When asking curl to use a `.netrc` file to find credentials and at the same
-time specifying a URL with a username (without a password), like
-`https://user@example.com/`, curl could wrongly get and use the password for
-*another* user set in the `.netrc` file for that host if such a one exists and
-there is no match for the specified user.
-
-Score: 9.1 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-8925 [CVSS:3.1 9.8 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-8925</link>
-            <guid isPermaLink="false">CVE-2026-8925</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:32 GMT</pubDate>
-            <description><![CDATA[The curl logic that works with SASL authentication could end up cleaning up
-the GSASL context *twice* without clearing the pointer in between, making it
-`free()` the same pointer twice.
-
-Score: 9.8 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-8924 [CVSS:3.1 9.1 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-8924</link>
-            <guid isPermaLink="false">CVE-2026-8924</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:32 GMT</pubDate>
-            <description><![CDATA[A flaw in curl’s cookie parsing logic allows a malicious HTTP server to set
-"super cookies" that bypass the Public Suffix List check. This enables an
-attacker-controlled origin to inject cookies that curl subsequently scopes and
-transmits to unrelated third-party domains.
-
-Score: 9.1 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-8458 [CVSS:3.1 6.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-8458</link>
-            <guid isPermaLink="false">CVE-2026-8458</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:32 GMT</pubDate>
-            <description><![CDATA[libcurl might in some circumstances reuse the wrong connection when asked to
-do Negotiate-authenticated ones, even when they are set to use different
-"services".
-
-libcurl features a pool of recent connections so that subsequent requests can
-reuse an existing connection to avoid overhead.
-
-When reusing a connection a range of criteria must be met. Due to a logical
-error in the code, a request that was issued by an application could
-wrongfully reuse an existing connection to the same server that was
-authenticated using different services.
+            <title><![CDATA[CVE-2026-57115 [CVSS:3.1 6.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-57115</link>
+            <guid isPermaLink="false">CVE-2026-57115</guid>
+            <pubDate>Tue, 15 Sep 2026 14:45:28 GMT</pubDate>
+            <description><![CDATA[PraisonAI is a multi-agent teams system. Prior to praisonaiagents 1.6.59, SpiderTools.scrape_page validates only the initial URL and lets requests.Session.get follow redirects automatically, so a public-looking URL can redirect to a loopback, private, link-local, or metadata address without revalidation. The redirected response body is returned through scrape_page and its extract_links, crawl, and extract_text callers, allowing disclosure from otherwise blocked services. This issue is fixed in praisonaiagents 1.6.59.
 
 Score: 6.5 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:H/A:N]]></description>
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-8286 [CVSS:3.1 8.1 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-8286</link>
-            <guid isPermaLink="false">CVE-2026-8286</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:31 GMT</pubDate>
-            <description><![CDATA[A vulnerability exists where a new transfer that uses STARTTLS to upgrade the
-connection might reuse an existing live connection even though the TLS
-configuration mismatches so it should not.
-
-Score: 8.1 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-89141 [CVSS:3.1 6.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-89141</link>
-            <guid isPermaLink="false">CVE-2026-89141</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:31 GMT</pubDate>
-            <description><![CDATA[The AI Engine – The Chatbot, AI Framework & MCP for WordPress plugin for WordPress is vulnerable to Insecure Direct Object Reference in all versions up to, and including, 3.7.7 via the 'mediaId' parameter due to missing validation on a user controlled key. This makes it possible for authenticated attackers, with subscriber-level access and above, to access and retrieve the transcribed contents of private audio attachments belonging to other users, including Administrators, via a supplied attachment ID. This vulnerability requires the Public API module to be enabled in the plugin settings; when disabled, the REST route is absent and the endpoint returns HTTP 404.
+            <title><![CDATA[CVE-2026-57120 [CVSS:3.1 6.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-57120</link>
+            <guid isPermaLink="false">CVE-2026-57120</guid>
+            <pubDate>Tue, 15 Sep 2026 14:45:28 GMT</pubDate>
+            <description><![CDATA[PraisonAI is a multi-agent teams system. Prior to praisonaiagents 1.6.59, execute_code sandbox mode permits runtime assembly of blocklisted dunder names and allows str.format or str.format_map to resolve dotted fields through C-level attribute access that bypasses _safe_getattr. This exposes class, qualified-name, base-class, globals, and object-dictionary attributes to prompt-influenced code when approval is automatically granted, producing a high-impact read primitive without establishing a complete in-process execution chain. This issue is fixed in praisonaiagents 1.6.59.
 
 Score: 6.5 (MEDIUM)
 Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-82209 [CVSS:3.1 8.2 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-82209</link>
-            <guid isPermaLink="false">CVE-2026-82209</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:31 GMT</pubDate>
-            <description><![CDATA[When libpsl support is enabled, libcurl fails to enforce the Public Suffix
-List boundary check when processing a `Set-Cookie` header where the `Domain`
-attribute explicitly matches an origin host that is itself a public suffix
-(e.g., `Domain=co.uk` set by `co.uk`).
-
-Instead of coercing it into a strict host-only cookie, libcurl saves the
-cookie with wildcard domain scope (`.co.uk`). Consequently, the cookie is
-inappropriately included in subsequent outbound requests or HTTP redirects to
-arbitrary sibling subdomains under the same public suffix (e.g.,
-`attacker.co.uk`).
-
-Score: 8.2 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:H/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-82208 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-82208</link>
-            <guid isPermaLink="false">CVE-2026-82208</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:31 GMT</pubDate>
-            <description><![CDATA[With the wolfSSL backend, when CA caching is enabled and an
-`CURLOPT_SSL_CTX_FUNCTION` callback replaces the trust store, libcurl can
-silently reinstall the cached store after the callback returns. A certificate
-trusted by the cached store but rejected by the callback-selected store is
-then incorrectly accepted.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-80255 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-80255</link>
-            <guid isPermaLink="false">CVE-2026-80255</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:30 GMT</pubDate>
-            <description><![CDATA[A `Set-Cookie:` header using tab (horizontal tab, ASCII code 9) instead of
-space (ascii code 32) immediately before the `Secure` attribute causes curl to
-store the cookie without its Secure flag. The cookie might then wrongfully be
-sent over plaintext HTTP on subsequent requests to the same host.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-80231 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-80231</link>
-            <guid isPermaLink="false">CVE-2026-80231</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:30 GMT</pubDate>
-            <description><![CDATA[A flaw in libcurl makes it wrongly reuse an existing HTTPS connection setup
-for a given hostname even when using a different Native CA Store setting
-(`CURLSSLOPT_NATIVE_CA`) than when the connection was created.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-80230 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-80230</link>
-            <guid isPermaLink="false">CVE-2026-80230</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:30 GMT</pubDate>
-            <description><![CDATA[When `CURLOPT_PINNEDPUBLICKEY` is configured alongside options that disable
-standard peer verification (`CURLOPT_SSL_VERIFYPEER = 0` and
-`CURLOPT_SSL_VERIFYHOST = 0`), libcurl fails to enforce public key pinning on
-connections established without a presented server certificate. Bypassing the
-pinning check under these disabled-verification conditions allows
-unauthenticated connections to succeed when they should be rejected.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-80229 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-80229</link>
-            <guid isPermaLink="false">CVE-2026-80229</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:30 GMT</pubDate>
-            <description><![CDATA[When performing transfers via libcurl’s multi interface, pooled TLS
-connections can outlive their originating easy handles. In OpenSSL 3 provider
-configurations, libcurl attaches an allocated library context to the easy
-handle's state and passes it to OpenSSL without acquiring an ownership
-reference; destroying the easy handle prematurely frees this context while the
-active connection retains a dangling pointer, leading to a heap-use-after-free
-upon subsequent I/O or post-handshake operations.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-7168 [CVSS:3.1 5.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-7168</link>
-            <guid isPermaLink="false">CVE-2026-7168</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:29 GMT</pubDate>
-            <description><![CDATA[Successfully using libcurl to do a transfer over a specific HTTP proxy
-(`proxyA`) with **Digest** authentication and then changing the proxy host to
-a second one (`proxyB`) for a second transfer, reusing the same handle, makes
-libcurl wrongly pass on the `Proxy-Authorization:` header field meant for
-`proxyA`, to `proxyB`.
-
-Score: 5.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-75983 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-75983</link>
-            <guid isPermaLink="false">CVE-2026-75983</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:29 GMT</pubDate>
-            <description><![CDATA[The Eventin – Event Calendar, Tickets, Registration, Booking & WooCommerce plugin for WordPress is vulnerable to Privilege Escalation in all versions up to, and including, 4.1.23. This is due to the `PermissionManager::manage_permissions()` function being registered as a callback on WordPress core's `map_meta_cap` filter and unconditionally returning the always-true `'exist'` primitive for every capability check whenever the evaluated user ID is 1, without scoping this behavior to plugin-specific capabilities. This makes it possible for authenticated attackers whose account is user ID 1, even subscribers, to pass every WordPress capability check, including `manage_options`, `edit_plugins`, `edit_themes`, `promote_users`, and `update_core`, thereby elevating their privileges to administrator-equivalent power and achieving full site takeover, including remote code execution via the plugin and theme editors. Exploitation is only impactful when user ID 1 has been deliberately demoted to a lower-privilege role as a common administrator-account hardening practice; on default installations where user ID 1 retains the administrator role, no incremental privilege gain occurs.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-6429 [CVSS:3.1 5.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-6429</link>
-            <guid isPermaLink="false">CVE-2026-6429</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:29 GMT</pubDate>
-            <description><![CDATA[When asked to both use a `.netrc` file for credentials and to follow HTTP
-redirects, libcurl could leak the password used for the first host to the
-followed-to host under certain circumstances.
-
-Score: 5.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-6276 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-6276</link>
-            <guid isPermaLink="false">CVE-2026-6276</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:29 GMT</pubDate>
-            <description><![CDATA[Using libcurl, when a custom `Host:` header is first set for an HTTP request
-and a second request is subsequently done using the same *easy handle* but
-without the custom `Host:` header set, the second request would use stale
-information and pass on cookies meant for the first host in the second
-request. Leak them.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-6253 [CVSS:3.1 5.9 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-6253</link>
-            <guid isPermaLink="false">CVE-2026-6253</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:29 GMT</pubDate>
-            <description><![CDATA[curl might erroneously pass on credentials for a first proxy to a second
-proxy.
-
-This can happen when the following conditions are true:
-
-1. curl is setup to use specific different proxies for different URL schemes
-2. the first proxy needs credentials
-3. the second proxy uses no credentials
-4. while using the first proxy (using say `http://`), curl is asked to follow
-   a redirect to a URL using another scheme (say `https://`), accessed using a
-   second, different, proxy
-
-Score: 5.9 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-5773 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-5773</link>
-            <guid isPermaLink="false">CVE-2026-5773</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:28 GMT</pubDate>
-            <description><![CDATA[libcurl might in some circumstances reuse the wrong connection for SMB(S)
-transfers.
-
-libcurl features a pool of recent connections so that subsequent requests can
-reuse an existing connection to avoid overhead.
-
-When reusing a connection a range of criteria must be met. Due to a logical
-error in the code, a network transfer operation that was requested by an
-application could wrongfully reuse an existing SMB connection to the same
-server that was using a different "share" than the new subsequent transfer
-should.
-
-This could in unlucky situations lead to the download of the wrong file or the
-upload of a file to the wrong place. When this happens, the same credentials
-are used and the server name is the same.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-5545 [CVSS:3.1 6.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-5545</link>
-            <guid isPermaLink="false">CVE-2026-5545</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:28 GMT</pubDate>
-            <description><![CDATA[libcurl might in some circumstances reuse the wrong connection when asked to
-do an authenticated HTTP(S) request after a Negotiate-authenticated one, when
-both use the same host.
-
-libcurl features a pool of recent connections so that subsequent requests can
-reuse an existing connection to avoid overhead.
-
-When reusing a connection a range of criteria must be met. Due to a logical
-error in the code, a request that was issued by an application could
-wrongfully reuse an existing connection to the same server that was
-authenticated using different credentials.
-
-An application that first uses Negotiate authentication to a server with
-`user1:password1` and then does another operation to the same server asking
-for any authentication method but for `user2:password2` (while the previous
-connection is still alive) - the second request gets confused and wrongly
-reuses the same connection and sends the new request over that connection
-thinking it uses a mix of user1's and user2's credentials when it is in fact
-still using the connection authenticated for user1...
-
-Score: 6.5 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:H/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-4873 [CVSS:3.1 5.9 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-4873</link>
-            <guid isPermaLink="false">CVE-2026-4873</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:28 GMT</pubDate>
-            <description><![CDATA[A vulnerability exists where a connection requiring TLS incorrectly reuses an
-existing unencrypted connection from the same connection pool. If an initial
-transfer is made in clear-text (via IMAP, SMTP, or POP3), a subsequent request
-to that same host bypasses the TLS requirement and instead transmit data
-unencrypted.
-
-Score: 5.9 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-3784 [CVSS:3.1 6.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-3784</link>
-            <guid isPermaLink="false">CVE-2026-3784</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:27 GMT</pubDate>
-            <description><![CDATA[curl would wrongly reuse an existing HTTP proxy connection doing CONNECT to a
-server, even if the new request uses different credentials for the HTTP proxy.
-The proper behavior is to create or use a separate connection.
-
-Score: 6.5 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-3783 [CVSS:3.1 5.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-3783</link>
-            <guid isPermaLink="false">CVE-2026-3783</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:27 GMT</pubDate>
-            <description><![CDATA[When an OAuth2 bearer token is used for an HTTP(S) transfer, and that transfer
-performs a redirect to a second URL, curl could leak that token to the second
-hostname under some circumstances.
-
-If the hostname that the first request is redirected to has information in the
-used .netrc file, with either of the `machine` or `default` keywords, curl
-would pass on the bearer token set for the first host also to the second one.
-
-Score: 5.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-1965 [CVSS:3.1 6.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-1965</link>
-            <guid isPermaLink="false">CVE-2026-1965</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:27 GMT</pubDate>
-            <description><![CDATA[libcurl can in some circumstances reuse the wrong connection when asked to do
-an Negotiate-authenticated HTTP or HTTPS request.
-
-libcurl features a pool of recent connections so that subsequent requests can
-reuse an existing connection to avoid overhead.
-
-When reusing a connection a range of criterion must first be met. Due to a
-logical error in the code, a request that was issued by an application could
-wrongfully reuse an existing connection to the same server that was
-authenticated using different credentials. One underlying reason being that
-Negotiate sometimes authenticates *connections* and not *requests*, contrary
-to how HTTP is designed to work.
-
-An application that allows Negotiate authentication to a server (that responds
-wanting Negotiate) with `user1:password1` and then does another operation to
-the same server also using Negotiate but with `user2:password2` (while the
-previous connection is still alive) - the second request wrongly reused the
-same connection and since it then sees that the Negotiate negotiation is
-already made, it sends the request over that connection thinking it uses
-the user2 credentials when it is in fact still using the connection
-authenticated for user1...
-
-The set of authentication methods to use is set with `CURLOPT_HTTPAUTH`.
-
-Applications can disable libcurl's reuse of connections and thus mitigate this
-problem, by using one of the following libcurl options to alter how
-connections are or are not reused: `CURLOPT_FRESH_CONNECT`,
-`CURLOPT_MAXCONNECTS` and `CURLMOPT_MAX_HOST_CONNECTIONS` (if using the
-curl_multi API).
-
-Score: 6.5 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:H/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-19931 [CVSS:3.1 9.8 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-19931</link>
-            <guid isPermaLink="false">CVE-2026-19931</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:27 GMT</pubDate>
-            <description><![CDATA[A flaw in libcurl makes it wrongly reuse an HTTP connection setup for a given
-hostname using Negotiate authentication, when the initial request is done
-using empty credentials. This can make user B's request get sent over user A's
-previously authenticated connection.
+            <title><![CDATA[CVE-2026-57123 [CVSS:3.1 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-57123</link>
+            <guid isPermaLink="false">CVE-2026-57123</guid>
+            <pubDate>Tue, 15 Sep 2026 14:45:28 GMT</pubDate>
+            <description><![CDATA[PraisonAI is a multi-agent teams system. Prior to praisonaiagents 1.6.59, ToolsMCPServer.run_sse and launch_tools_mcp_server bind to 0.0.0.0 and create /sse and /messages/ routes without invoking the available SecurityConfig authentication, origin-validation, or DNS-rebinding controls. Any reachable client can list and invoke registered tools, and a browser can target a local instance through DNS rebinding, with impact determined by the registered file, shell, and code-execution tools. This vulnerability is fixed in praisonaiagents 1.6.59.
 
 Score: 9.8 (CRITICAL)
 Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-18924 [CVSS:3.1 9.1 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-18924</link>
-            <guid isPermaLink="false">CVE-2026-18924</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:27 GMT</pubDate>
-            <description><![CDATA[A flaw in libcurl's handling of HTTP/2 Server Push streams, when the parent
-handle is set to share connections with other handles, can lead to
-use-after-free in the cleanup process.
-
-Score: 9.1 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-18917 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-18917</link>
-            <guid isPermaLink="false">CVE-2026-18917</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:26 GMT</pubDate>
-            <description><![CDATA[A flaw was found in libvirt. An unprivileged local user could exploit an integer overflow vulnerability in the NodeGetFreePages RPC handler. This flaw allows crafted values to bypass a size check, leading to an undersized memory buffer. Subsequently, real NUMA node data can overwrite this buffer. This heap buffer overflow can corrupt the root libvirt daemon's memory, potentially leading to a denial of service or local privilege escalation.
-
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-18063 [CVSS:3.1 6.4 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-18063</link>
-            <guid isPermaLink="false">CVE-2026-18063</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:26 GMT</pubDate>
-            <description><![CDATA[The Job Postings plugin for WordPress is vulnerable to Stored Cross-Site Scripting via the 'position_button' parameter in all versions up to, and including, 2.8.1 due to insufficient input sanitization and output escaping. This makes it possible for authenticated attackers, with contributor-level access and above, to inject arbitrary web scripts in pages that will execute whenever a user accesses an injected page.
-
-Score: 6.4 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:L/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-15402 [CVSS:3.1 6.4 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-15402</link>
-            <guid isPermaLink="false">CVE-2026-15402</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:26 GMT</pubDate>
-            <description><![CDATA[The Eventin – Event Calendar, Event Registration, Tickets & Booking (AI Powered) plugin for WordPress is vulnerable to Stored Cross-Site Scripting via 'etn_shedule_objective' schedule_slot Parameter in all versions up to, and including, 4.1.23 due to insufficient input sanitization and output escaping. This makes it possible for authenticated attackers, with contributor-level access and above, to inject arbitrary web scripts in pages that will execute whenever a user accesses an injected page.
-
-Score: 6.4 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:L/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-13608 [CVSS:3.1 7.4 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-13608</link>
-            <guid isPermaLink="false">CVE-2026-13608</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:26 GMT</pubDate>
-            <description><![CDATA[A flaw in the libcurl SASL negotiation for LDAP authentication allows an
-incomplete handshake sequence to be misinterpreted as a successful
-cryptographic verification. An attacker executing a Man-in-the-Middle (MITM)
-attack can inject a premature or shortcut response that bypasses complete peer
-validation.
-
-Score: 7.4 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-12064 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-12064</link>
-            <guid isPermaLink="false">CVE-2026-12064</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:26 GMT</pubDate>
-            <description><![CDATA[When a user invokes curl using a schemeless URL combined with
-`--proto-default` sftp (or scp), a disconnect occurs between the tool layer
-and libcurl. The tool layer incorrectly infers the URL scheme, which
-erroneously bypasses the initialization of critical SSH security options like
-CURLOPT_SSH_HOST_PUBLIC_KEY_SHA256 and CURLOPT_SSH_KNOWNHOSTS. Conversely, the
-libcurl runtime successfully honors CURLOPT_DEFAULT_PROTOCOL and establishes
-the connection via SFTP/SCP as specified. Because the tool layer skipped the
-security configuration, these SSH host verification options are silently
-omitted, causing curl to connect to an unverified SSH remote host without
-throwing an error.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-11856 [CVSS:3.1 9.8 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-11856</link>
-            <guid isPermaLink="false">CVE-2026-11856</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:25 GMT</pubDate>
-            <description><![CDATA[Successfully using libcurl to do a transfer to a specific HTTP origin
-(`hostA`) with **Digest** authentication and then changing the origin to a
-different one (`hostB`) for a second transfer, reusing the same handle, makes
-libcurl wrongly pass on the `Authorization:` header field meant for `hostA`,
-to `hostB`.
+            <title><![CDATA[CVE-2026-57125 [CVSS:3.1 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-57125</link>
+            <guid isPermaLink="false">CVE-2026-57125</guid>
+            <pubDate>Tue, 15 Sep 2026 14:45:28 GMT</pubDate>
+            <description><![CDATA[PraisonAI is a multi-agent teams system. Prior to praisonai 4.6.59 and praisonaiagents 1.6.59, the unauthenticated POST /api/v1/runs Jobs API accepts attacker-controlled agent_yaml, and the approve field can mark execute_command as YAML-approved before @require_approval checks critical tools. This chain allows a remote caller to cause a configured language model agent to invoke arbitrary operating-system commands without credentials or operator interaction. This vulnerability is fixed in praisonai 4.6.59 and praisonaiagents 1.6.59 as fixed versions.
 
 Score: 9.8 (CRITICAL)
 Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-11586 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-11586</link>
-            <guid isPermaLink="false">CVE-2026-11586</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:25 GMT</pubDate>
-            <description><![CDATA[By default, curl automatically responds to WebSocket PING frames. Because curl
-lacks an upper bound on memory allocation for unacknowledged frames, a
-malicious server can exhaust all available memory by flooding curl with rapid,
-sequential PING messages.
+            <title><![CDATA[CVE-2026-57126 [CVSS:3.1 8.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-57126</link>
+            <guid isPermaLink="false">CVE-2026-57126</guid>
+            <pubDate>Tue, 15 Sep 2026 14:45:28 GMT</pubDate>
+            <description><![CDATA[PraisonAI is a multi-agent teams system. Prior to praisonaiagents 1.6.58, SpiderTools._validate_url calls _host_is_blocked, which checks literal host encodings but does not resolve DNS names before scrape_page, crawl, extract_links, extract_text, or URL-mention fetches connect. An attacker-controlled hostname resolving to a loopback, private, link-local, or cloud-metadata address therefore bypasses the SSRF policy without a rebinding race and can expose internal responses to the agent. This issue is fixed in praisonaiagents 1.6.58.
 
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
+Score: 8.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:L/A:N]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-11564 [CVSS:3.1 9.1 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-11564</link>
-            <guid isPermaLink="false">CVE-2026-11564</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:25 GMT</pubDate>
-            <description><![CDATA[libcurl keeps previously used connections in a connection pool for subsequent
-transfers to reuse if one of them matches the setup.
+            <title><![CDATA[CVE-2026-57130 [CVSS:3.1 8.1 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-57130</link>
+            <guid isPermaLink="false">CVE-2026-57130</guid>
+            <pubDate>Tue, 15 Sep 2026 14:45:28 GMT</pubDate>
+            <description><![CDATA[PraisonAI is a multi-agent teams system. Prior to praisonaiagents 1.6.59, src/praisonai-agents/praisonaiagents/tools/email_tools.py interpolates LLM-controlled from_addr, subject, and query values directly into quoted IMAP SEARCH criteria. Embedded quote, backslash, newline, or null characters can escape the intended criterion and alter IMAP operations when search_emails, reply_email, or archive_email is exposed to an agent with configured email credentials, allowing mailbox data access, modification, deletion, or connection disruption. This issue is fixed in praisonaiagents 1.6.59.
 
-An easy handle that first uses default native CA trust can continue trusting
-the native platform store after the application switches that same handle to
-custom CA material for a later transfer.
+Score: 8.1 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-57122 [CVSS:3.1 8.6 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-57122</link>
+            <guid isPermaLink="false">CVE-2026-57122</guid>
+            <pubDate>Tue, 15 Sep 2026 14:45:28 GMT</pubDate>
+            <description><![CDATA[PraisonAI is a multi-agent teams system. Prior to 4.6.59, the WhatsApp and Linear bot webhook handlers verify HMAC signatures only when WHATSAPP_APP_SECRET or LINEAR_WEBHOOK_SECRET is configured and otherwise parse and dispatch unsigned request bodies. A remote unauthenticated client that reaches the webhook route can forge messages, comments, or agent-session events, impersonate platform users, influence agent prompts and actions, and disrupt bot processing. This issue is fixed in 4.6.59.
+
+Score: 8.6 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:H/A:L]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-57124 [CVSS:3.1 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-57124</link>
+            <guid isPermaLink="false">CVE-2026-57124</guid>
+            <pubDate>Tue, 15 Sep 2026 14:45:28 GMT</pubDate>
+            <description><![CDATA[PraisonAI is a multi-agent teams system. Prior to 4.6.59, the default UI host applications expose POST /api/mcp/connect without mandatory authentication and accept caller-controlled command and args values that PraisonAIUI passes to StdioMCPClient to start a local process. Because the UI commands bind to 0.0.0.0 by default, a reachable unauthenticated client can execute commands as the UI service account even when the MCP handshake later fails. This vulnerability is fixed in 4.6.59.
+
+Score: 9.8 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-57145 [CVSS:3.1 9.1 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-57145</link>
+            <guid isPermaLink="false">CVE-2026-57145</guid>
+            <pubDate>Tue, 15 Sep 2026 14:45:28 GMT</pubDate>
+            <description><![CDATA[PraisonAI is a multi-agent teams system. Prior to 4.6.62, src/praisonai/praisonai/tools/multiedit.py passes the LLM-controlled filepath parameter directly to open for reading and writing without traversal rejection, symlink resolution, a workspace boundary, or protected-path checks. Prompt-influenced agents can read files through edit and diff behavior or overwrite files accessible to the process, exposing secrets and enabling persistence or application tampering. This issue is fixed in 4.6.62.
 
 Score: 9.1 (CRITICAL)
 Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-11352 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-11352</link>
-            <guid isPermaLink="false">CVE-2026-11352</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:25 GMT</pubDate>
-            <description><![CDATA[An issue in curl’s QUIC UDP receive function allows a malicious HTTP/3 server
-to trigger a remote denial of service against a curl or libcurl client.
-Because the helper function discards zero-length UDP datagrams before counting
-them toward the per-call packet budget, a connected QUIC peer can continuously
-stream empty datagrams to indefinitely stall the client.
+            <title><![CDATA[CVE-2026-57112 [CVSS:3.1 8.3 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-57112</link>
+            <guid isPermaLink="false">CVE-2026-57112</guid>
+            <pubDate>Tue, 15 Sep 2026 14:45:28 GMT</pubDate>
+            <description><![CDATA[PraisonAI is a multi-agent teams system. From praisonaiagents 0.6.0 until 1.6.59 and PraisonAI 3.10.0 until 4.6.59, ToolsMCPServer.run_sse() in src/praisonai-agents/praisonaiagents/mcp/mcp_server.py mounts SseServerTransport on the legacy /sse and /messages/ endpoints without default Host, Origin, or authentication enforcement. A malicious website can use DNS rebinding against a reachable local or internal SSE server, supply attacker-controlled Host and Origin headers, enumerate registered tools, and invoke them with the server user's privileges. The Streamable HTTP transport rejects the same hostile Origin, which isolates the flaw to the legacy SSE wrapper. An initial remediation was released in praisonaiagents 1.6.59 and PraisonAI 4.6.59.
 
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
+Score: 8.3 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:C/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-10536 [CVSS:3.1 9.8 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-10536</link>
-            <guid isPermaLink="false">CVE-2026-10536</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:25 GMT</pubDate>
-            <description><![CDATA[A use-after-free vulnerability exists in libcurl when an application
-configures an HTTP/2 stream-dependency tree via `CURLOPT_STREAM_DEPENDS` or
-`CURLOPT_STREAM_DEPENDS_E`, subsequently invokes `curl_easy_reset()`, and
-finally terminates the handle with `curl_easy_cleanup()`. During this final
-cleanup phase, libcurl attempts to access and modify an internal structure
-that was already freed during the reset operation.
+            <title><![CDATA[CVE-2026-57133 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-57133</link>
+            <guid isPermaLink="false">CVE-2026-57133</guid>
+            <pubDate>Tue, 15 Sep 2026 14:45:28 GMT</pubDate>
+            <description><![CDATA[PraisonAI is a multi-agent teams system. From 1.5.1 until 1.7.2, the shell() helper exported from src/praisonai-ts/src/tools/utility-tools.ts checks only the first whitespace-delimited token against safeCommands and then passes the complete original string to child_process.exec(). A string that starts with an allowed read-only command can append a second non-allowlisted command through shell syntax, allowing arbitrary command execution with the PraisonAI process privileges. This issue is fixed in version 1.7.2.
 
-Score: 9.8 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2025-15224 [CVSS:3.1 3.1 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-15224</link>
-            <guid isPermaLink="false">CVE-2025-15224</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:24 GMT</pubDate>
-            <description><![CDATA[When doing SSH-based transfers using either SCP or SFTP, and asked to do
-public key authentication, curl would wrongly still ask and authenticate using
-a locally running SSH agent.
+            <title><![CDATA[CVE-2026-57134 [CVSS:3.1 8.2 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-57134</link>
+            <guid isPermaLink="false">CVE-2026-57134</guid>
+            <pubDate>Tue, 15 Sep 2026 14:45:28 GMT</pubDate>
+            <description><![CDATA[PraisonAI is a multi-agent teams system. From 1.5.1 until 1.7.2, MCPSecurity.evaluatePolicy() in src/praisonai-ts/src/mcp/security.ts invokes the configured credential validator only when AuthMethod is api-key or bearer. Basic and OAuth policies accept any non-empty Authorization header without calling auth.validate(), then return an authenticated result, allowing callers with invalid credentials to access MCP tools and resources protected by those policies. This issue is fixed in version 1.7.2.
 
-Score: 3.1 (LOW)
-Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:N/I:L/A:N]]></description>
+Score: 8.2 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:L/A:N]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2025-15079 [CVSS:3.1 5.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-15079</link>
-            <guid isPermaLink="false">CVE-2025-15079</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:24 GMT</pubDate>
-            <description><![CDATA[When doing SSH-based transfers using either SCP or SFTP, and setting the
-known_hosts file, libcurl could still mistakenly accept connecting to hosts
-*not present* in the specified file if they were added as recognized in the
-libssh *global* known_hosts file.
+            <title><![CDATA[CVE-2026-57135 [CVSS:3.1 7.6 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-57135</link>
+            <guid isPermaLink="false">CVE-2026-57135</guid>
+            <pubDate>Tue, 15 Sep 2026 14:45:28 GMT</pubDate>
+            <description><![CDATA[PraisonAI is a multi-agent teams system. From 1.2.3 until 1.7.2, SandboxExecutor network-isolated mode in src/praisonai-ts/src/cli/features/sandbox-executor.ts uses buildEnv() only to inject invalid http_proxy and https_proxy environment variables and does not establish an operating-system network boundary. Programs that ignore those proxy variables can open sockets directly, allowing supposedly isolated commands to reach localhost, internal services, cloud metadata, or external hosts and potentially exfiltrate data. An initial remediation was released in version 1.7.2.
 
-Score: 5.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:N/A:N]]></description>
+Score: 7.6 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:L/A:L]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2025-14819 [CVSS:3.1 5.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-14819</link>
-            <guid isPermaLink="false">CVE-2025-14819</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:24 GMT</pubDate>
-            <description><![CDATA[When doing TLS related transfers with reused easy or multi handles and
-altering the `CURLSSLOPT_NO_PARTIALCHAIN` option, libcurl could accidentally
-reuse a CA store cached in memory for which the partial chain option was
-reversed. Contrary to the user's wishes and expectations. This could make
-libcurl find and accept a trust chain that it otherwise would not.
+            <title><![CDATA[CVE-2026-57136 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-57136</link>
+            <guid isPermaLink="false">CVE-2026-57136</guid>
+            <pubDate>Tue, 15 Sep 2026 14:45:28 GMT</pubDate>
+            <description><![CDATA[PraisonAI is a multi-agent teams system. From 1.2.3 until 1.7.2, CommandValidator in src/praisonai-ts/src/cli/features/sandbox-executor.ts validates only the first whitespace-delimited executable against allowedCommands, then SandboxExecutor passes the complete command string to sh -c. A command beginning with an allowed executable can append a non-allowlisted command through shell metacharacters, causing arbitrary commands to run with the PraisonAI process privileges. This issue is fixed in version 1.7.2.
 
-Score: 5.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:N/A:N]]></description>
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2025-14524 [CVSS:3.1 5.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-14524</link>
-            <guid isPermaLink="false">CVE-2025-14524</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:24 GMT</pubDate>
-            <description><![CDATA[When an OAuth2 bearer token is used for an HTTP(S) transfer, and that transfer
-performs a cross-protocol redirect to a second URL that uses an IMAP, LDAP,
-POP3 or SMTP scheme, curl might wrongly pass on the bearer token to the new
-target host.
+            <title><![CDATA[CVE-2026-57137 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-57137</link>
+            <guid isPermaLink="false">CVE-2026-57137</guid>
+            <pubDate>Tue, 15 Sep 2026 14:45:28 GMT</pubDate>
+            <description><![CDATA[PraisonAI is a multi-agent teams system. From 1.4.0 until 1.7.2, createAgentLoop() in src/praisonai-ts/src/ai/agent-loop.ts passes executable tools to generateText() before invoking the onToolCall approval callback. Because the wrapped AI SDK executes tool handlers during generation, a callback that returns false records tool_rejected only after the denied tool has already produced side effects and populated toolResults. Applications using onToolCall as a human or policy approval boundary can therefore execute rejected file, command, API, or data-modifying operations. This issue is fixed in version 1.7.2.
 
-Score: 5.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:N/A:N]]></description>
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2025-14017 [CVSS:3.1 6.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-14017</link>
-            <guid isPermaLink="false">CVE-2025-14017</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:23 GMT</pubDate>
-            <description><![CDATA[When doing multi-threaded LDAPS transfers (LDAP over TLS) with libcurl,
-changing TLS options in one thread would inadvertently change them globally
-and therefore possibly also affect other concurrently setup transfers.
-
-Disabling certificate verification for a specific transfer could
-unintentionally disable the feature for other threads as well.
-
-Score: 6.3 (MEDIUM)
-Vector: CVSS:3.1/AV:L/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2025-13034 [CVSS:3.1 5.9 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-13034</link>
-            <guid isPermaLink="false">CVE-2025-13034</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:23 GMT</pubDate>
-            <description><![CDATA[When using `CURLOPT_PINNEDPUBLICKEY` option with libcurl or `--pinnedpubkey`
-with the curl tool, curl should check the public key of the server certificate
-to verify the peer.
-
-This check was skipped in a certain condition that would then make curl allow
-the connection without performing the proper check, thus not noticing a
-possible impostor. To skip this check, the connection had to be done with QUIC
-with ngtcp2 built to use GnuTLS and the user had to explicitly disable the
-standard certificate verification.
-
-Score: 5.9 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:H/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2025-10966 [CVSS:3.1 4.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-10966</link>
-            <guid isPermaLink="false">CVE-2025-10966</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:23 GMT</pubDate>
-            <description><![CDATA[curl's code for managing SSH connections when SFTP was done using the wolfSSH
-powered backend was flawed and missed host verification mechanisms.
-
-This prevents curl from detecting MITM attackers and more.
-
-Score: 4.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2025-10148 [CVSS:3.1 5.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-10148</link>
-            <guid isPermaLink="false">CVE-2025-10148</guid>
-            <pubDate>Tue, 15 Sep 2026 07:16:21 GMT</pubDate>
-            <description><![CDATA[curl's WebSocket code did not update the 32-bit mask pattern for each new
-outgoing frame as the specification says. Instead it used a fixed mask that
-persisted and was used throughout the entire connection.
-
-A predictable mask pattern allows for a malicious server to induce traffic
-between the two communicating parties that could be interpreted by an involved
-proxy (configured or transparent) as genuine, real, HTTP traffic with content
-and thereby poison its cache. That cached poisoned content could then be
-served to all users of that proxy.
-
-Score: 5.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-91004 [CVSS:4.0 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-91004</link>
-            <guid isPermaLink="false">CVE-2026-91004</guid>
-            <pubDate>Tue, 15 Sep 2026 06:17:01 GMT</pubDate>
-            <description><![CDATA[A vulnerability has been found in SourceCodester Online Faculty Clearance System 1.0. The impacted element is an unknown function of the file /delete_faculty1.php. Such manipulation of the argument ID leads to sql injection. The attack can be executed remotely. The exploit has been disclosed to the public and may be used.
-
-Score: 5.5 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-91003 [CVSS:4.0 8.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-91003</link>
-            <guid isPermaLink="false">CVE-2026-91003</guid>
-            <pubDate>Tue, 15 Sep 2026 06:17:01 GMT</pubDate>
-            <description><![CDATA[A flaw has been found in D-Link DI-8300 16.07. The affected element is the function rzgl_asp of the file /rzgl.asp of the component CGI Service. This manipulation of the argument redirct_url causes stack-based buffer overflow. Remote exploitation of the attack is possible. The exploit has been published and may be used.
-
-Score: 8.5 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:H/UI:N/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-91002 [CVSS:4.0 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-91002</link>
-            <guid isPermaLink="false">CVE-2026-91002</guid>
-            <pubDate>Tue, 15 Sep 2026 06:17:00 GMT</pubDate>
-            <description><![CDATA[A weakness has been identified in stamparm maltrail up to 3.0.1. This vulnerability affects the function _blacklist of the file core/httpd.py of the component Blacklist Endpoint. Executing a manipulation can lead to missing authentication. The attack can be launched remotely. The exploit has been made available to the public and could be used for attacks. Upgrading to version 3.1 is able to resolve this issue. This patch is called d95868dff3da4d3bd4f942837a26cb7c73a797ae. It is suggested to upgrade the affected component. The vendor fixed the issue the same day it was reported, in version 3.1, by gating the endpoint on an authenticated session or the new Blacklist_ALLOWLIST option.
-
-Score: 5.5 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-91001 [CVSS:4.0 8.6 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-91001</link>
-            <guid isPermaLink="false">CVE-2026-91001</guid>
-            <pubDate>Tue, 15 Sep 2026 06:16:59 GMT</pubDate>
-            <description><![CDATA[A security flaw has been discovered in D-Link DI-8400 16.07. This affects the function ddns_asp of the file /ddns.asp of the component DDNS Configuration. Performing a manipulation of the argument serv/user/host/wild/mx/bmx/cust/ip results in stack-based buffer overflow. The attack can be initiated remotely. The exploit has been released to the public and may be used for attacks.
-
-Score: 8.6 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-86701 [CVSS:4.0 1.8 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-86701</link>
-            <guid isPermaLink="false">CVE-2026-86701</guid>
-            <pubDate>Tue, 15 Sep 2026 06:16:59 GMT</pubDate>
-            <description><![CDATA[Android application "ManabiPocket for Parents" contains an improper access control vulnerability in one of its components. A malicious application installed on the user's Android device may exploit the affected component via an Intent, potentially allowing the malicious application to obtain sensitive information from the affected application.
-
-Score: 1.8 (LOW)
-Vector: CVSS:4.0/AV:L/AC:L/AT:P/PR:N/UI:A/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-81320 [CVSS:3.1 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-81320</link>
-            <guid isPermaLink="false">CVE-2026-81320</guid>
-            <pubDate>Tue, 15 Sep 2026 06:16:58 GMT</pubDate>
-            <description><![CDATA[A flaw was found in hawtio-operator. When a custom Route TLS secret is configured and the operator runs at debug log level 1 or higher, the entire Route object — including the TLS private key in PEM format — is serialized to JSON and written to the operator's standard output. Operator logs are typically forwarded to centralized logging systems and readable by anyone with pods/log access in the openshift-operators namespace. Debug level 1 is a low threshold commonly enabled during troubleshooting.
-
-Score: 5.5 (MEDIUM)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-81303 [CVSS:3.1 6.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-81303</link>
-            <guid isPermaLink="false">CVE-2026-81303</guid>
-            <pubDate>Tue, 15 Sep 2026 06:16:58 GMT</pubDate>
-            <description><![CDATA[A flaw was found in hawtio-operator. The operator holds routes/custom-host:create permission cluster-wide and writes the tenant-supplied spec.routeHostName value from the Hawtio custom resource directly into the Route spec without validation or authorization checks. A namespace edit user, who normally cannot set custom Route hostnames, can use the operator as a confused deputy to claim arbitrary externally-routable hostnames, enabling subdomain takeover and, in combination with the auto-grant OAuthClient, OAuth redirect hijack.
-
-Score: 6.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:R/S:U/C:H/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-18232]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-18232</link>
-            <guid isPermaLink="false">CVE-2026-18232</guid>
-            <pubDate>Tue, 15 Sep 2026 06:16:57 GMT</pubDate>
-            <description><![CDATA[The WP Directory Kit WordPress plugin through 1.5.7 does not check the status or ownership of a listing before returning its content through one of its public AJAX actions, allowing unauthenticated attackers to read draft and unapproved listings belonging to other users.]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-17495 [CVSS:3.1 5.9 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-17495</link>
-            <guid isPermaLink="false">CVE-2026-17495</guid>
-            <pubDate>Tue, 15 Sep 2026 06:16:57 GMT</pubDate>
-            <description><![CDATA[moment is a JavaScript date library for parsing, validating, manipulating, and formatting dates. In versions 2.29.2 through 2.30.1, a specially crafted non-string object passed to moment.locale() can bypass the locale-name path-traversal guard. The guard assumes the input is a string, so an object whose match() method satisfies the check while its toString() returns a traversal path reaches an internal require() call with attacker-controlled path segments. This is an incomplete fix for CVE-2022-24785 and primarily affects npm (server-side) users that pass user-provided input directly to moment.locale(). The issue is fixed in moment 2.31.0, and users should upgrade to 2.31.0 or later. As a workaround, validate that any user-supplied input is a string before passing it to moment.locale().
-
-Score: 5.9 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:H/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-16593]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-16593</link>
-            <guid isPermaLink="false">CVE-2026-16593</guid>
-            <pubDate>Tue, 15 Sep 2026 06:16:57 GMT</pubDate>
-            <description><![CDATA[The WP Directory Kit WordPress plugin through 1.5.7 does not sanitize and escape some widget settings before using them in a SQL statement, allowing authenticated users with access to the page builder (Editor and above) to perform SQL injection attacks that execute when the affected page is rendered.]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-16592]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-16592</link>
-            <guid isPermaLink="false">CVE-2026-16592</guid>
-            <pubDate>Tue, 15 Sep 2026 06:16:57 GMT</pubDate>
-            <description><![CDATA[The WP Directory Kit WordPress plugin through 1.5.7 does not check authorization or listing visibility in one of its shortcodes, allowing users with a role as low as Contributor to disclose non-public listing content, including password-protected and hidden fields, belonging to other users.]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-15758 [CVSS:3.1 5.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-15758</link>
-            <guid isPermaLink="false">CVE-2026-15758</guid>
-            <pubDate>Tue, 15 Sep 2026 06:16:54 GMT</pubDate>
-            <description><![CDATA[The 3D FlipBook – PDF Embedder, PDF Flipbook Viewer, Flipbook Image Gallery plugin for WordPress is vulnerable to Sensitive Information Exposure in all versions up to, and including, 1.16.20 via the 'id' parameter. This makes it possible for unauthenticated attackers to extract sensitive data including the full metadata payload of password-protected flipbooks — including title, outline, props, and the serialized data blob containing the underlying PDF file's direct URL — bypassing WordPress post-password confidentiality. Flipbook post IDs can be pre-enumerated via the also-unauthenticated fb3d_send_posts AJAX action, requiring no prior knowledge to target specific flipbooks.
-
-Score: 5.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-90881 [CVSS:4.0 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-90881</link>
-            <guid isPermaLink="false">CVE-2026-90881</guid>
-            <pubDate>Tue, 15 Sep 2026 05:17:00 GMT</pubDate>
-            <description><![CDATA[A weakness has been identified in D-Link DIR-882 up to 20260814. Impacted is the function main of the file /HNAP1/dllog.cgi of the component CGI Binary. Executing a manipulation can lead to information disclosure. The attack may be launched remotely. The exploit has been made available to the public and could be used for attacks.
-
-Score: 5.5 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-90880 [CVSS:4.0 2.1 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-90880</link>
-            <guid isPermaLink="false">CVE-2026-90880</guid>
-            <pubDate>Tue, 15 Sep 2026 05:17:00 GMT</pubDate>
-            <description><![CDATA[A security flaw has been discovered in D-Link DSL-3782 2016-07-28. This issue affects the function system of the file /cgi-bin/New_GUI/Set/Diagnostics.asp of the component Diagnostics. Performing a manipulation of the argument Addr results in command injection. The attack may be initiated remotely. The exploit has been released to the public and may be used for attacks.
-
-Score: 2.1 (LOW)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:L/VI:L/VA:L/SC:L/SI:L/SA:L/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-90879 [CVSS:4.0 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-90879</link>
-            <guid isPermaLink="false">CVE-2026-90879</guid>
-            <pubDate>Tue, 15 Sep 2026 05:17:00 GMT</pubDate>
-            <description><![CDATA[A vulnerability was identified in zyx0814 FilePress up to 3.0.1. This vulnerability affects unknown code of the file dzz/publish/search.php of the component Publish Module. Such manipulation of the argument orderby/order leads to sql injection. The attack can be launched remotely. The exploit is publicly available and might be used. The project was informed of the problem early through an issue report but has not responded yet.
-
-Score: 5.5 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-90878 [CVSS:4.0 2.1 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-90878</link>
-            <guid isPermaLink="false">CVE-2026-90878</guid>
-            <pubDate>Tue, 15 Sep 2026 05:16:59 GMT</pubDate>
-            <description><![CDATA[A vulnerability was determined in vllm-project vLLM up to 0.27.1. This affects an unknown part of the file /v1/chat/completions of the component Jinja Template Rendering. This manipulation of the argument chat_template causes resource consumption. The attack can be initiated remotely. The exploit has been publicly disclosed and may be utilized. The pull request to fix this issue awaits acceptance.
-
-Score: 2.1 (LOW)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-90877 [CVSS:4.0 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-90877</link>
-            <guid isPermaLink="false">CVE-2026-90877</guid>
-            <pubDate>Tue, 15 Sep 2026 04:18:20 GMT</pubDate>
-            <description><![CDATA[A vulnerability was found in SourceCodester Online Faculty Clearance System 1.0. Affected by this issue is some unknown functionality of the file /update_requirement_status.php. The manipulation of the argument haydi results in sql injection. It is possible to launch the attack remotely. The exploit has been made public and could be used.
-
-Score: 5.5 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-90876 [CVSS:4.0 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-90876</link>
-            <guid isPermaLink="false">CVE-2026-90876</guid>
-            <pubDate>Tue, 15 Sep 2026 04:18:20 GMT</pubDate>
-            <description><![CDATA[A vulnerability has been found in SourceCodester Online Faculty Clearance System 1.0. Affected by this vulnerability is an unknown functionality of the file /delete_requirement.php. The manipulation of the argument ID leads to sql injection. It is possible to initiate the attack remotely. The exploit has been disclosed to the public and may be used.
-
-Score: 5.5 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-90858 [CVSS:4.0 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-90858</link>
-            <guid isPermaLink="false">CVE-2026-90858</guid>
-            <pubDate>Tue, 15 Sep 2026 04:18:20 GMT</pubDate>
-            <description><![CDATA[A flaw has been found in subhajitkhan online-clinic-management-system up to e9ee77a8827a1446220fa07ee693dc4d9a29a578. Affected by this vulnerability is the function session_start of the file adminappview.php. Executing a manipulation of the argument adminmail can lead to authorization bypass. The attack may be launched remotely. The exploit has been published and may be used. This product operates on a rolling release basis, ensuring continuous delivery. Consequently, there are no version details for either affected or updated releases. The project was informed of the problem early through an issue report but has not responded yet.
-
-Score: 5.5 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-90857 [CVSS:4.0 2.1 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-90857</link>
-            <guid isPermaLink="false">CVE-2026-90857</guid>
-            <pubDate>Tue, 15 Sep 2026 04:18:19 GMT</pubDate>
-            <description><![CDATA[A vulnerability was detected in SourceCodester College Notes Gallery Management System 1.0. Affected is an unknown function of the file /dashboard/userprofile.php of the component Profile Upload. Performing a manipulation of the argument image results in unrestricted upload. The attack may be initiated remotely. The exploit is now public and may be used.
-
-Score: 2.1 (LOW)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-87719 [CVSS:3.1 9.9 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-87719</link>
-            <guid isPermaLink="false">CVE-2026-87719</guid>
-            <pubDate>Tue, 15 Sep 2026 04:18:19 GMT</pubDate>
-            <description><![CDATA[GitLab has remediated an issue in GitLab EE affecting all versions from 18.3 before 19.1.8, 19.2 before 19.2.6, and 19.3 before 19.3.2 that under certain conditions could allow an authenticated user with Duo Chat access to obtain Advanced Search instance configurations and sensitive credentials using a specially crafted GraphQL subscription argument to bypass serialization and perform server object lookup.
+            <title><![CDATA[CVE-2026-57138 [CVSS:3.1 9.9 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-57138</link>
+            <guid isPermaLink="false">CVE-2026-57138</guid>
+            <pubDate>Tue, 15 Sep 2026 14:45:28 GMT</pubDate>
+            <description><![CDATA[PraisonAI is a multi-agent teams system. From 1.4.0 until 1.7.2, codeMode in src/praisonai-ts/src/tools/builtins/code-mode.ts executes untrusted JavaScript with new Function() inside with(sandbox) and relies on a small source-code blocklist plus shadowed process and require properties. Code can use ({}).constructor.constructor to recover the real Function constructor, obtain process and process.mainModule.require, and reach host filesystem and subprocess APIs despite the advertised sandbox. Attackers who control codeMode input can read secrets, modify files, execute commands, or exhaust the host process. This issue is fixed in version 1.7.2.
 
 Score: 9.9 (CRITICAL)
 Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H]]></description>
         </item>
         <item>
+            <title><![CDATA[CVE-2026-57139 [CVSS:3.1 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-57139</link>
+            <guid isPermaLink="false">CVE-2026-57139</guid>
+            <pubDate>Tue, 15 Sep 2026 14:45:28 GMT</pubDate>
+            <description><![CDATA[PraisonAI is a multi-agent teams system. From 1.5.0 until 1.7.2, MCPServer.startHttp() in src/praisonai-ts/src/mcp/server.ts binds without a host restriction and forwards every HTTP POST request to handleRequest() without authentication or authorization. Any network client that can reach the port can call tools/list, tools/call, resources/read, or prompts/get, causing registered handlers to run with server-side credentials and process privileges or disclose registered data. An initial remediation was released in version 1.7.2.
+
+Score: 9.8 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-57140 [CVSS:3.1 9.4 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-57140</link>
+            <guid isPermaLink="false">CVE-2026-57140</guid>
+            <pubDate>Tue, 15 Sep 2026 14:45:28 GMT</pubDate>
+            <description><![CDATA[PraisonAI is a multi-agent teams system. From 1.6.0 until 1.7.2, AgentOS in src/praisonai-ts/src/os/agentos.ts uses the 0.0.0.0 default from src/praisonai-ts/src/os/config.ts and registers GET /api/agents and POST /api/chat without authentication middleware. A remote caller who can reach the service can obtain agent names, roles, and instruction prefixes and can invoke a selected agent, potentially reaching its tools, memory, external APIs, credentials, and workflow state. An initial remediation was released in version 1.7.2.
+
+Score: 9.4 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:L]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-57141 [CVSS:3.1 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-57141</link>
+            <guid isPermaLink="false">CVE-2026-57141</guid>
+            <pubDate>Tue, 15 Sep 2026 14:45:28 GMT</pubDate>
+            <description><![CDATA[PraisonAI is a multi-agent teams system. Prior to 1.7.2, the codeMode tool in src/praisonai-ts/src/tools/builtins/code-mode.ts executes model-generated JavaScript with new Function() and with(sandbox), while a regular-expression blocklist can be bypassed with Function('return this')() to recover the global object and by constructing the child_process module name dynamically. An attacker who can influence the code argument can access host process capabilities, read or write files, obtain environment credentials, and execute operating-system commands with the PraisonAI process privileges. This issue is fixed in version 1.7.2.
+
+Score: 9.8 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-57147 [CVSS:3.1 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-57147</link>
+            <guid isPermaLink="false">CVE-2026-57147</guid>
+            <pubDate>Tue, 15 Sep 2026 14:45:28 GMT</pubDate>
+            <description><![CDATA[PraisonAI is a multi-agent teams system. Prior to 0.1.6, praisonai_platform/services/auth_service.py assigns the public dev-secret-change-me value to JWT_SECRET when PLATFORM_JWT_SECRET is unset, and its production guard does not run when PLATFORM_ENV is also unset because that setting defaults to dev. A remote unauthenticated attacker can mint an HS256 token with an arbitrary sub and email, and the platform's AuthService._verify_token() and get_current_user dependency accept the forged identity for protected API routes. This vulnerability is fixed in praisonai-platform 0.1.6.
+
+Score: 9.8 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-57148 [CVSS:3.1 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-57148</link>
+            <guid isPermaLink="false">CVE-2026-57148</guid>
+            <pubDate>Tue, 15 Sep 2026 14:45:28 GMT</pubDate>
+            <description><![CDATA[PraisonAI is a multi-agent teams system. Prior to 0.1.6, praisonai_platform/services/auth_service.py falls back to the public dev-secret-change-me HS256 signing key when PLATFORM_JWT_SECRET is unset, while the startup and token-issuance guards are disabled because PLATFORM_ENV also defaults to dev. An unauthenticated attacker can sign a JWT containing an attacker-chosen sub value, and AuthService._verify_token() accepts it as an authenticated identity, enabling user or workspace-owner impersonation when a target identifier is known. This vulnerability is fixed in praisonai-platform 0.1.6.
+
+Score: 9.8 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-81910 [CVSS:4.0 5.9 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-81910</link>
+            <guid isPermaLink="false">CVE-2026-81910</guid>
+            <pubDate>Tue, 15 Sep 2026 14:40:24 GMT</pubDate>
+            <description><![CDATA[Concrete CMS 9 through 9.5.2 is vulnerable to Server-Side Template Injection (SSTI) in Theme Customizer via Unvalidated Style Values. Values submitted through the customizer (color channels and other style properties handled by ColorStyle and sibling Style classes such as FontFamilyStyle and ImageStyle) are interpolated into server-compiled LESS source without neutralization of LESS syntax, allowing a user with the Theme Customization permission to inject arbitrary LESS directives. By injecting the @import (inline) directive, an attacker can read arbitrary files on the server and reach internal network resources through PHP stream wrappers. The compiled output, including any disclosed file contents, is written to the site's publicly served CSS cache, exposing database credentials, private keys, and other application secrets, and enabling server-side request forgery. The Concrete CMS security team gave this vulnerability a CVSS v4.0 score of 5.9 with vector CVSS:4.0/AV:N/AC:L/AT:P/PR:H/UI:N/VC:H/VI:N/VA:N/SC:N/SI:N/SA:N. Thanks Yonatan Drori from Tenzai for reporting.
+
+Score: 5.9 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:P/PR:H/UI:N/VC:H/VI:N/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-68526 [CVSS:4.0 5.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-68526</link>
+            <guid isPermaLink="false">CVE-2026-68526</guid>
+            <pubDate>Tue, 15 Sep 2026 14:40:24 GMT</pubDate>
+            <description><![CDATA[Concrete CMS before 9.5.3 did not validate an anti-CSRF token in the Calendar event duplicate dialog controller (concrete/controllers/dialog/event/duplicate.php) submit() action, which duplicated a calendar event after checking only canAccess() and the per-resource canAddCalendarEvent() permission, so a crafted cross-site request could cause an authenticated user with add-event permission to create duplicate CalendarEvents and CalendarEventVersions records under their own authority. The Concrete CMS security team gave this vulnerability a CVSS v4.0 score of 5.3 with vector CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:P/VC:N/VI:L/VA:N/SC:N/SI:N/SA:N. Thanks Winston Crooker for reporting.
+
+Score: 5.3 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:P/VC:N/VI:L/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-81911 [CVSS:4.0 5.8 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-81911</link>
+            <guid isPermaLink="false">CVE-2026-81911</guid>
+            <pubDate>Tue, 15 Sep 2026 14:40:24 GMT</pubDate>
+            <description><![CDATA[Concrete CMS versions 9.0.0 to 9.5.2 is vulnerable to Stored XSS in Board Custom Slot dialog. The custom_slot save_template endpoint authorizes the request only against the target board instance (canEditBoardContents()) and then persists the client-supplied selectedTemplateOption[collection] verbatim, rather than rebuilding the content object collection server-side and verifying that each item belongs to the authorized board's data pool. A user with permission to edit the contents of at least one board instance can therefore store a forged summary object whose description field carries a JavaScript-bearing HTML payload. The default summary template renders the description field without output encoding, so the payload executes in the browser of any user who views the affected board slot, including anonymous front-end visitors and dashboard users who preview the resulting rule or block. This can enable session or action takeover and escalation toward an administrator. Concrete CMS versions below 9 do not include the Boards feature and are not affected. The Concrete CMS security team gave this vulnerability a CVSS v4.0 score of 5.8 with vector CVSS:4.0/AV:N/AC:L/AT:P/PR:H/UI:P/VC:H/VI:L/VA:L/SC:N/SI:N/SA:N. Thanks riodrwn for reporting.
+
+Score: 5.8 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:P/PR:H/UI:P/VC:H/VI:L/VA:L/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-81912 [CVSS:4.0 5.7 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-81912</link>
+            <guid isPermaLink="false">CVE-2026-81912</guid>
+            <pubDate>Tue, 15 Sep 2026 14:40:24 GMT</pubDate>
+            <description><![CDATA[Concrete CMS before 9.5.3 is vulnerable to Cross-Site Request Forgery in the Move Multiple Groups feature. The dashboard/users/groups/bulkupdate/confirm() endpoint moved the selected group tree nodes without validating an action token, so a state-changing group move could be processed for an authenticated user who did not initiate it. Because relocating a group under a new parent causes that group's members to inherit the parent's permissions, a forged move can change effective authorization. The Concrete CMS security team gave this vulnerability a CVSS v4.0 score of 5.7 with vector CVSS:4.0/AV:N/AC:L/AT:P/PR:H/UI:P/VC:H/VI:N/VA:N/SC:N/SI:N/SA:N. Thanks riodrwn for reporting.
+
+Score: 5.7 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:P/PR:H/UI:P/VC:H/VI:N/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-81913 [CVSS:4.0 5.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-81913</link>
+            <guid isPermaLink="false">CVE-2026-81913</guid>
+            <pubDate>Tue, 15 Sep 2026 14:40:24 GMT</pubDate>
+            <description><![CDATA[Concrete CMS versions 9.5.0 through 9.5.2 are vulnerable to Open Redirect via the rcURL parameter. An attacker can craft a single link on the site's own domain that sends a user to an arbitrary external site immediately after authentication, facilitating phishing and credential theft. The same handling is present in the registration flow, giving a second entry point on sites with registration enabled. Concrete CMS versions prior to 9.5.0 do not include the rcURL parameter or this allowlist and are not affected. The Concrete CMS security team gave this vulnerability a CVSS v4.0 score of 5.3 with vector CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:P/VC:N/VI:L/VA:N/SC:N/SI:N/SA:N. Thanks Michal M. for reporting.
+
+Score: 5.3 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:P/VC:N/VI:L/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-81915 [CVSS:4.0 5.1 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-81915</link>
+            <guid isPermaLink="false">CVE-2026-81915</guid>
+            <pubDate>Tue, 15 Sep 2026 14:40:24 GMT</pubDate>
+            <description><![CDATA[Concrete CMS below 9.5.3 does not perform an object-level authorization check when a Page Type was updated. The Types::submit() dashboard controller loaded and saved the Page Type identified by a user-supplied ptID without calling canEditPageType(), so a signed-in dashboard user permitted to edit one Page Type could modify the configuration of Page Types outside their assigned authorization boundary. The update_page_type token was validated but is action- and user-scoped rather than object-scoped, so it did not constrain which Page Type could be targeted. The Concrete CMS security team gave this vulnerability a CVSS v4.0 score of 5.1 with vector CVSS:4.0/AV:N/AC:L/AT:N/PR:H/UI:N/VC:N/VI:L/VA:N/SC:N/SI:N/SA:N. Thanks Andrew Gonzalez for reporting.
+
+Score: 5.1 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:H/UI:N/VC:N/VI:L/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-81916 [CVSS:4.0 5.1 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-81916</link>
+            <guid isPermaLink="false">CVE-2026-81916</guid>
+            <pubDate>Tue, 15 Sep 2026 14:40:24 GMT</pubDate>
+            <description><![CDATA[Concrete CMS before 9.5.3 evaluated the authorization check for an Express entry submission against the entity of the posted form rather than the entity identified by the dashboard route. As a result, a user permitted to add entries to one Express object could create entries in a different Express object outside their authorization scope, potentially polluting protected datasets, triggering workflows, or injecting content into administrative processes. The dashboard submit route resolved the mutated entity from the attacker-controlled route ID while the permission check validated the independently posted form's entity, and the submission proceeded because the two entities were never compared. The Concrete CMS security team gave this vulnerability a CVSS v4.0 score of 5.1 with vector CVSS:4.0/AV:N/AC:L/AT:N/PR:H/UI:N/VC:N/VI:L/VA:N/SC:N/SI:N/SA:N. Thanks Yonatan Drori from Tenzai for reporting.
+
+Score: 5.1 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:H/UI:N/VC:N/VI:L/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-68535 [CVSS:4.0 5.1 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-68535</link>
+            <guid isPermaLink="false">CVE-2026-68535</guid>
+            <pubDate>Tue, 15 Sep 2026 14:40:24 GMT</pubDate>
+            <description><![CDATA[Concrete CMS Area API's block-create endpoint in versions 9.2.0 to 9.5.2 did not invoke the block type controller's validate() method on submitted data, which, for file-referencing blocks such as hero_image and gallery, is where the referenced file is authorized against the user's file-manager visibility. As a result, an authenticated user holding the block-add scope could store, and cause the page to render, a reference to a file that the file-manager authorization policy would otherwise reject, disclosing that file's URL and preview to the editor and to visitors of the affected page. Under public file storage, the URL and thumbnail are exposed directly; under private storage, the disclosure is limited by the permission-checked download URL. The Concrete CMS security team gave this vulnerability a CVSS v4.0 score of 5.1 with vector CVSS:4.0/AV:N/AC:L/AT:N/PR:H/UI:N/VC:N/VI:L/VA:L/SC:N/SI:N/SA:N. Thanks riodrwn for reporting.
+
+Score: 5.1 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:H/UI:N/VC:N/VI:L/VA:L/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-81907 [CVSS:4.0 6.1 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-81907</link>
+            <guid isPermaLink="false">CVE-2026-81907</guid>
+            <pubDate>Tue, 15 Sep 2026 14:40:24 GMT</pubDate>
+            <description><![CDATA[Concrete CMS 9.5.2 and below is vulnerable to Cross-Site Request Forgery (CSRF) in the Express "Clear Entries" function (POST /index.php/dashboard/system/express/entities/delete_entries) because the controller records but does not enforce a failed CSRF token check, allowing the destructive operation to proceed when the token is missing or invalid. A remote unauthenticated attacker can force an authenticated administrator who visits an attacker-controlled page to permanently delete all entries belonging to an attacker-selected Express entity on a web application to which the administrator is currently authenticated. Because the default Contact Express object ships with a fixed entity UUID, the target identifier can be obtained without dashboard access. The Concrete CMS security team gave this vulnerability a CVSS v4.0 score of 6.1 with vector CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:P/VC:N/VI:H/VA:H/SC:N/SI:N/SA:N. Thanks Pratik Zanjurne for reporting.
+
+Score: 6.1 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:P/VC:N/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-81917 [CVSS:4.0 5.1 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-81917</link>
+            <guid isPermaLink="false">CVE-2026-81917</guid>
+            <pubDate>Tue, 15 Sep 2026 14:40:24 GMT</pubDate>
+            <description><![CDATA[Concrete CMS below 9.5.3 does not apply HTML output escaping to the file description and tags fields when rendering the Document Library block, so a user with permission to edit file properties could store a script payload that executed in the browser of any visitor to a page displaying the block with the description or tags column enabled, including unauthenticated visitors. Successful exploitation could allow theft of session data or actions performed in the visitor's context. The block controller returned the description and tags values without the h() escaping already applied to the title column, and the block view template wrote the returned value directly into the results table The Concrete CMS security team gave this vulnerability a CVSS v4.0 score of 5.1 with vector CVSS:4.0/AV:N/AC:L/AT:P/PR:H/UI:N/VC:L/VI:L/VA:N/SC:H/SI:H/SA:N. Thanks Nguyen Manh Thuan for reporting.
+
+Score: 5.1 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:P/PR:H/UI:N/VC:L/VI:L/VA:N/SC:H/SI:H/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-81918 [CVSS:4.0 4.8 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-81918</link>
+            <guid isPermaLink="false">CVE-2026-81918</guid>
+            <pubDate>Tue, 15 Sep 2026 14:40:24 GMT</pubDate>
+            <description><![CDATA[Concrete CMS below 9.5.3 is vulnerable to Stored XSS via the Date Format field in the Page Attribute Display block. A user with edit_page_contents permissions could store a payload which executes in the browser of any visitor who viewed a page where the block was configured to display a date-type attribute. The Concrete CMS security team gave this vulnerability a CVSS v4.0 score of 4.8 with vector CVSS:4.0/AV:N/AC:L/AT:N/PR:H/UI:P/VC:L/VI:L/VA:N/SC:N/SI:N/SA:N. Thanks Oriol Ortiz for reporting.
+
+Score: 4.8 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:H/UI:P/VC:L/VI:L/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-18119 [CVSS:4.0 7 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-18119</link>
+            <guid isPermaLink="false">CVE-2026-18119</guid>
+            <pubDate>Tue, 15 Sep 2026 14:40:24 GMT</pubDate>
+            <description><![CDATA[Concrete CMS below 9.5.3 did not sanitize custom style values in the Block Design dialog before writing them into page CSS via a DOM sink, permitting stored cross-site scripting. An editor-level user could execute script in an administrator's session and escalate privileges. The Concrete CMS security team gave this vulnerability a CVSS v4.0 score of 7.0 with vector CVSS:4.0/AV:N/AC:L/AT:N/PR:H/UI:P/VC:L/VI:H/VA:H/SC:N/SI:N/SA:N. Thanks Nguyen Manh Thuan for reporting.
+
+Score: 7 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:H/UI:P/VC:L/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-81901 [CVSS:4.0 7.2 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-81901</link>
+            <guid isPermaLink="false">CVE-2026-81901</guid>
+            <pubDate>Tue, 15 Sep 2026 14:40:24 GMT</pubDate>
+            <description><![CDATA[In Concrete CMS 9.2.0 through 9.5.2, the REST API page update endpoint (PUT /ccm/api/1.0/pages/{cID}) did not enforce page-property, page-template, or page-type authorization. A user granted only content-editing rights on a page could therefore alter its properties, template, and type through the API, and could set the header_extra_content attribute, which is rendered unescaped into the head element of every page, to persist JavaScript that executed in the browser of every visitor, including higher-privileged reviewers who approve the page version. The Concrete CMS security team gave this vulnerability a CVSS v4.0 score of 7.2 with vector CVSS:4.0/AV:N/AC:L/AT:P/PR:H/UI:P/VC:H/VI:H/VA:N/SC:N/SI:N/SA:N. Thanks Yonatan Drori from Tenzai for reporting.
+
+Score: 7.2 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:P/PR:H/UI:P/VC:H/VI:H/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-81902 [CVSS:4.0 7.1 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-81902</link>
+            <guid isPermaLink="false">CVE-2026-81902</guid>
+            <pubDate>Tue, 15 Sep 2026 14:40:24 GMT</pubDate>
+            <description><![CDATA[Concrete CMS 9 through 9.5.2 did not validate a CSRF token in the orphaned block removal panel action (removeOrphanedBlocks). A remote attacker could craft a request that, when loaded by an authenticated user holding edit permission on the target page, deleted every block on that page's current version; blocks not aliased to another page or scrapbook entry were also removed from the global Blocks table and their block-type data table, permanently destroying the content. The Concrete CMS security team gave this vulnerability a CVSS v4.0 score of 7.1 with vector CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:P/VC:N/VI:H/VA:N/SC:N/SI:N/SA:N. Thanks Yonatan Drori from Tenzai for reporting.
+
+Score: 7.1 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:P/VC:N/VI:H/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-81903 [CVSS:4.0 7 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-81903</link>
+            <guid isPermaLink="false">CVE-2026-81903</guid>
+            <pubDate>Tue, 15 Sep 2026 14:40:24 GMT</pubDate>
+            <description><![CDATA[Concrete CMS versions 9.0.0 to 9.5.2 stored the Page Container icon value submitted through the dashboard without validating it against the set of known container icons. The unvalidated value was later concatenated into the src attribute of an img tag by a helper that did not encode attribute output, and was rendered raw in the Containers dashboard list and editor views. A user with delegated access to the Page Containers dashboard could store a crafted icon value that broke out of the src attribute and executed script in the authenticated session of another editor or administrator who viewed the list, enabling session token theft and privileged dashboard actions. The Concrete CMS security team gave this vulnerability a CVSS v4.0 score of 7.0 with vector CVSS:4.0/AV:A/AC:L/AT:N/PR:H/UI:P/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N. Thanks Andrew Gonzalez for reporting.
+
+Score: 7 (HIGH)
+Vector: CVSS:4.0/AV:A/AC:L/AT:N/PR:H/UI:P/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-18117 [CVSS:4.0 7.3 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-18117</link>
+            <guid isPermaLink="false">CVE-2026-18117</guid>
+            <pubDate>Tue, 15 Sep 2026 14:40:24 GMT</pubDate>
+            <description><![CDATA[Concrete CMS 9.0.0 through 9.5.3 is vulnerable to stored XSS via the custom page alias name (customAliasName) because the Edit Alias dialog applied only trim() to the submitted value and performed no input neutralization. An authenticated user holding canWrite (editor) permission on a page could store a malicious alias name that was later rendered unescaped in the administrative Sitemap panel, where it executed automatically in any administrator or editor session that opened the panel, allowing an editor to escalate to administrator through the victim's active session. The Concrete CMS security team gave this vulnerability a CVSS v4.0 score of 7.3 with vector CVSS:4.0/AV:N/AC:L/AT:P/PR:H/UI:P/VC:H/VI:H/VA:L/SC:N/SI:N/SA:N. Thanks Nguyen Manh Thuan for reporting.
+
+Score: 7.3 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:P/PR:H/UI:P/VC:H/VI:H/VA:L/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-18116 [CVSS:4.0 7.3 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-18116</link>
+            <guid isPermaLink="false">CVE-2026-18116</guid>
+            <pubDate>Tue, 15 Sep 2026 14:40:24 GMT</pubDate>
+            <description><![CDATA[Concrete CMS 8.3.0 to 9.5.2 stored calendar event names without sanitization and rendered them without HTML escaping in the workflow approval and deletion notifications shown in the dashboard "Waiting For Me" block. A registered user permitted to add events to a calendar governed by an approval workflow could submit an event whose name contained a script payload, which then executed in an administrator's browser when the pending request was displayed and could be used to create a new administrator account. The Concrete CMS security team gave this vulnerability a CVSS v4.0 score of 7.3 with vector CVSS:4.0/AV:N/AC:L/AT:P/PR:H/UI:P/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N. Thanks v01demort for reporting.
+
+Score: 7.3 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:P/PR:H/UI:P/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-81900 [CVSS:4.0 7.3 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-81900</link>
+            <guid isPermaLink="false">CVE-2026-81900</guid>
+            <pubDate>Tue, 15 Sep 2026 14:40:24 GMT</pubDate>
+            <description><![CDATA[Concrete CMS before 9.5.3 applied only trim() to the YouTube block's stored width and height values and printed them into iframe HTML attributes without escaping or integer casting, resulting in stored cross-site scripting. A user with edit_block permission could inject an event handler that executed script for visitors rendering the page, acting with administrative privileges where the victim was an administrator. The Concrete CMS security team gave this vulnerability a CVSS v4.0 score of 7.3 with vector CVSS:4.0/AV:N/AC:L/AT:P/PR:H/UI:P/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N. Thanks sh4d0byss for reporting.
+
+Score: 7.3 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:P/PR:H/UI:P/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-84933 [CVSS:3.1 8.2 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-84933</link>
+            <guid isPermaLink="false">CVE-2026-84933</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:55 GMT</pubDate>
+            <description><![CDATA[undici's cache interceptor does not handle the Set-Cookie response header anywhere in its cache path, so it neither refuses to store nor strips that header. In shared cache mode, which is the default, an otherwise cacheable response that carries a Set-Cookie header, for example one marked with a public and max-age directive, is stored and then re-served to a later caller that matches the same cache key. As a result one caller's cookie is disclosed to a different caller, and an untrusted server can inject cookies into cached responses served to all subsequent callers. This violates the requirement that a shared cache must not store cookies. This affects undici versions from 7.0.0 up to 7.29.1 and from 8.0.0 up to 8.10.2. Users should upgrade to undici 7.29.1 or 8.10.2.
+
+Score: 8.2 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:L/A:N]]></description>
+        </item>
+        <item>
             <title><![CDATA[CVE-2026-86917 [CVSS:3.1 7.8 HIGH]]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-86917</link>
             <guid isPermaLink="false">CVE-2026-86917</guid>
-            <pubDate>Tue, 15 Sep 2026 04:18:18 GMT</pubDate>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
             <description><![CDATA[A permissions issue was addressed with additional restrictions. This issue is fixed in macOS Golden Gate 27, macOS Sequoia 15.8, macOS Tahoe 26.7. An app may be able to gain root privileges.
 
 Score: 7.8 (HIGH)
 Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-28960 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-28960</link>
+            <guid isPermaLink="false">CVE-2026-28960</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[A denial-of-service issue was addressed with improved validation. This issue is fixed in iOS 18.7.10 and iPadOS 18.7.10. A remote attacker may be able to cause a denial-of-service.
+
+Score: 7.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-43677 [CVSS:3.1 6.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-43677</link>
+            <guid isPermaLink="false">CVE-2026-43677</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[An out-of-bounds write issue was addressed by removing the vulnerable code. This issue is fixed in macOS Golden Gate 27, macOS Sequoia 15.8, macOS Tahoe 26.7. Connecting to a malicious WebDAV server may lead to unexpected app termination.
+
+Score: 6.5 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-43689 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-43689</link>
+            <guid isPermaLink="false">CVE-2026-43689</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[A permissions issue was addressed with additional restrictions. This issue is fixed in iOS 26.7 and iPadOS 26.7, iOS 27 and iPadOS 27, macOS Golden Gate 27, visionOS 27. A malicious app may be able to gain root privileges.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-43691 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-43691</link>
+            <guid isPermaLink="false">CVE-2026-43691</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[A path handling issue was addressed with improved validation. This issue is fixed in macOS Golden Gate 27, macOS Sequoia 15.8, macOS Tahoe 26.7. An app may be able to gain root privileges.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-43692 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-43692</link>
+            <guid isPermaLink="false">CVE-2026-43692</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[A validation issue was addressed with improved input sanitization. This issue is fixed in macOS Golden Gate 27, macOS Sequoia 15.8, macOS Tahoe 26.7. A remote user may cause an unexpected app termination or arbitrary code execution.
+
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-43783 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-43783</link>
+            <guid isPermaLink="false">CVE-2026-43783</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[A race condition was addressed with improved locking. This issue is fixed in macOS Tahoe 26.6. A malicious app may be able to gain root privileges.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-43786 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-43786</link>
+            <guid isPermaLink="false">CVE-2026-43786</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[This issue was addressed with additional entitlement checks. This issue is fixed in macOS Golden Gate 27, macOS Sequoia 15.8, macOS Tahoe 26.7. An app may be able to gain root privileges.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-64701 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64701</link>
+            <guid isPermaLink="false">CVE-2026-64701</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[A permissions issue was addressed with additional restrictions. This issue is fixed in macOS Sequoia 15.7.8, macOS Tahoe 26.6. A malicious app may be able to gain root privileges.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-64712 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64712</link>
+            <guid isPermaLink="false">CVE-2026-64712</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[This issue was addressed with improved checks. This issue is fixed in macOS Golden Gate 27, macOS Sequoia 15.8, macOS Tahoe 26.7. An app may be able to gain root privileges.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-64752 [CVSS:3.1 7.3 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64752</link>
+            <guid isPermaLink="false">CVE-2026-64752</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[A memory corruption issue was addressed by removing the vulnerable code. This issue is fixed in iOS 27 and iPadOS 27, macOS Golden Gate 27, visionOS 27. Processing a maliciously crafted image may lead to arbitrary code execution.
+
+Score: 7.3 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:R/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-65352 [CVSS:3.1 4.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-65352</link>
+            <guid isPermaLink="false">CVE-2026-65352</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[An information disclosure issue was addressed with improved state management. This issue is fixed in iOS 26.6.1 and iPadOS 26.6.1, macOS Tahoe 26.6.2, visionOS 26.6.1. A website may be able to determine a user's IP address with Private Relay turned on.
+
+Score: 4.3 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-65355 [CVSS:3.1 4.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-65355</link>
+            <guid isPermaLink="false">CVE-2026-65355</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[An information disclosure issue was addressed with improved state management. This issue is fixed in iOS 18.7.10 and iPadOS 18.7.10, iOS 26.6.1 and iPadOS 26.6.1, macOS Tahoe 26.6.2, visionOS 26.6.1. A website may be able to determine a user's IP address with Private Relay turned on.
+
+Score: 4.3 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-65362 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-65362</link>
+            <guid isPermaLink="false">CVE-2026-65362</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[This issue was addressed with improved checks. This issue is fixed in macOS Golden Gate 27, macOS Sequoia 15.8, macOS Tahoe 26.7. An app may be able to gain root privileges.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-65364 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-65364</link>
+            <guid isPermaLink="false">CVE-2026-65364</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[An out-of-bounds read was addressed with improved bounds checking. This issue is fixed in macOS Golden Gate 27, macOS Sequoia 15.8, macOS Tahoe 26.7. A remote attacker may be able to cause unexpected system termination.
+
+Score: 7.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-65391]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-65391</link>
+            <guid isPermaLink="false">CVE-2026-65391</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[An out-of-bounds write issue was addressed with improved bounds checking. This issue is fixed in Safari 26.6.1, iOS 26.6.1 and iPadOS 26.6.1, macOS Tahoe 26.6.2, tvOS 27, visionOS 27, watchOS 27. Processing maliciously crafted web content may lead to memory corruption.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-65393]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-65393</link>
+            <guid isPermaLink="false">CVE-2026-65393</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[A permissions issue was addressed with improved validation. This issue is fixed in Xcode 27, macOS Golden Gate 27. An app may be able to access user-sensitive data.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-65395]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-65395</link>
+            <guid isPermaLink="false">CVE-2026-65395</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[An out-of-bounds write issue was addressed with improved bounds checking. This issue is fixed in iOS 26.7 and iPadOS 26.7, iOS 27 and iPadOS 27, macOS Golden Gate 27, macOS Sequoia 15.8, macOS Tahoe 26.7, tvOS 27, visionOS 27. Processing a maliciously crafted image may result in memory corruption.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-65398]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-65398</link>
+            <guid isPermaLink="false">CVE-2026-65398</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[An out-of-bounds access issue was addressed with improved bounds checking. This issue is fixed in iOS 27 and iPadOS 27, macOS Golden Gate 27, tvOS 27, visionOS 27, watchOS 27. An app may be able to cause unexpected system termination or corrupt kernel memory.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-65399]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-65399</link>
+            <guid isPermaLink="false">CVE-2026-65399</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[A file quarantine bypass was addressed with additional checks. This issue is fixed in iOS 26.7 and iPadOS 26.7, iOS 27 and iPadOS 27, macOS Golden Gate 27, macOS Sequoia 15.8, macOS Tahoe 26.7, visionOS 27, watchOS 27. An archive may be able to bypass Gatekeeper.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-65401]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-65401</link>
+            <guid isPermaLink="false">CVE-2026-65401</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[A race condition was addressed with improved state handling. This issue is fixed in macOS Golden Gate 27, macOS Tahoe 26.7. An app may be able to cause unexpected system termination.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-65402]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-65402</link>
+            <guid isPermaLink="false">CVE-2026-65402</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[A use after free issue was addressed with improved memory management. This issue is fixed in iOS 26.7 and iPadOS 26.7, iOS 27 and iPadOS 27, macOS Golden Gate 27, macOS Sequoia 15.8, macOS Tahoe 26.7, tvOS 27, visionOS 27, watchOS 27. An app may be able to cause unexpected system termination.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-65403]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-65403</link>
+            <guid isPermaLink="false">CVE-2026-65403</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[This issue was addressed with improved checks. This issue is fixed in iOS 26.7 and iPadOS 26.7, iOS 27 and iPadOS 27, macOS Golden Gate 27, macOS Sequoia 15.8, macOS Tahoe 26.7, visionOS 27, watchOS 27. An app may be able to access sensitive user data.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-65404]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-65404</link>
+            <guid isPermaLink="false">CVE-2026-65404</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[An authorization issue was addressed with improved state management. This issue is fixed in iOS 18.7.10 and iPadOS 18.7.10, iOS 27 and iPadOS 27, macOS Golden Gate 27, macOS Sequoia 15.7.8, macOS Sonoma 14.8.8. A malicious application may be able to bypass Privacy preferences.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-65405]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-65405</link>
+            <guid isPermaLink="false">CVE-2026-65405</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[A memory initialization issue was addressed with improved memory handling. This issue is fixed in iOS 26.7 and iPadOS 26.7, iOS 27 and iPadOS 27, macOS Golden Gate 27, macOS Sequoia 15.8, macOS Tahoe 26.7, tvOS 27, visionOS 27, watchOS 27. An app may be able to determine kernel memory layout.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-65406]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-65406</link>
+            <guid isPermaLink="false">CVE-2026-65406</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[A logic issue was addressed with improved validation. This issue is fixed in iOS 26.7 and iPadOS 26.7, iOS 27 and iPadOS 27, macOS Golden Gate 27, macOS Sequoia 15.8, macOS Tahoe 26.7, tvOS 27, visionOS 27. An app may be able to access sensitive user data.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-65407]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-65407</link>
+            <guid isPermaLink="false">CVE-2026-65407</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[A use after free issue was addressed with improved memory management. This issue is fixed in iOS 26.6 and iPadOS 26.6, iOS 26.7 and iPadOS 26.7, iOS 27 and iPadOS 27, macOS Golden Gate 27, macOS Sequoia 15.8, macOS Tahoe 26.6, macOS Tahoe 26.7, tvOS 26.6, tvOS 27, visionOS 26.6, visionOS 27, watchOS 26.6, watchOS 27. An app may be able to cause unexpected system termination.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-65408]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-65408</link>
+            <guid isPermaLink="false">CVE-2026-65408</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[An integer overflow was addressed with improved input validation. This issue is fixed in iOS 26.7 and iPadOS 26.7, iOS 27 and iPadOS 27, macOS Golden Gate 27, macOS Sequoia 15.8, macOS Tahoe 26.7. An app may be able to cause unexpected system termination.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-65409]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-65409</link>
+            <guid isPermaLink="false">CVE-2026-65409</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[A type confusion issue was addressed with improved memory handling. This issue is fixed in iOS 26.7 and iPadOS 26.7, iOS 27 and iPadOS 27, macOS Golden Gate 27, macOS Sequoia 15.8, macOS Tahoe 26.7, tvOS 27, visionOS 27, watchOS 27. An app may be able to cause a denial of service.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-65410]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-65410</link>
+            <guid isPermaLink="false">CVE-2026-65410</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[The issue was addressed with improved checks. This issue is fixed in iOS 26.7 and iPadOS 26.7, iOS 27 and iPadOS 27, macOS Golden Gate 27, macOS Tahoe 26.7, tvOS 27, visionOS 27, watchOS 27. An app may be able to cause unexpected system termination.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-65411]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-65411</link>
+            <guid isPermaLink="false">CVE-2026-65411</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[A path handling issue was addressed with improved validation. This issue is fixed in iOS 26.7 and iPadOS 26.7, iOS 27 and iPadOS 27, visionOS 27. An app may be able to modify protected parts of the file system.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-65412]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-65412</link>
+            <guid isPermaLink="false">CVE-2026-65412</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[A null pointer dereference was addressed with improved input validation. This issue is fixed in iOS 26.7 and iPadOS 26.7, iOS 27 and iPadOS 27, macOS Golden Gate 27, macOS Sequoia 15.8, macOS Tahoe 26.7, visionOS 27, watchOS 27. Processing web content may lead to a denial-of-service.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-65413]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-65413</link>
+            <guid isPermaLink="false">CVE-2026-65413</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[An integer overflow was addressed with improved input validation. This issue is fixed in macOS Golden Gate 27, macOS Sequoia 15.8, macOS Tahoe 26.7. An app may be able to cause a denial of service.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-65414 [CVSS:3.1 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-65414</link>
+            <guid isPermaLink="false">CVE-2026-65414</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[An out-of-bounds write issue was addressed with improved bounds checking. This issue is fixed in iOS 26.7 and iPadOS 26.7, iOS 27 and iPadOS 27, macOS Golden Gate 27, macOS Sequoia 15.8, macOS Tahoe 26.7, tvOS 27, visionOS 27, watchOS 27. A remote attacker may be able to cause unexpected app termination or arbitrary code execution.
+
+Score: 9.8 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-65415]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-65415</link>
+            <guid isPermaLink="false">CVE-2026-65415</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[A race condition was addressed with additional validation. This issue is fixed in iOS 27 and iPadOS 27, macOS Golden Gate 27, tvOS 27, visionOS 27, watchOS 27. A local user may be able to cause unexpected system termination or read kernel memory.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-84505 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-84505</link>
+            <guid isPermaLink="false">CVE-2026-84505</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[An out-of-bounds write issue was addressed with improved bounds checking. This issue is fixed in macOS Golden Gate 27, macOS Sequoia 15.8, macOS Tahoe 26.7. An app may be able to gain root privileges.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-84506 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-84506</link>
+            <guid isPermaLink="false">CVE-2026-84506</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[A use after free issue was addressed with improved memory management. This issue is fixed in macOS Golden Gate 27, macOS Sequoia 15.8, macOS Tahoe 26.7. An app may be able to execute arbitrary code with kernel privileges.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-84518 [CVSS:3.1 4.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-84518</link>
+            <guid isPermaLink="false">CVE-2026-84518</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[This issue was addressed through improved state management. This issue is fixed in Safari 27, iOS 27 and iPadOS 27, macOS Golden Gate 27. A malicious website may be able to determine what apps a user has installed.
+
+Score: 4.3 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-84538 [CVSS:3.1 6.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-84538</link>
+            <guid isPermaLink="false">CVE-2026-84538</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[A denial-of-service issue was addressed with improved input validation. This issue is fixed in macOS Golden Gate 27, macOS Sequoia 15.8, macOS Tahoe 26.7. A remote attacker may be able to cause a denial-of-service.
+
+Score: 6.5 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-84553 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-84553</link>
+            <guid isPermaLink="false">CVE-2026-84553</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[A resource exhaustion issue was addressed with improved input validation. This issue is fixed in macOS Golden Gate 27, macOS Sequoia 15.8, macOS Tahoe 26.7. A remote attacker may be able to cause a denial-of-service.
+
+Score: 7.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-84568 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-84568</link>
+            <guid isPermaLink="false">CVE-2026-84568</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[A path traversal issue was addressed with improved path validation. This issue is fixed in macOS Golden Gate 27, macOS Sequoia 15.8, macOS Tahoe 26.7. An attacker with control of a network directory server may be able to execute arbitrary code with root privileges.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-84607 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-84607</link>
+            <guid isPermaLink="false">CVE-2026-84607</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[A race condition was addressed with improved state management. This issue is fixed in iOS 26.7 and iPadOS 26.7, iOS 27 and iPadOS 27, macOS Golden Gate 27, macOS Sequoia 15.8, macOS Tahoe 26.7, tvOS 27, visionOS 27, watchOS 27. A sandboxed app may be able to execute arbitrary code with kernel privileges.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:C/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-84631 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-84631</link>
+            <guid isPermaLink="false">CVE-2026-84631</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[This issue was addressed with additional entitlement checks. This issue is fixed in macOS Golden Gate 27. An app may be able to gain root privileges.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-86876 [CVSS:3.1 5.2 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-86876</link>
+            <guid isPermaLink="false">CVE-2026-86876</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[An out-of-bounds write issue was addressed with improved bounds checking. This issue is fixed in iOS 26.7 and iPadOS 26.7, iOS 27 and iPadOS 27, macOS Golden Gate 27, macOS Sequoia 15.8, macOS Tahoe 26.7, visionOS 27, watchOS 27. A sandboxed process may be able to circumvent sandbox restrictions.
+
+Score: 5.2 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:C/C:L/I:L/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-86879 [CVSS:3.1 6.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-86879</link>
+            <guid isPermaLink="false">CVE-2026-86879</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:26 GMT</pubDate>
+            <description><![CDATA[A denial-of-service issue was addressed with improved input validation. This issue is fixed in iOS 27 and iPadOS 27. A remote attacker may be able to cause a denial-of-service.
+
+Score: 6.5 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-20683]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-20683</link>
+            <guid isPermaLink="false">CVE-2026-20683</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:06 GMT</pubDate>
+            <description><![CDATA[An authentication issue was addressed with improved state management. This issue is fixed in iOS 27 and iPadOS 27, macOS Golden Gate 27, macOS Sequoia 15.8, macOS Tahoe 26.7, visionOS 27. An app may be able to use the Sign In With Apple authentication flow to access the user's Apple Account.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-28836]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-28836</link>
+            <guid isPermaLink="false">CVE-2026-28836</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:06 GMT</pubDate>
+            <description><![CDATA[A correctness issue was addressed with improved checks. This issue is fixed in macOS Sonoma 14.8.8. An attacker with physical access may be able to silently persist an Apple Account on an erased device.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-28899]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-28899</link>
+            <guid isPermaLink="false">CVE-2026-28899</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:06 GMT</pubDate>
+            <description><![CDATA[A logic issue was addressed with improved checks. This issue is fixed in macOS Golden Gate 27, macOS Sequoia 15.8, macOS Tahoe 26.6, macOS Tahoe 26.7. An app may bypass Gatekeeper checks.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-28933]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-28933</link>
+            <guid isPermaLink="false">CVE-2026-28933</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:06 GMT</pubDate>
+            <description><![CDATA[A use-after-free issue was addressed with improved memory management. This issue is fixed in macOS Sequoia 15.7.8, macOS Sonoma 14.8.8, macOS Tahoe 26.6. An app may be able to cause unexpected system termination.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-28934]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-28934</link>
+            <guid isPermaLink="false">CVE-2026-28934</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:06 GMT</pubDate>
+            <description><![CDATA[A buffer overflow was addressed with improved bounds checking. This issue is fixed in macOS Golden Gate 27, macOS Sequoia 15.8, macOS Tahoe 26.7. Mounting a malicious disk image may cause unexpected system termination.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-28935]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-28935</link>
+            <guid isPermaLink="false">CVE-2026-28935</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:06 GMT</pubDate>
+            <description><![CDATA[The issue was addressed with improved memory handling. This issue is fixed in iOS 26.6.1 and iPadOS 26.6.1, macOS Sequoia 15.8, macOS Tahoe 26.6.2, tvOS 27, visionOS 27, watchOS 27. An app may be able to cause unexpected system termination or corrupt kernel memory.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-28937]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-28937</link>
+            <guid isPermaLink="false">CVE-2026-28937</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:06 GMT</pubDate>
+            <description><![CDATA[This issue was addressed through improved state management. This issue is fixed in macOS Golden Gate 27. An app may be able to access sensitive user data.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-28938]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-28938</link>
+            <guid isPermaLink="false">CVE-2026-28938</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:06 GMT</pubDate>
+            <description><![CDATA[A privacy issue was addressed by moving sensitive data. This issue is fixed in iOS 26.6 and iPadOS 26.6. An app may be able to fingerprint the user.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-28966]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-28966</link>
+            <guid isPermaLink="false">CVE-2026-28966</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:06 GMT</pubDate>
+            <description><![CDATA[An out-of-bounds write issue was addressed with improved bounds checking. This issue is fixed in iOS 26.7 and iPadOS 26.7, iOS 27 and iPadOS 27, macOS Golden Gate 27, macOS Sequoia 15.8, macOS Tahoe 26.7, tvOS 27, visionOS 27. Processing a maliciously crafted file may lead to unexpected app termination.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-28968]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-28968</link>
+            <guid isPermaLink="false">CVE-2026-28968</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:06 GMT</pubDate>
+            <description><![CDATA[An out-of-bounds write issue was addressed with improved bounds checking. This issue is fixed in iOS 26.7 and iPadOS 26.7, iOS 27 and iPadOS 27, macOS Golden Gate 27, macOS Sequoia 15.8, macOS Tahoe 26.7, tvOS 27, visionOS 27, watchOS 27. An app may be able to cause unexpected system termination or corrupt kernel memory.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-43664]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-43664</link>
+            <guid isPermaLink="false">CVE-2026-43664</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:06 GMT</pubDate>
+            <description><![CDATA[This issue was addressed with improved data protection. This issue is fixed in iOS 26.7 and iPadOS 26.7, iOS 27 and iPadOS 27, macOS Golden Gate 27, macOS Sequoia 15.8, macOS Tahoe 26.7, tvOS 27, watchOS 27. An app may be able to access sensitive user data.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-43674]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-43674</link>
+            <guid isPermaLink="false">CVE-2026-43674</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:06 GMT</pubDate>
+            <description><![CDATA[An authentication issue was addressed with improved state management. This issue is fixed in iOS 27 and iPadOS 27. An attacker with physical access to an unlocked device may be able to view Wi-Fi passwords without authentication.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-43683]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-43683</link>
+            <guid isPermaLink="false">CVE-2026-43683</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:06 GMT</pubDate>
+            <description><![CDATA[An out-of-bounds read was addressed with improved bounds checking. This issue is fixed in macOS Golden Gate 27, macOS Sequoia 15.8, macOS Tahoe 26.7. An app may be able to cause unexpected process termination or disclose process memory.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-43684]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-43684</link>
+            <guid isPermaLink="false">CVE-2026-43684</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:06 GMT</pubDate>
+            <description><![CDATA[A use-after-free issue was addressed with improved memory management. This issue is fixed in iOS 26.7 and iPadOS 26.7, macOS Golden Gate 27, macOS Sequoia 15.8. An app may be able to cause unexpected system termination or corrupt kernel memory.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-43686]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-43686</link>
+            <guid isPermaLink="false">CVE-2026-43686</guid>
+            <pubDate>Tue, 15 Sep 2026 14:38:06 GMT</pubDate>
+            <description><![CDATA[A use-after-free issue was addressed with improved memory management. This issue is fixed in iOS 26.7 and iPadOS 26.7, iOS 27 and iPadOS 27, macOS Golden Gate 27, macOS Sequoia 15.8, macOS Tahoe 26.7, tvOS 27, visionOS 27, watchOS 27. Connecting to a malicious NFS server may lead to kernel memory corruption.]]></description>
         </item>
     </channel>
 </rss>
