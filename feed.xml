@@ -4,11 +4,139 @@
         <title>NVD CVE Feed</title>
         <link>https://github.com/TasukuKuchinomachi/NVD-RSS-feed</link>
         <description>Latest CVE entries from the National Vulnerability Database. This product uses the NVD API but is not endorsed or certified by the NVD.</description>
-        <lastBuildDate>Sat, 26 Sep 2026 07:17:03 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 26 Sep 2026 12:17:35 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>National Vulnerability Database - NIST</copyright>
+        <item>
+            <title><![CDATA[CVE-2026-94367 [CVSS:3.1 7.2 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-94367</link>
+            <guid isPermaLink="false">CVE-2026-94367</guid>
+            <pubDate>Sat, 26 Sep 2026 12:17:35 GMT</pubDate>
+            <description><![CDATA[OpenEye Apex Network Video Recorder (NVR) firmware 3.2.9.376 contains an OS command injection vulnerability in recbackup. An authenticated administrator can supply crafted backup-area configuration input that is passed to a shell command, allowing commands to execute with the privileges of the nvr user. The underlying design has been present since at least firmware 2.2.3.4.
+
+This vulnerability is resolved in OpenEye Apex version 3.4.3.
+
+Score: 7.2 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-100314 [CVSS:4.0 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-100314</link>
+            <guid isPermaLink="false">CVE-2026-100314</guid>
+            <pubDate>Sat, 26 Sep 2026 12:17:35 GMT</pubDate>
+            <description><![CDATA[A security vulnerability has been detected in mathurvishal CloudClassroom-PHP-Project up to 5dadec098bfbbf3300d60c3494db3fb95b66e7be. This impacts an unknown function of the file updatedetailsfromstudent.php. The manipulation of the argument eno leads to sql injection. The attack can be initiated remotely. The exploit has been disclosed publicly and may be used. Continious delivery with rolling releases is used by this product. Therefore, no version details of affected nor updated releases are available. The vendor was contacted early about this disclosure but did not respond in any way.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-100313 [CVSS:4.0 2.1 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-100313</link>
+            <guid isPermaLink="false">CVE-2026-100313</guid>
+            <pubDate>Sat, 26 Sep 2026 12:17:33 GMT</pubDate>
+            <description><![CDATA[A weakness has been identified in mathurvishal CloudClassroom-PHP-Project up to 5dadec098bfbbf3300d60c3494db3fb95b66e7be. This affects an unknown function of the file updatequery.php. Executing a manipulation of the argument queryx can lead to cross site scripting. It is possible to launch the attack remotely. The exploit has been made available to the public and could be used for attacks. This product takes the approach of rolling releases to provide continious delivery. Therefore, version details for affected and updated releases are not available. The vendor was contacted early about this disclosure but did not respond in any way.
+
+Score: 2.1 (LOW)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:P/VC:N/VI:L/VA:N/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-98163]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-98163</link>
+            <guid isPermaLink="false">CVE-2026-98163</guid>
+            <pubDate>Sat, 26 Sep 2026 09:16:38 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+cgroup: Avoid iteration of dying tasks with zero refcount
+
+The commit 260fbcb92bbea ("cgroup: Move dying_tasks cleanup from
+cgroup_task_release() to cgroup_task_free()") extended the lifetime of
+tasks on the dying_tasks list.
+The iterators have provision to go through dying_tasks because of
+dying threadgroup leaders or explicit CSS_TASK_ITER_WITH_DEAD, however,
+it was expected that such tasks can obtain a new reference (that is
+possible before cgroup_task_release()/put_task_struct_rcu_user()).
+The tasks after cgroup_task_release() and before cgroup_task_free()
+are subject to race when they may or may not have ->usage count > 0.
+
+The race window is between css_task_iter_next() invocations
+when css_set_lock is released and we may arrive at a new ->task_pos.
+The iterator should not attempt to resurrect tasks whose ->usage count
+dropped to zero. (When that happens, __put_task_struct_rcu_cb() is
+already imminent and the returned task_struct would could be used
+after free.)
+
+As for the fix, we cannot simply check the signal->live count of a task
+on the dying list because that won't distinguish regular zombies waiting
+to be reaped from RCU remnant tasks that are going to be free'd.
+Therefore add an extra check to rule out ->usage==0 tasks from any
+iteration.
+
+The repeat: loop in css_task_iter_advance() doesn't consider ->usage
+count, so add a new loop to css_task_iter_next() to skip de-used tasks
+on the dying_list.
+
+Rough illustration of the possible race
+
+  R (reader of cgroup.procs)         T (thread)                       L (group leader)
+  ---------------------------------  -------------------------------- --------------------------------
+                                                                      L exits, signal->live > 0
+                                                                      cgroup_task_dead(L)
+                                                                        css_set_skip_task_iters() // skips only cset->tasks
+                                                                        list_add_tail(&L->cg_list, &cset->dying_tasks)
+  css_task_iter_next()
+    take css_set_lock
+    css_task_iter_advance()
+      leader && signal->live != 0
+      => it->task_pos = &L->cg_list
+    release css_set_lock
+                                     T exits
+                                     --signal->live == 0
+				     cgroup_task_dead(T) // css_set_lock
+                                     release_task(T)
+                                       cgroup_task_release(T)
+                                       release_task(L) // zap_leader
+                                         cgroup_task_release(L)
+                                         put_task_struct_rcu_user(L)
+                                         ...RCU...
+                                         put_task_struct(L)
+                                           L->usage = 0
+                                           /* L still on dying_tasks */
+                                           ...RCU...
+                                           __put_task_struct(L)
+  css_task_iter_next() // another iteration
+    take css_set_lock
+    it->task_pos = &L->cg_list
+    get_task_struct(L)
+      => addition on 0
+    drop css_set_lock
+                                           cgroup_task_free(L)
+                                             css_set_skip_task_iters() // dying skip comes too late
+                                           free_task(L)
+  cgroup_procs_show()
+    task_pid_vnr(L)]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-100312 [CVSS:4.0 2.1 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-100312</link>
+            <guid isPermaLink="false">CVE-2026-100312</guid>
+            <pubDate>Sat, 26 Sep 2026 09:16:37 GMT</pubDate>
+            <description><![CDATA[A security flaw has been discovered in mathurvishal CloudClassroom-PHP-Project up to 5dadec098bfbbf3300d60c3494db3fb95b66e7be. The impacted element is an unknown function of the file /updateguest.php. Performing a manipulation of the argument gname/editassid results in sql injection. It is possible to initiate the attack remotely. The exploit has been released to the public and may be used for attacks. This product is using a rolling release to provide continious delivery. Therefore, no version details for affected nor updated releases are available. The vendor was contacted early about this disclosure but did not respond in any way.
+
+Score: 2.1 (LOW)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-100311 [CVSS:4.0 2 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-100311</link>
+            <guid isPermaLink="false">CVE-2026-100311</guid>
+            <pubDate>Sat, 26 Sep 2026 08:16:32 GMT</pubDate>
+            <description><![CDATA[A vulnerability was identified in mathurvishal CloudClassroom-PHP-Project up to 5dadec098bfbbf3300d60c3494db3fb95b66e7be. The affected element is an unknown function of the file managevideos2.php of the component Faculty Video Management. Such manipulation of the argument V_Title/V_Url/V_Remarks leads to cross site scripting. The attack may be performed from remote. The exploit is publicly available and might be used. This product utilizes a rolling release system for continuous delivery, and as such, version information for affected or updated releases is not disclosed. The vendor was contacted early about this disclosure but did not respond in any way.
+
+Score: 2 (LOW)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:P/VC:N/VI:L/VA:N/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
         <item>
             <title><![CDATA[CVE-2026-96533]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-96533</link>
@@ -911,66 +1039,6 @@ Vector: CVSS:4.0/AV:N/AC:H/AT:P/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X
 
 Score: 7.6 (HIGH)
 Vector: CVSS:4.0/AV:N/AC:H/AT:P/PR:L/UI:N/VC:H/VI:H/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-100539 [CVSS:4.0 2.1 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-100539</link>
-            <guid isPermaLink="false">CVE-2026-100539</guid>
-            <pubDate>Sat, 26 Sep 2026 03:16:59 GMT</pubDate>
-            <description><![CDATA[OpenClaw (npm package 'openclaw') before 2026.8.1 fails to revoke memory tool access when an operator hot-disables memory configuration. Existing memory_search and memory_get tool instances retain the enabled configuration captured at creation time because the execution-time resolver treats explicit disablement like an unavailable configuration snapshot and restores the stale authority. As a result, during an already-running agent turn the model can continue searching and reading durable memory after the operator revoked that access, for the remainder of that run. Exploitation requires memory to be disabled while a previously created memory tool remains active. The issue is fixed in 2026.8.1.
-
-Score: 2.1 (LOW)
-Vector: CVSS:4.0/AV:N/AC:H/AT:P/PR:L/UI:P/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-100538 [CVSS:4.0 7.1 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-100538</link>
-            <guid isPermaLink="false">CVE-2026-100538</guid>
-            <pubDate>Sat, 26 Sep 2026 03:16:59 GMT</pubDate>
-            <description><![CDATA[OpenClaw (npm package 'openclaw') before 2026.8.1 does not apply the originating sender's global or per-agent toolsBySender policy when handling outbound attachments. A sender that has been explicitly denied filesystem read tools can still cause a known local file to be read and returned via a final-response media directive or a message attachment, disclosing local file contents to an admitted requester whose agent turn did not include the read tool. Exploitation requires knowledge or derivation of a useful host path and a delivery flow that accepts local attachments. The issue is fixed in version 2026.8.1.
-
-Score: 7.1 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:N/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-100537 [CVSS:4.0 2.3 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-100537</link>
-            <guid isPermaLink="false">CVE-2026-100537</guid>
-            <pubDate>Sat, 26 Sep 2026 03:16:59 GMT</pubDate>
-            <description><![CDATA[OpenClaw (npm package 'openclaw') before 2026.8.1 fails to apply the originating requester's effective tool policy during Active Memory automatic recall. In deployments that use Active Memory together with requester-specific tool rules, deterministic and hidden recall paths can retrieve durable memory and inject it into the agent's context even when toolsBySender explicitly denies that requester access to the memory tools (memory_search, memory_get). As a result, an admitted but denied sender can receive information derived from durable memory in the agent's response without directly invoking any memory tool. The issue is fixed in 2026.8.1.
-
-Score: 2.3 (LOW)
-Vector: CVSS:4.0/AV:N/AC:H/AT:P/PR:L/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-100536 [CVSS:4.0 7.1 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-100536</link>
-            <guid isPermaLink="false">CVE-2026-100536</guid>
-            <pubDate>Sat, 26 Sep 2026 03:16:59 GMT</pubDate>
-            <description><![CDATA[OpenClaw versions before 2026.8.1 fail to validate all source fields in structured message attachments, allowing attackers to hide unvalidated host paths behind allowed attachment sources. Attackers can exploit this by providing multiple source fields to bypass sandbox path validation and cause Telegram delivery to read and send known host files that would otherwise be rejected.
-
-Score: 7.1 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:N/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-100535 [CVSS:4.0 7.7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-100535</link>
-            <guid isPermaLink="false">CVE-2026-100535</guid>
-            <pubDate>Sat, 26 Sep 2026 03:16:59 GMT</pubDate>
-            <description><![CDATA[OpenClaw (npm package 'openclaw') versions >= 2026.4.5 and < 2026.8.1 can lose the originating requester's restrictions and untrusted provenance when session-derived text is persisted to session memory. In deployments where session-memory capture and dreaming are enabled, a restricted external sender whose messages are admitted with limited tools can persist instructions that are later supplied to an unattended background (dreaming) agent holding broader file and command capabilities, allowing actions beyond the authority of the original turn and affecting files, commands, or services available to that agent. Exploitation requires the content to be captured, selected for later processing, and followed by the model. The issue is fixed in 2026.8.1.
-
-Score: 7.7 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:H/AT:P/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-100534 [CVSS:4.0 2.3 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-100534</link>
-            <guid isPermaLink="false">CVE-2026-100534</guid>
-            <pubDate>Sat, 26 Sep 2026 03:16:58 GMT</pubDate>
-            <description><![CDATA[OpenClaw versions before 2026.8.1 contain an authorization bypass vulnerability in webhook TaskFlow cancellation that allows attackers to cancel unrelated sessions. An attacker with a webhook route secret can supply an arbitrary child session key to cancel ACP or subagent work outside the route's configured authority.
-
-Score: 2.3 (LOW)
-Vector: CVSS:4.0/AV:N/AC:H/AT:P/PR:L/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
         </item>
     </channel>
 </rss>
