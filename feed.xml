@@ -4,11 +4,289 @@
         <title>NVD CVE Feed</title>
         <link>https://github.com/TasukuKuchinomachi/NVD-RSS-feed</link>
         <description>Latest CVE entries from the National Vulnerability Database. This product uses the NVD API but is not endorsed or certified by the NVD.</description>
-        <lastBuildDate>Sat, 31 Oct 2026 17:18:45 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 31 Oct 2026 21:16:53 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>National Vulnerability Database - NIST</copyright>
+        <item>
+            <title><![CDATA[CVE-2026-98432 [CVSS:3.1 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-98432</link>
+            <guid isPermaLink="false">CVE-2026-98432</guid>
+            <pubDate>Sat, 31 Oct 2026 21:16:53 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+ipv4: free inet_opt and ireq_opt after an RCU grace period
+
+tcp_v4_syn_recv_sock() transfers ownership of ireq->ireq_opt to the
+child socket (newinet->inet_opt) without copying it.
+
+Another cpu can concurrently process a retransmitted SYN for the same
+request socket, and send a SYNACK from tcp_check_req().
+tcp_v4_send_synack() and inet_csk_route_req() read ireq->ireq_opt
+under rcu_read_lock() only, and ip_build_and_send_pkt() and
+ip_options_build() then read opt->optlen twice.
+
+Note that the SYNACK timer itself is not an issue: it holds a
+reference on its request socket, and inet_csk_reqsk_queue_drop()
+calls timer_delete_sync() before the child can be freed.
+
+Since commit 079096f103fa ("tcp/dccp: install syn_recv requests
+into ehash table"), request sockets are processed without holding
+the listener lock, so nothing prevents the child socket from being
+freed while the SYNACK is still being built. TCP child sockets do
+not have SOCK_RCU_FREE, and inet_sock_destruct() frees inet_opt
+with a plain kfree(), leading to a use-after-free in
+ip_options_build().
+
+A similar issue exists with request socket migration
+(net.ipv4.tcp_migrate_req=1, or a BPF_SK_REUSEPORT_SELECT_OR_MIGRATE
+program). reqsk_timer_handler() clones the request socket with
+inet_reqsk_clone(), so that the old request socket and its clone
+share the same ireq_opt, then reqsk_migrate_reset() clears the
+pointer in the old one. Another cpu holding a reference on the old
+request socket can still be using these options (sending a SYNACK,
+or creating a child in tcp_v4_syn_recv_sock()) when the clone is
+freed, and tcp_v4_reqsk_destructor() also uses a plain kfree().
+
+Readers already use RCU, and other paths replacing inet_opt
+(do_ip_setsockopt(), cipso_v4_sock_setattr()...) already use
+kfree_rcu(). Use kfree_rcu() in inet_sock_destruct() and
+tcp_v4_reqsk_destructor() as well.
+
+IPv6 is not affected by the first issue, because tcp_v6_syn_recv_sock()
+duplicates the options. tcp_v6_reqsk_destructor() has the same
+migration issue with ipv6_opt, which is only set by CALIPSO. This
+will be addressed in a separate patch.
+
+Score: 9.8 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-120135 [CVSS:4.0 8.2 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-120135</link>
+            <guid isPermaLink="false">CVE-2026-120135</guid>
+            <pubDate>Sat, 31 Oct 2026 21:16:53 GMT</pubDate>
+            <description><![CDATA[Uncontrolled Recursion vulnerability in Apache Thrift Java bindings.
+
+
+
+This issue affects Apache Thrift: before 0.24.0.
+
+
+
+Users are recommended to upgrade to version 0.24.0, which fixes the issue.
+
+Score: 8.2 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-118636 [CVSS:3.1 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-118636</link>
+            <guid isPermaLink="false">CVE-2026-118636</guid>
+            <pubDate>Sat, 31 Oct 2026 21:16:53 GMT</pubDate>
+            <description><![CDATA[**UNSUPPORTED WHEN ASSIGNED** 
+
+JavaNativeMessageDecoder in the MINA 3.0 codec module calls ObjectInputStream.readObject() on frame bytes with no class filter, so an
+application that puts it in front of an untrusted peer is open to gadget-chain RCE.
+
+As the 3.0.0 branch is inactive, we do not plan to release a version that fixes this issue. 
+
+Users are recommended to use the latest Apache MINA 2.2.X branch.
+
+Score: 9.8 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-85908 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-85908</link>
+            <guid isPermaLink="false">CVE-2026-85908</guid>
+            <pubDate>Sat, 31 Oct 2026 19:17:18 GMT</pubDate>
+            <description><![CDATA[Heap-based buffer overflow in Windows Win32K - GRFX allows an authorized attacker to elevate privileges locally.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-83651 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-83651</link>
+            <guid isPermaLink="false">CVE-2026-83651</guid>
+            <pubDate>Sat, 31 Oct 2026 19:17:04 GMT</pubDate>
+            <description><![CDATA[Out-of-bounds read in Windows GDI allows an unauthorized attacker to disclose information over a network.
+
+Score: 7.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-70211 [CVSS:3.1 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-70211</link>
+            <guid isPermaLink="false">CVE-2026-70211</guid>
+            <pubDate>Sat, 31 Oct 2026 19:16:56 GMT</pubDate>
+            <description><![CDATA[Out-of-bounds read in Windows Win32 Kernel Subsystem allows an authorized attacker to disclose information locally.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-118147 [CVSS:3.1 7.4 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-118147</link>
+            <guid isPermaLink="false">CVE-2026-118147</guid>
+            <pubDate>Sat, 31 Oct 2026 19:16:47 GMT</pubDate>
+            <description><![CDATA[Improper certificate validation in Visual Studio allows an unauthorized attacker to perform spoofing over a network.
+
+Score: 7.4 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-83831 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-83831</link>
+            <guid isPermaLink="false">CVE-2026-83831</guid>
+            <pubDate>Sat, 31 Oct 2026 18:17:44 GMT</pubDate>
+            <description><![CDATA[Double free in Microsoft Edge (Chromium-based) allows an unauthorized attacker to execute code over a network.
+
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-70271 [CVSS:3.1 7 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-70271</link>
+            <guid isPermaLink="false">CVE-2026-70271</guid>
+            <pubDate>Sat, 31 Oct 2026 18:17:32 GMT</pubDate>
+            <description><![CDATA[Use after free in Windows Win32 Kernel Subsystem allows an authorized attacker to elevate privileges locally.
+
+Score: 7 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-70106 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-70106</link>
+            <guid isPermaLink="false">CVE-2026-70106</guid>
+            <pubDate>Sat, 31 Oct 2026 18:17:22 GMT</pubDate>
+            <description><![CDATA[Heap-based buffer overflow in Windows Kernel allows an authorized attacker to elevate privileges locally.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-120210 [CVSS:4.0 5.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-120210</link>
+            <guid isPermaLink="false">CVE-2026-120210</guid>
+            <pubDate>Sat, 31 Oct 2026 18:17:09 GMT</pubDate>
+            <description><![CDATA[FFmpeg 5.0 through 9.0.2 contains a path traversal vulnerability in the IMF demuxer that allows attackers to open files outside the package via unvalidated ASSETMAP Path elements. Attackers can supply a crafted IMF package with '..' or absolute paths to demux local MXF files, probe file existence and size, or trigger server-side requests.
+
+Score: 5.3 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:P/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-120209 [CVSS:4.0 9.3 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-120209</link>
+            <guid isPermaLink="false">CVE-2026-120209</guid>
+            <pubDate>Sat, 31 Oct 2026 18:17:09 GMT</pubDate>
+            <description><![CDATA[AJ-Report through 1.7.1 signs share tokens with a hard-coded JWT secret, allowing attackers to forge valid Share-Tokens offline. Attackers can mint a token with reportCode 'dataSet' to access the testTransform endpoint, which passes scripts to GroovyClassLoader for unauthenticated remote code execution.
+
+Score: 9.3 (CRITICAL)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-120208 [CVSS:4.0 7.7 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-120208</link>
+            <guid isPermaLink="false">CVE-2026-120208</guid>
+            <pubDate>Sat, 31 Oct 2026 18:17:09 GMT</pubDate>
+            <description><![CDATA[libheif 1.18.0 before 1.23.3 contains a heap-based buffer overflow vulnerability in unc_decoder_mixed_interleave::processTile() that allows attackers to write out of bounds by supplying chroma components with unequal bit depths. Attackers can craft a HEIF file declaring, for example, 16-bit Cb and 8-bit Cr to trigger file-controlled heap writes past the Cr plane, potentially achieving code execution in image-processing pipelines.
+
+Score: 7.7 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:P/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-120207 [CVSS:4.0 7 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-120207</link>
+            <guid isPermaLink="false">CVE-2026-120207</guid>
+            <pubDate>Sat, 31 Oct 2026 18:17:08 GMT</pubDate>
+            <description><![CDATA[Thelia Page Module before 2.0.4 contains a cross-site request forgery vulnerability that allows remote attackers to delete page tags, documents and images by abusing back-office delete routes lacking CSRF tokens and permission checks. Attackers can lure a logged-in administrator into navigating to crafted GET requests that walk sequential ids, removing TheliaLibrary images, their files and variants across pages, products and categories.
+
+Score: 7 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:A/VC:N/VI:H/VA:L/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-120206 [CVSS:4.0 5.9 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-120206</link>
+            <guid isPermaLink="false">CVE-2026-120206</guid>
+            <pubDate>Sat, 31 Oct 2026 18:17:08 GMT</pubDate>
+            <description><![CDATA[Thelia before 3.2.0 contains a cross-site request forgery vulnerability in the back office that allows attackers to forge administrative actions because per-session CSRF tokens leak via URL query strings. Attackers can reuse leaked tokens or target the unprotected setToggleVisibilityAction and updatePositionAction to make logged-in administrators delete, hide or reorder catalogue and configuration objects.
+
+Score: 5.9 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:A/VC:N/VI:H/VA:L/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-120205 [CVSS:4.0 7.4 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-120205</link>
+            <guid isPermaLink="false">CVE-2026-120205</guid>
+            <pubDate>Sat, 31 Oct 2026 18:17:08 GMT</pubDate>
+            <description><![CDATA[Thelia before 3.1.0 contains a stored cross-site scripting vulnerability in ForSomeCustomers::getSummary() that allows unauthenticated attackers to inject scripts via unescaped customer names. Attackers can register with a script payload as their name that executes when administrators view related coupons, stealing CSRF tokens to create administrator accounts.
+
+Score: 7.4 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:A/VC:H/VI:H/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-120204 [CVSS:4.0 6.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-120204</link>
+            <guid isPermaLink="false">CVE-2026-120204</guid>
+            <pubDate>Sat, 31 Oct 2026 18:17:08 GMT</pubDate>
+            <description><![CDATA[DeepInfer through 0.1.0 contains a path traversal vulnerability in the unauthenticated /profile endpoint that allows remote attackers to create arbitrary directories via the output_dir parameter. Attackers, including cross-site GET requests from an operator's browser, can write chrome trace files to exhaust disk or inodes and use error messages as a filesystem oracle.
+
+Score: 6.3 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-120203 [CVSS:4.0 8.7 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-120203</link>
+            <guid isPermaLink="false">CVE-2026-120203</guid>
+            <pubDate>Sat, 31 Oct 2026 18:17:08 GMT</pubDate>
+            <description><![CDATA[ShowDoc 2.8.14 before 3.9.6 contains a code injection vulnerability in its Mock feature that allows authenticated users to execute shell commands through mockjs templates. Attackers can store a template via MockController::add with escaped parentheses that mockjs evaluates with eval(), then trigger it through MockController::infoByKey to run commands, as root in the official Docker image.
+
+Score: 8.7 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-120202 [CVSS:4.0 7.1 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-120202</link>
+            <guid isPermaLink="false">CVE-2026-120202</guid>
+            <pubDate>Sat, 31 Oct 2026 18:17:08 GMT</pubDate>
+            <description><![CDATA[Highflame ramparts 0.8.1 through 0.8.10 contains a security scan bypass vulnerability that allows attackers to hide malicious payloads because collect_bundle_siblings and walk_bundle_subdir skip nested directories and .pyc files. Attackers can distribute a skill bundle with an unchecked-hash .pyc under scripts/<subdir>/__pycache__/ that ramparts silently ignores, while CPython executes it when the skill runs.
+
+Score: 7.1 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:P/VC:N/VI:H/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-120201 [CVSS:4.0 9.3 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-120201</link>
+            <guid isPermaLink="false">CVE-2026-120201</guid>
+            <pubDate>Sat, 31 Oct 2026 18:17:08 GMT</pubDate>
+            <description><![CDATA[Jpom 2.10.0 through 2.11.12 contains an authentication bypass vulnerability that allows unauthenticated attackers to gain super-administrator access by injecting query conditions into the JPOM-USER-TOKEN header. Attackers can send a value like 'is not null', which Hutool's Condition parser treats as an operator, then execute commands through Jpom's script features.
+
+Score: 9.3 (CRITICAL)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-120200 [CVSS:4.0 5.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-120200</link>
+            <guid isPermaLink="false">CVE-2026-120200</guid>
+            <pubDate>Sat, 31 Oct 2026 18:17:07 GMT</pubDate>
+            <description><![CDATA[Nexterm through 1.2.2-BETA contains a missing authorization vulnerability that allows authenticated users to hibernate, resume, or terminate other users' remote sessions via session lifecycle routes. Attackers who obtain a session ID can call the hibernate, resume, or DELETE connection endpoints to disrupt live SSH, RDP, VNC, or SFTP sessions.
+
+Score: 5.3 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:N/VI:L/VA:L/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-120199 [CVSS:4.0 5.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-120199</link>
+            <guid isPermaLink="false">CVE-2026-120199</guid>
+            <pubDate>Sat, 31 Oct 2026 18:17:07 GMT</pubDate>
+            <description><![CDATA[LearnHouse before 1.1.1 contains a missing authorization vulnerability in the assignment API that allows authenticated users to read other users' grades and submissions. Attackers can supply another user_id to the submissions grade endpoint or query submission read functions to view other students' work, grades and instructor feedback.
+
+Score: 5.3 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
         <item>
             <title><![CDATA[CVE-2026-83943 [CVSS:3.1 8.7 HIGH]]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-83943</link>
@@ -1681,226 +1959,6 @@ Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:L/I:L/A:N]]></description>
             <guid isPermaLink="false">CVE-2026-109367</guid>
             <pubDate>Sat, 31 Oct 2026 09:16:32 GMT</pubDate>
             <description><![CDATA[The All in One SEO – AI SEO Plugin to Boost SEO Rankings & Traffic (Schema, Local SEO, Sitemap & SEO Insights) plugin for WordPress is vulnerable to Sensitive Information Exposure in all versions up to, and including, 5.0.3 via the 's' parameter. This makes it possible for unauthenticated attackers to extract arbitrary non-public post meta values, including sensitive custom fields such as API keys and internal notes, emitted verbatim into the HTML title element and JSON-LD SearchResultsPage schema.
-
-Score: 5.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-103915 [CVSS:3.1 5.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-103915</link>
-            <guid isPermaLink="false">CVE-2026-103915</guid>
-            <pubDate>Sat, 31 Oct 2026 09:16:32 GMT</pubDate>
-            <description><![CDATA[The Booking for Appointments and Events Calendar – Amelia plugin for WordPress is vulnerable to Sensitive Information Exposure in all versions up to, and including, 2.4.12 via the 'page' parameter. This makes it possible for unauthenticated attackers to extract staff personally identifiable information — including full name, email address, phone number, gender, and timezone — as well as administrator-authored internal notes for every published event, all serialized into the JSON response because the raw providers array is never stripped before output.
-
-Score: 5.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-103882 [CVSS:3.1 9.1 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-103882</link>
-            <guid isPermaLink="false">CVE-2026-103882</guid>
-            <pubDate>Sat, 31 Oct 2026 09:16:32 GMT</pubDate>
-            <description><![CDATA[The Acadlix LMS – AI Quiz Maker, Online Exam & Course Plugin for WordPress plugin for WordPress is vulnerable to arbitrary file deletion due to insufficient file path validation in the post_delete_assessment_file_by_id function in all versions up to, and including, 1.1.9. This makes it possible for authenticated attackers, with subscriber-level access and above, to delete arbitrary files on the server, which can easily lead to remote code execution when the right file is deleted (such as wp-config.php). The route's permission callback only verifies a generic wp_rest nonce that the plugin itself emits inside the public acadlixOptions JavaScript object on every frontend page, effectively reducing the authentication requirement to unauthenticated.
-
-Score: 9.1 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-101325 [CVSS:3.1 5.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-101325</link>
-            <guid isPermaLink="false">CVE-2026-101325</guid>
-            <pubDate>Sat, 31 Oct 2026 09:16:32 GMT</pubDate>
-            <description><![CDATA[The Newsletters plugin for WordPress is vulnerable to time-based SQL Injection via the 'id' parameter in all versions up to, and including, 4.18.1 due to insufficient escaping on the user supplied parameter and lack of sufficient preparation on the existing SQL query. This makes it possible for authenticated attackers, with subscriber-level access and above, to append additional SQL queries into already existing queries that can be used to extract sensitive information from the database. An attacker can obtain the required nonce and subscriberauth cookie without a WordPress account by simply subscribing through the public newsletter form and opening the management link sent via email; the ownership check verifies only the subscriber_id field and does not validate that the injected id parameter belongs to the authenticated subscriber.
-
-Score: 5.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-93834 [CVSS:3.1 8.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-93834</link>
-            <guid isPermaLink="false">CVE-2026-93834</guid>
-            <pubDate>Sat, 31 Oct 2026 08:16:49 GMT</pubDate>
-            <description><![CDATA[A use-after-free vulnerability was found in QEMU's 9pfs subsystem. A race condition between the main thread and a worker thread when processing concurrent Tlcreate and Twalk requests allows a malicious guest user to craft a fid path containing stale heap data, bypassing directory traversal restrictions and escaping the shared directory boundary. This can lead to arbitrary host file read/write and code execution (VM escape) as the QEMU process user.
-
-Score: 8.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-34892 [CVSS:3.1 6.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-34892</link>
-            <guid isPermaLink="false">CVE-2026-34892</guid>
-            <pubDate>Sat, 31 Oct 2026 08:16:49 GMT</pubDate>
-            <description><![CDATA[Missing Authorization vulnerability in Rank Math SEO Rank Math SEO seo-by-rank-math allows Exploiting Incorrectly Configured Access Control Security Levels.This issue affects Rank Math SEO: from n/a through 1.0.271.
-
-Score: 6.5 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:H/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-120070 [CVSS:3.1 8.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-120070</link>
-            <guid isPermaLink="false">CVE-2026-120070</guid>
-            <pubDate>Sat, 31 Oct 2026 08:16:49 GMT</pubDate>
-            <description><![CDATA[The User Frontend – Membership, User Registration, User Profile, User Directory & Content Restriction with Frontend Post Submission plugin for WordPress is vulnerable to Privilege Escalation in all versions up to, and including, 4.3.13 via the `post_content` parameter of the `submit_post()` function. The vulnerability exists because the protected-shortcode blocklist guard inspects the `sanitize_textarea_field()` copy of the submitted `post_content`, while the copy actually persisted to the database is processed through `wp_kses()`, whose `wp_kses_no_null()` step strips C0 control bytes — allowing an attacker to inject a single `\x01` byte inside the `[wpuf-registration]` tag name to defeat the `strpos()` blocklist check while the clean, functional shortcode is stored verbatim; `strip_shortcodes()` does not neutralize the stored shortcode either, because the Frontend container that registers it via `add_shortcode()` is only instantiated when `is_admin()` is false, and `admin-ajax` requests have `is_admin() === true`. This makes it possible for authenticated attackers, with Subscriber-level access and above, to inject a `[wpuf-registration role="editor"]` shortcode into a published post, causing a live Editor-role registration form to be rendered publicly on the frontend that any visitor — or the attacker themselves — can submit to mint a WordPress Editor account with an immediately active privileged session when the default `autologin_after_registration` setting is enabled.
-
-Score: 8.8 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-119096 [CVSS:3.1 9.8 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-119096</link>
-            <guid isPermaLink="false">CVE-2026-119096</guid>
-            <pubDate>Sat, 31 Oct 2026 08:16:49 GMT</pubDate>
-            <description><![CDATA[The Uncanny Toolkit for LearnDash plugin for WordPress is vulnerable to Authentication Bypass in versions up to, and including, 3.8.2 via the `email` parameter of the `uo_login_action()` function. This is due to a parser-differential flaw in which the plugin's account-verification gate resolves the submitted `email` value using the raw, unsanitized string passed to `get_user_by()`, while the subsequent `wp_signon()` call relies on WordPress core's internal `sanitize_user()` to strip appended junk characters — causing the gate lookup to fail and be skipped entirely while the real account is still resolved and authenticated. This makes it possible for unauthenticated attackers to log in to unverified or administrator-suspended accounts whose credentials they already possess, obtaining a valid `wordpress_logged_in` session cookie and defeating the plugin's account-approval and account-suspension controls. The nonce required to reach the handler is freely obtainable in the same request from the unauthenticated `ult-refresh-nonce` endpoint, making exploitation trivial for any attacker with network access to the site and knowledge of a target account's credentials.
-
-Score: 9.8 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-118057 [CVSS:3.1 7.2 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-118057</link>
-            <guid isPermaLink="false">CVE-2026-118057</guid>
-            <pubDate>Sat, 31 Oct 2026 08:16:48 GMT</pubDate>
-            <description><![CDATA[The Shield Security – Smart Bot Blocking, Brute-Force Login Protection & File Scanning plugin for WordPress is vulnerable to Stored Cross-Site Scripting via the 'REQUEST_URI' parameter in all versions up to, and including, 22.3.2 due to insufficient input sanitization and output escaping. This makes it possible for unauthenticated attackers to inject arbitrary web scripts in pages that will execute whenever a user accesses an injected page. The hidden 'path' column in ForTraffic.php lacks a client-side render function, so DataTables builds its cell via innerHTML, causing stored HTML in the path value to be parsed into live DOM nodes; a prior partial fix in version 18.5.8 added esc_html() only to the visible 'page' column, leaving the hidden 'path' field unescaped and exploitable through version 22.2.6.
-
-Score: 7.2 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:L/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-116535 [CVSS:3.1 6.4 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-116535</link>
-            <guid isPermaLink="false">CVE-2026-116535</guid>
-            <pubDate>Sat, 31 Oct 2026 08:16:48 GMT</pubDate>
-            <description><![CDATA[The SEOPress – AI SEO Plugin & On-site SEO plugin for WordPress is vulnerable to Stored Cross-Site Scripting via the 'display_name' parameter in all versions up to, and including, 10.3 due to insufficient input sanitization and output escaping. This makes it possible for authenticated attackers, with subscriber-level access and above, to inject arbitrary web scripts in pages that will execute whenever a user accesses an injected page. This is exploitable by any Subscriber who sets their display_name to a string containing the literal %%archive_title%% token alongside HTML event-handler payloads, as WordPress stores display names without HTML filtering and the plugin substitutes the token after escaping has already occurred.
-
-Score: 6.4 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:L/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-116512 [CVSS:3.1 9.8 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-116512</link>
-            <guid isPermaLink="false">CVE-2026-116512</guid>
-            <pubDate>Sat, 31 Oct 2026 08:16:48 GMT</pubDate>
-            <description><![CDATA[The Project Manager – AI Powered Project Management, Task Management, Kanban Board & Time Tracker plugin for WordPress is vulnerable to Remote Code Execution in all versions up to, and including, 4.1.1 via the 'id' parameter parameter. This is due to unsanitized 'id' parameter value concatenated directly into the pipe-delimited validation rule string, which is then split and each token invoked as a dynamic PHP function with no allowlist check. This makes it possible for unauthenticated attackers to execute code on the server. This is exploitable by unauthenticated attackers because WordPress core executes the route argument's validate_callback inside WP_REST_Server::dispatch() before the route's permission_callback is invoked, meaning the Project_Manage_Capability authorization gate is never reached on the vulnerable code path.
-
-Score: 9.8 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-111592 [CVSS:3.1 6.4 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-111592</link>
-            <guid isPermaLink="false">CVE-2026-111592</guid>
-            <pubDate>Sat, 31 Oct 2026 08:16:48 GMT</pubDate>
-            <description><![CDATA[The Co-Authors, Multiple Authors and Guest Authors in an Author Box with PublishPress Authors plugin for WordPress is vulnerable to Stored Cross-Site Scripting via the 'name (maps to display_name)' parameter in all versions up to, and including, 4.17.0 due to insufficient input sanitization and output escaping. This makes it possible for authenticated attackers, with subscriber-level access and above, to inject arbitrary web scripts in pages that will execute whenever a user accesses an injected page. Exploitation requires the attacker's user account to have a mapped author term, which occurs when an administrator has assigned them as a co-author on content or has enabled automatic author term creation for their role — this mapping is not present by default for new users on a stock install.
-
-Score: 6.4 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:L/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-111070 [CVSS:3.1 5.4 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-111070</link>
-            <guid isPermaLink="false">CVE-2026-111070</guid>
-            <pubDate>Sat, 31 Oct 2026 08:16:48 GMT</pubDate>
-            <description><![CDATA[The Content Pilot – Autoblogging & Affiliate Marketing Suite plugin for WordPress is vulnerable to Stored Cross-Site Scripting in versions up to, and including, 2.2.4. This is due to the plugin extracting the HTML meta description from each remotely-fetched article (WPCP_Readability::parse_meta()), piping that value through the article template substitution and html_entity_decode() in WPCP_Module::insert_post(), and then calling wp_insert_post() after switching the current user to the configured campaign author (an Administrator with the unfiltered_html capability by default) — so no wp_kses_post sanitization is applied to the attacker-controlled HTML before it is persisted as post_content and rendered on the front end. This makes it possible for unauthenticated attackers who control the content of any RSS source an administrator has configured a Content Pilot RSS campaign to consume to inject arbitrary web scripts in pages that will execute whenever a user accesses an injected page.
-
-Score: 5.4 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:C/C:L/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-110023 [CVSS:3.1 5.9 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-110023</link>
-            <guid isPermaLink="false">CVE-2026-110023</guid>
-            <pubDate>Sat, 31 Oct 2026 08:16:48 GMT</pubDate>
-            <description><![CDATA[The WP Data Access – App Builder for Tables, Forms, Dashboards, Charts & Maps plugin for WordPress is vulnerable to Sensitive Information Exposure in all versions up to, and including, 5.5.88 via the 'rel_tab' parameter. This makes it possible for unauthenticated attackers to extract every row and column of the underlying database table backing any anonymously published app, including WordPress user password hashes, email addresses, and password-reset keys from wp_users. Exploitation requires that an administrator has published at least one app with its REST API authorization set to 'anonymous', which is the standard configuration for publicly embedded apps.
-
-Score: 5.9 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-107759 [CVSS:3.1 7.2 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-107759</link>
-            <guid isPermaLink="false">CVE-2026-107759</guid>
-            <pubDate>Sat, 31 Oct 2026 08:16:48 GMT</pubDate>
-            <description><![CDATA[The WPO365 | MICROSOFT 365 GRAPH MAILER plugin for WordPress is vulnerable to Stored Cross-Site Scripting via the 'Subject (via wp_mail/PHPMailer, e.g. CF7 your-subject)' parameter in all versions up to, and including, 6.2 due to insufficient input sanitization and output escaping. This makes it possible for unauthenticated attackers to inject arbitrary web scripts in pages that will execute whenever a user accesses an injected page. The payload is stored without authentication via any mail-sending feature that forwards a submitter-controlled subject (e.g. a Contact Form 7 form) when the Graph Mailer is enabled but OAuth authorization has not been completed, a default state immediately after plugin activation.
-
-Score: 7.2 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:L/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-104012 [CVSS:3.1 8.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-104012</link>
-            <guid isPermaLink="false">CVE-2026-104012</guid>
-            <pubDate>Sat, 31 Oct 2026 08:16:47 GMT</pubDate>
-            <description><![CDATA[The Rox Appointment Booking – Appointment Booking Scheduling Solution plugin for WordPress is vulnerable to Privilege Escalation via Mass Assignment in all versions up to, and including, 1.3.1 This is due to the public `/rox-appointment-booking/v1/public/booking` REST endpoint performing mass-assignment of the raw request body into a new customer row while `CustomerModel::$fillable` includes the internal `wp_user_id` column, allowing an unauthenticated attacker to persist an arbitrary WordPress user ID alongside an attacker-controlled email address with no authorization check. When an administrator subsequently opens the poisoned customer record and clicks Update Customer, `SaveCustomer::handleRequest()` passes the stored `wp_user_id` and attacker-supplied email to `wp_update_user()` — succeeding because `LinkedAccount::canChange()` unconditionally returns true when the acting user holds the `edit_users` capability — thereby overwriting the targeted administrator's email address and enabling full account takeover via a standard WordPress password-reset request. Successful exploitation requires an administrator to open and save the poisoned record, and the attacker must know or guess a valid administrator user ID (such as the default user ID 1).
-
-Score: 8.8 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-103997 [CVSS:3.1 6.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-103997</link>
-            <guid isPermaLink="false">CVE-2026-103997</guid>
-            <pubDate>Sat, 31 Oct 2026 08:16:47 GMT</pubDate>
-            <description><![CDATA[The Redux Framework plugin for WordPress is vulnerable to authorization bypass in all versions up to, and including, 4.5.15. This is due to the plugin not properly verifying that a user is authorized to perform an action. This makes it possible for authenticated attackers, with subscriber-level access and above, to view the entire Redux options payload — including plaintext password field values, API keys, license keys, and SMTP credentials — exposed in the inline redux_&lt;opt_name&gt; JavaScript block on wp-admin/profile.php. The Users extension is loaded automatically for every Redux instance registered by any installed theme or plugin, meaning any site running Redux Framework is affected regardless of whether the developer explicitly configured the Users extension.
-
-Score: 6.5 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-103962 [CVSS:3.1 6.1 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-103962</link>
-            <guid isPermaLink="false">CVE-2026-103962</guid>
-            <pubDate>Sat, 31 Oct 2026 08:16:47 GMT</pubDate>
-            <description><![CDATA[The User Frontend – Membership, User Registration, User Profile, User Directory & Content Restriction with Frontend Post Submission plugin for WordPress is vulnerable to Reflected Cross-Site Scripting via the 'field_attr[required]' parameter in all versions up to, and including, 4.3.13 due to insufficient input sanitization and output escaping. This makes it possible for unauthenticated attackers to inject arbitrary web scripts in pages that execute if they can successfully trick a user into performing an action such as clicking on a link. The nonce check on the wpuf_get_child_cat AJAX action is not an effective security barrier because the wpuf_nonce value is publicly localized to every anonymous visitor of any page containing a WPUF shortcode, making it freely harvestable by an unauthenticated attacker.
-
-Score: 6.1 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-103898 [CVSS:3.1 8.1 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-103898</link>
-            <guid isPermaLink="false">CVE-2026-103898</guid>
-            <pubDate>Sat, 31 Oct 2026 08:16:47 GMT</pubDate>
-            <description><![CDATA[The Wp Social Login and Register Social Counter plugin for WordPress is vulnerable to Authentication Bypass in all versions up to, and including, 3.2.2. This is due to the social login REST callback registered at `/wp-json/wslu-social-login/type/{provider}/` with `permission_callback => __return_true` locating an existing WordPress account solely by the email string returned from the OAuth provider and calling `wp_set_auth_cookie()` without a password check, while the only verification guard — `!empty($getProfile->emailVerified)` in `inc/admin-create-user.php` — is a no-op for the bundled Hybridauth Facebook and Twitter adapters, both of which assign the raw email string rather than a boolean verified flag to `emailVerified`. This makes it possible for unauthenticated attackers to obtain a fully authenticated session as any existing WordPress user, including Administrators, whose registered email address can be presented through a configured Facebook or Twitter login on the target site. Exploitation requires only that the attacker control an OAuth account whose provider-returned email matches the target account's registered WordPress email address; no local credentials, nonce, or prior foothold is needed.
-
-Score: 8.1 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2025-9462 [CVSS:3.1 6.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-9462</link>
-            <guid isPermaLink="false">CVE-2025-9462</guid>
-            <pubDate>Sat, 31 Oct 2026 08:16:47 GMT</pubDate>
-            <description><![CDATA[The WP2LEADS plugin for WordPress is vulnerable to time-based SQL Injection via the ‘order’ parameter in all versions up to, and including, 3.5.6 due to insufficient escaping on the user supplied parameter and lack of sufficient preparation on the existing SQL query.  This makes it possible for authenticated attackers, with Subscriber-level access and above, to append additional SQL queries into already existing queries that can be used to extract sensitive information from the database.
-
-Score: 6.5 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2025-2241 [CVSS:3.1 8.2 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-2241</link>
-            <guid isPermaLink="false">CVE-2025-2241</guid>
-            <pubDate>Sat, 31 Oct 2026 08:16:47 GMT</pubDate>
-            <description><![CDATA[A flaw was found in Hive, a component of Multicluster Engine (MCE) and Advanced Cluster Management (ACM). This vulnerability causes VCenter credentials to be exposed in the ClusterProvision object after provisioning a VSphere cluster. Users with read access to ClusterProvision objects can extract sensitive credentials even if they do not have direct access to Kubernetes Secrets. This issue can lead to unauthorized VCenter access, cluster management, and privilege escalation.
-
-Score: 8.2 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:C/C:H/I:H/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2025-11455 [CVSS:3.1 4.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-11455</link>
-            <guid isPermaLink="false">CVE-2025-11455</guid>
-            <pubDate>Sat, 31 Oct 2026 08:16:46 GMT</pubDate>
-            <description><![CDATA[The Perfect Images plugin for WordPress is vulnerable to unauthorized modification of data due to a missing capability check on the /wp-json/wp-retina-2x/v1/replace REST API in all versions up to, and including, 7.2.0 This makes it possible for authenticated attackers, with Author-level access and above, to replace files that do not belong to them.
-
-Score: 4.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-90960 [CVSS:3.1 5.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-90960</link>
-            <guid isPermaLink="false">CVE-2026-90960</guid>
-            <pubDate>Sat, 31 Oct 2026 07:16:37 GMT</pubDate>
-            <description><![CDATA[The Seraphinite Accelerator plugin for WordPress is vulnerable to Sensitive Information Exposure in all versions up to, and including, 2.29.24 via the WP_Object_Cache::_getFilePath. This makes it possible for unauthenticated attackers to extract complete WordPress user records — including plaintext user_login, user_email, hashed user_pass, and user_activation_key — from predictable gzip-serialized cache files at wp-content/cache/seraphinite-accelerator/oc/g/users/g/<USER_ID>.dat.gz. This vulnerability is only exploitable when the plugin's Object Cache feature is enabled, and requires the attacker to first trigger caching of the target user record (e.g., via an unauthenticated REST API request) before retrieving the resulting cache file.
 
 Score: 5.3 (MEDIUM)
 Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N]]></description>
