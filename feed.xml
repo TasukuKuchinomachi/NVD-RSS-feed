@@ -4,46 +4,470 @@
         <title>NVD CVE Feed</title>
         <link>https://github.com/TasukuKuchinomachi/NVD-RSS-feed</link>
         <description>Latest CVE entries from the National Vulnerability Database. This product uses the NVD API but is not endorsed or certified by the NVD.</description>
-        <lastBuildDate>Thu, 19 Nov 2026 21:18:07 GMT</lastBuildDate>
+        <lastBuildDate>Fri, 20 Nov 2026 02:17:17 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>National Vulnerability Database - NIST</copyright>
         <item>
-            <title><![CDATA[CVE-2026-92907 [CVSS:3.1 4.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-92907</link>
-            <guid isPermaLink="false">CVE-2026-92907</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:07 GMT</pubDate>
-            <description><![CDATA[IBM watsonx.data 2.4.0 through 2.4.0 patch 8 could allow a remote authenticated attacker to conduct a server-side request forgery due to a server-side request forgery (SSRF) vulnerability.
+            <title><![CDATA[CVE-2026-99288 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-99288</link>
+            <guid isPermaLink="false">CVE-2026-99288</guid>
+            <pubDate>Fri, 20 Nov 2026 02:17:17 GMT</pubDate>
+            <description><![CDATA[In the Linux kernel, the following vulnerability has been resolved:
+
+inet: reject unhashed sockets during established lookups
+
+TCP established ehash lookups are lockless. The socket caches involved
+use SLAB_TYPESAFE_BY_RCU, so memory can be reused before an RCU reader
+that retained its old address has finished.
+
+After a tuple match, __inet_lookup_established() and
+__inet6_lookup_established() acquire a reference and repeat the tuple
+check. They do not check whether the new object is hashed. If the
+address is reused for a socket with the same tuple, the lookup can
+acquire a reference to the new object and return it while its nulls node
+is unhashed.
+
+A PoC that drives reuse with a SYN cookie request socket reproduced the
+crash. The new request socket is unhashed and has a NULL rsk_listener.
+A lookup that had loaded the address of the old request socket acquired
+the reference published by tcp_get_cookie_sock() and returned the new
+object. tcp_v4_rcv() then read sk_state through the NULL listener.
+
+The resulting crash was:
+
+  BUG: kernel NULL pointer dereference, address: 0000000000000012
+  #PF: supervisor read access in kernel mode
+  #PF: error_code(0x0000) - not-present page
+  ...
+  Oops: Oops: 0000 [#1] SMP NOPTI
+  CPU: 4 UID: 0 PID: 0 Comm: swapper/4 Not tainted 7.3.0-00591-g0e135910deec #1 PREEMPT(lazy)
+  ...
+  RIP: 0010:tcp_v4_rcv+0x44e/0x1280
+  ...
+  R10: 0000000000000001 R11: 00000000024ca8c0 R12: 0000000000000000
+  ...
+  CR2: 0000000000000012 CR3: 0000000103d50004 CR4: 0000000000770ef0
+  ...
+  Call Trace:
+   <IRQ>
+   ? raw_local_deliver+0xae/0x240
+   ip_protocol_deliver_rcu+0x2d/0x180
+   ip_local_deliver_finish+0x84/0x100
+   ip_sublist_rcv_finish+0x5f/0x70
+   ip_sublist_rcv+0x12a/0x1d0
+   ip_list_rcv+0xfd/0x130
+   __netif_receive_skb_list_core+0x223/0x250
+   netif_receive_skb_list_internal+0x1d2/0x2c0
+   ? try_fill_recv+0x39/0x7b0
+   napi_complete_done+0x74/0x170
+   virtnet_poll+0x445/0x600
+   __napi_poll+0x27/0x1e0
+   net_rx_action+0x2fe/0x3b0
+   handle_softirqs+0xc2/0x2c0
+   __irq_exit_rcu+0x74/0xd0
+   common_interrupt+0x7f/0x90
+   </IRQ>
+  ...
+  Kernel panic - not syncing: Fatal exception in interrupt
+
+After taking a reference, check whether the nulls node is unhashed in
+both IPv4 and IPv6 established lookups. If it is unhashed or the tuple
+no longer matches, drop the reference and restart the lookup.
+
+Lookups racing with the TIME_WAIT hashdance, or with a request being
+replaced by its child, now restart and find the new socket instead of
+returning the old one.
+
+Request sockets that were never inserted into ehash can have a nonzero
+refcount, and a stale lookup can hold a transient reference. Therefore,
+when SYN cookie, Fast Open, and request migration paths fail after
+setting a nonzero refcount, release the references held by those paths
+with reqsk_put() instead of freeing the request directly.
+
+Score: 7.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-133415 [CVSS:4.0 5.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133415</link>
+            <guid isPermaLink="false">CVE-2026-133415</guid>
+            <pubDate>Fri, 20 Nov 2026 02:17:17 GMT</pubDate>
+            <description><![CDATA[A vulnerability has been found in sumiie24 School-Management-System up to d946d649c7c95e101fc5679ecd91999533bb10d7. The affected element is an unknown function of the file parent_Registration.php. Such manipulation of the argument student_reg leads to sql injection. The attack can be executed remotely. The exploit has been disclosed to the public and may be used. This product implements a rolling release for ongoing delivery, which means version information for affected or updated releases is unavailable.
+
+Score: 5.5 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-133414 [CVSS:4.0 6.9 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133414</link>
+            <guid isPermaLink="false">CVE-2026-133414</guid>
+            <pubDate>Fri, 20 Nov 2026 02:17:17 GMT</pubDate>
+            <description><![CDATA[A security flaw has been discovered in sofastack sofa-bolt up to 1.6.12. Affected by this issue is the function HessianSerializer.deserialize of the file src/main/java/com/alipay/remoting/serialization/HessianSerializer.java of the component Hessian2 Deserialization. Performing a manipulation results in allocation of resources. The attack can be initiated remotely. The vendor was contacted early about this disclosure but did not respond in any way.
+
+Score: 6.9 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-133413 [CVSS:4.0 4.6 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133413</link>
+            <guid isPermaLink="false">CVE-2026-133413</guid>
+            <pubDate>Fri, 20 Nov 2026 02:17:17 GMT</pubDate>
+            <description><![CDATA[A vulnerability was detected in smartalock wireguard-lwip up to cfba91666590e86bd67842c71cedf9a423be823a. This affects the function wireguard_generate_unique_index of the file src/wireguard.c of the component Session Index Allocator. The manipulation of the argument receiver_index results in allocation of resources. The attack is only possible with local access. The project was informed of the problem early through an issue report but has not responded yet.
+
+Score: 4.6 (MEDIUM)
+Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:H/UI:N/VC:N/VI:L/VA:L/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-133228 [CVSS:3.1 6.8 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133228</link>
+            <guid isPermaLink="false">CVE-2026-133228</guid>
+            <pubDate>Fri, 20 Nov 2026 02:17:17 GMT</pubDate>
+            <description><![CDATA[A flaw was found in Keycloak. When a client application enforces step-up authentication or multi-factor authentication (MFA) via a minimum authentication level, Keycloak fails to apply this requirement to login sessions initiated through the credential reset endpoint. An attacker who possesses a user's initial credentials (such as a password) can navigate from the reset interface back to the standard login form and authenticate without completing the required second factor. This flaw allows an attacker to obtain valid access tokens and gain unauthorized access to protected services without satisfying mandatory security controls.
+
+Score: 6.8 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-133226 [CVSS:3.1 4.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133226</link>
+            <guid isPermaLink="false">CVE-2026-133226</guid>
+            <pubDate>Fri, 20 Nov 2026 02:17:17 GMT</pubDate>
+            <description><![CDATA[A flaw was found in Keycloak. The Account API endpoint for sharing resources fails to verify whether owner-managed access is enabled and accepts permission scopes not assigned to the resource. An authenticated user can exploit this vulnerability to generate pre-granted permission tickets, causing Keycloak to bypass policy evaluation and issue access tokens with unauthorized scopes.
 
 Score: 4.3 (MEDIUM)
 Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:N]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-92906 [CVSS:3.1 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-92906</link>
-            <guid isPermaLink="false">CVE-2026-92906</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:06 GMT</pubDate>
-            <description><![CDATA[IBM watsonx.data 2.4.0 through 2.4.0 patch 8 could allow a remote authenticated attacker to cause a denial of service due to client-side enforcement of business rules.
+            <title><![CDATA[CVE-2026-133225 [CVSS:3.1 5.4 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133225</link>
+            <guid isPermaLink="false">CVE-2026-133225</guid>
+            <pubDate>Fri, 20 Nov 2026 02:17:16 GMT</pubDate>
+            <description><![CDATA[A flaw was found in Keycloak. When processing token requests using the User-Managed Access (UMA) grant, Keycloak fails to verify whether a target client or resource server is enabled before issuing an authorization token. An authenticated remote user can exploit this flaw to obtain valid Requesting Party Tokens (RPTs) for disabled clients, bypassing administrative access controls and permissions restrictions.
 
-Score: 5.5 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:N/I:L/A:H]]></description>
+Score: 5.4 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:N]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-91416 [CVSS:3.1 5.9 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-91416</link>
-            <guid isPermaLink="false">CVE-2026-91416</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:06 GMT</pubDate>
-            <description><![CDATA[Vulnerability in the Oracle WebLogic Server product of Oracle Fusion Middleware (component: Core).   The supported version that is affected is 12.2.1.4.0. Difficult to exploit vulnerability allows high privileged attacker with network access via HTTP to compromise Oracle WebLogic Server.  Successful attacks of this vulnerability can result in  unauthorized creation, deletion or modification access to critical data or all Oracle WebLogic Server accessible data as well as  unauthorized access to critical data or complete access to all Oracle WebLogic Server accessible data. CVSS 3.1 Base Score 5.9 (Confidentiality and Integrity impacts).  CVSS Vector: (CVSS:3.1/AV:N/AC:H/PR:H/UI:N/S:U/C:H/I:H/A:N).
+            <title><![CDATA[CVE-2026-133224 [CVSS:3.1 5.4 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133224</link>
+            <guid isPermaLink="false">CVE-2026-133224</guid>
+            <pubDate>Fri, 20 Nov 2026 02:17:16 GMT</pubDate>
+            <description><![CDATA[A flaw was found in Keycloak. When an administrator revokes tokens by setting a not-before revocation cutoff, Keycloak fails to enforce this boundary when processing User-Managed Access (UMA) grant requests using ID token claims. An authenticated remote user with an active session can submit a previously revoked ID token to receive a fresh Requesting Party Token (RPT). This flaw allows an attacker to bypass token revocation and retain unauthorized access to protected resources.
 
-Score: 5.9 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:H/PR:H/UI:N/S:U/C:H/I:H/A:N]]></description>
+Score: 5.4 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-102430 [CVSS:4.0 6.9 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-102430</link>
+            <guid isPermaLink="false">CVE-2026-102430</guid>
+            <pubDate>Fri, 20 Nov 2026 02:17:16 GMT</pubDate>
+            <description><![CDATA[An uncontrolled recursion vulnerability exists in the LINE iOS app prior to version 26.19.0.
+
+The Flex Message processing component does not adequately validate the structure of externally supplied message content.
+
+As a result, an attacker who is able to send a crafted message to a victim could cause the application to crash when the message is received or displayed.
+
+A server-side mitigation has been deployed that also protects existing iOS clients that have not been updated to version 26.19.0.
+
+Score: 6.9 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:P/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-82091 [CVSS:3.1 3.2 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-82091</link>
+            <guid isPermaLink="false">CVE-2026-82091</guid>
+            <pubDate>Fri, 20 Nov 2026 01:17:10 GMT</pubDate>
+            <description><![CDATA[The Canva Desktop App before 1.128.0 stores encrypted application state on disk. The encryption key is hardcoded as a plaintext string in the main.js file and is identical across all Canva installations on Windows and macOS.
+
+Score: 3.2 (LOW)
+Vector: CVSS:3.1/AV:L/AC:L/PR:H/UI:N/S:C/C:L/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-133528 [CVSS:4.0 9.3 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133528</link>
+            <guid isPermaLink="false">CVE-2026-133528</guid>
+            <pubDate>Fri, 20 Nov 2026 01:17:10 GMT</pubDate>
+            <description><![CDATA[BeamNG.drive before 0.40.6 contains an out-of-bounds write vulnerability because JIT-compiled LuaJIT traces omit FFI array bounds checks, letting untrusted Lua escape the sandbox. Attackers supplying a malicious mod can JIT-compile an FFI store loop, write out of range using a tostring() address leak, re-enable ffi.load, and run commands as the game user.
+
+Score: 9.3 (CRITICAL)
+Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:N/UI:P/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-133521 [CVSS:4.0 5.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133521</link>
+            <guid isPermaLink="false">CVE-2026-133521</guid>
+            <pubDate>Fri, 20 Nov 2026 01:17:10 GMT</pubDate>
+            <description><![CDATA[Bar Assistant 3.0.0 before 6.11.0 contains an authorization bypass vulnerability in BarController::join that allows authenticated users to join bars without a valid invite code. Attackers can send POST requests to /api/bars/join omitting invite_code, matching invite-disabled bars with NULL codes, to read cocktails, ingredients, members, settings and search tokens.
+
+Score: 5.3 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:L/VI:L/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-133520 [CVSS:4.0 5.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133520</link>
+            <guid isPermaLink="false">CVE-2026-133520</guid>
+            <pubDate>Fri, 20 Nov 2026 01:17:10 GMT</pubDate>
+            <description><![CDATA[Dokploy 0.28.0 before 0.31.1 contains a path traversal vulnerability in the patch.readRepoDirectories tRPC procedure that allows authenticated organization members to list tracked files of arbitrary git repositories. Attackers with service read permission can supply a crafted repoPath, which is passed to git ls-tree unconfined, to enumerate other organizations' application and compose source trees.
+
+Score: 5.3 (MEDIUM)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:L/VI:N/VA:N/SC:L/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-133519 [CVSS:4.0 6.8 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133519</link>
+            <guid isPermaLink="false">CVE-2026-133519</guid>
+            <pubDate>Fri, 20 Nov 2026 01:17:10 GMT</pubDate>
+            <description><![CDATA[FFmpeg 7.0 through 9.0.2 contains an out-of-bounds read vulnerability in dvdvideo_menu_next_ps_block() in libavformat/dvdvideodec.c when demuxing DVD menu domains. Attackers can craft a DVD image whose last cell sector and NAV next-VOBU pointer bypass the end-of-cell check, overreading pgc->cell_playback and crashing the process.
+
+Score: 6.8 (MEDIUM)
+Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:N/UI:P/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-133406 [CVSS:4.0 4.8 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133406</link>
+            <guid isPermaLink="false">CVE-2026-133406</guid>
+            <pubDate>Fri, 20 Nov 2026 01:17:10 GMT</pubDate>
+            <description><![CDATA[A vulnerability was determined in aoiflux mutant 2.3.0/2.4.0/2.5.0. This vulnerability affects unknown code of the file builtin/hive_builtins.go of the component Forensic Parser. This manipulation of the argument Count causes uncontrolled memory allocation. It is possible to launch the attack on the local host. Upgrading to version 2.6.0 is able to resolve this issue. Patch name: c4b1a7dec6c603115e2a05d1e8970a142f0b9774. Upgrading the affected component is recommended.
+
+Score: 4.8 (MEDIUM)
+Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-132825 [CVSS:3.1 7.4 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-132825</link>
+            <guid isPermaLink="false">CVE-2026-132825</guid>
+            <pubDate>Fri, 20 Nov 2026 01:17:09 GMT</pubDate>
+            <description><![CDATA[Ruby before 3.3.14, 3.4.13, and 4.0.10 has a heap-based buffer overflow during case conversion. One byte can be written outside a buffer for, for example, ISO-8859-1 or Windows-1252.
+
+Score: 7.4 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-131877]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131877</link>
+            <guid isPermaLink="false">CVE-2026-131877</guid>
+            <pubDate>Fri, 20 Nov 2026 01:17:09 GMT</pubDate>
+            <description><![CDATA[Convert::ASN1 versions before 0.37 for Perl allow CPU exhaustion via unbounded arc length in OBJECT IDENTIFIER decoding and encoding.
+
+The content of an OBJECT IDENTIFIER or RELATIVE-OID element is passed to unpack "w*" on decode, and the arcs of an OID string to pack "w*" on encode. Perl converts each arc to or from its decimal string in time quadratic in the arc's length, and nothing limits that length.
+
+An attacker who controls the decoded data, or an OID string passed to encode, can exhaust CPU with a single oversized arc.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-131868]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131868</link>
+            <guid isPermaLink="false">CVE-2026-131868</guid>
+            <pubDate>Fri, 20 Nov 2026 01:17:09 GMT</pubDate>
+            <description><![CDATA[Convert::ASN1 versions before 0.37 for Perl allow memory exhaustion via a declared element length passed unchecked to sysread in asn_read and asn_get.
+
+The length an element declares in its BER header is passed to sysread as the read size. Perl grows the target buffer to that size before reading, so memory is allocated from the declared length, not from the data received. A 6-byte header can declare a length of up to 4GB.
+
+A single header makes the reading process allocate the declared size. Where the allocation fails, perl exits with "Out of memory", which eval cannot catch.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-126956]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-126956</link>
+            <guid isPermaLink="false">CVE-2026-126956</guid>
+            <pubDate>Fri, 20 Nov 2026 01:17:09 GMT</pubDate>
+            <description><![CDATA[Convert::ASN1 versions before 0.37 for Perl allow memory exhaustion via unlimited recursion depth in constructed-form string decoding.
+
+Any constructed-form string element causes the decoder to recurse on the element's contents. The BER encoding controls nesting depth at four bytes per level, with no bound checked. Perl recursion is heap-allocated, so the process grows without a stack crash.
+
+An attacker who controls the decoded data can exhaust memory with a small deeply nested constructed string.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-126819]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-126819</link>
+            <guid isPermaLink="false">CVE-2026-126819</guid>
+            <pubDate>Fri, 20 Nov 2026 01:17:09 GMT</pubDate>
+            <description><![CDATA[Convert::ASN1 versions before 0.37 for Perl allow memory exhaustion via zero-length BIT STRING content.
+
+A BIT STRING with zero content octets passes -1 to substr as the length. Perl reads a negative length as an offset from the end of the string, so the decoded value is nearly all of the input that follows the element. In the constructed form each zero-length segment copies the rest of the input again, so memory grows with the square of the input size.
+
+An attacker who controls the decoded data can exhaust memory with a short constructed BIT STRING. The resulting value also contains bytes from adjacent input.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-126682]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-126682</link>
+            <guid isPermaLink="false">CVE-2026-126682</guid>
+            <pubDate>Fri, 20 Nov 2026 01:17:09 GMT</pubDate>
+            <description><![CDATA[Convert::ASN1 versions before 0.37 for Perl allow CPU exhaustion via exponent-notation string in INTEGER encoding.
+
+The encoder routes any value with abs >= 2**31 to i2osp without validating that it is an integer. A string in exponent notation such as "1e8000" passes that threshold. Math::BigInt expands it to an 8001-digit integer, and i2osp's per-octet conversion loop is quadratic in that size.
+
+An attacker who controls encoded INTEGER values can exhaust CPU with a short exponent-notation string.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-126576]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-126576</link>
+            <guid isPermaLink="false">CVE-2026-126576</guid>
+            <pubDate>Fri, 20 Nov 2026 01:17:09 GMT</pubDate>
+            <description><![CDATA[Convert::ASN1 versions before 0.37 for Perl allow CPU exhaustion via unchecked exponent length in binary REAL decoding.
+
+Binary REAL decoding never bounds-checks the exponent length against the available content. For a minimal one-byte binary REAL, the exponent byte is read from outside the element, making the mantissa length -1. Perl reads a negative length as an offset from the end of the string, so the mantissa is nearly all of the input that follows the element. The long-form exponent path also omits the extra length octet when sizing the mantissa.
+
+An attacker who controls the decoded data can exhaust CPU with a list of such values, as each mantissa loop iterates over the remaining input. The decoded values are also computed from bytes outside each element.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-126568]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-126568</link>
+            <guid isPermaLink="false">CVE-2026-126568</guid>
+            <pubDate>Fri, 20 Nov 2026 01:17:08 GMT</pubDate>
+            <description><![CDATA[Convert::ASN1 versions before 0.37 for Perl allow memory exhaustion via unbounded MSG_PEEK buffer doubling in asn_recv.
+
+asn_recv peeks the socket in a loop, doubling the buffer size on each pass until a tag and length can be decoded. An inverted boolean guard ($tb || rather than $tb &&) prevents the need-more-data exit from firing once a tag byte has been decoded. When asn_decode_length returns no value because the length is absent or incomplete, no exit fires for that case either. MSG_PEEK leaves socket data unconsumed, so each re-peek returns at once while the buffer size doubles.
+
+A single truncated BER header sent to a process calling asn_recv doubles the peek buffer until memory is exhausted. Perl's realloc failure is fatal and not catchable with eval.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-126540]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-126540</link>
+            <guid isPermaLink="false">CVE-2026-126540</guid>
+            <pubDate>Fri, 20 Nov 2026 01:17:08 GMT</pubDate>
+            <description><![CDATA[Convert::ASN1 versions before 0.37 for Perl allow CPU exhaustion via quadratic bigint loop in os2ip.
+
+Every INTEGER or ENUMERATED longer than four content octets reaches os2ip, which iterates over each content octet with $result = ($result * 256) + $octet. Each multiplication operates on a bigint that grows by one octet per step, so decoding an n-octet value takes O(n^2) bigint work. Nothing limits content length before this loop runs.
+
+An attacker who controls the decoded data can exhaust CPU with a single oversized INTEGER or ENUMERATED value.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-71474 [CVSS:4.0 6.9 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-71474</link>
+            <guid isPermaLink="false">CVE-2025-71474</guid>
+            <pubDate>Fri, 20 Nov 2026 01:17:08 GMT</pubDate>
+            <description><![CDATA[lwext4 through 1.0.0 contains an out-of-bounds write vulnerability in ext4_fs_init_block_bitmap() that allows attackers to corrupt heap memory via crafted superblock geometry fields. Attackers can supply an ext4 image with oversized s_reserved_gdt_blocks and BLOCK_UNINIT groups to write past the bitmap buffer, crashing applications that mount it.
+
+Score: 6.9 (MEDIUM)
+Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:N/UI:P/VC:N/VI:L/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2025-71473 [CVSS:4.0 6.9 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2025-71473</link>
+            <guid isPermaLink="false">CVE-2025-71473</guid>
+            <pubDate>Fri, 20 Nov 2026 01:17:07 GMT</pubDate>
+            <description><![CDATA[lwext4 through 1.0.0 contains a heap buffer overflow in ext4_fs_init_inode_bitmap() in src/ext4_fs.c because it does not validate s_inodes_per_group against the inode bitmap size. Attackers can supply a crafted ext4 image with an oversized s_inodes_per_group so memset writes past the heap buffer, corrupting memory and crashing the mounting application.
+
+Score: 6.9 (MEDIUM)
+Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:N/UI:P/VC:N/VI:L/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-22062 [CVSS:4.0 2.3 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-22062</link>
+            <guid isPermaLink="false">CVE-2026-22062</guid>
+            <pubDate>Fri, 20 Nov 2026 00:17:26 GMT</pubDate>
+            <description><![CDATA[StorageGRID (formerly StorageGRID Webscale) versions 12.1.0 and higher are susceptible to an information exposure vulnerability which allows a remote unauthenticated attacker to acquire low-sensitivity credentials via a Man-in-the-middle attack when certain non-default features are enabled.
+
+Score: 2.3 (LOW)
+Vector: CVSS:4.0/AV:A/AC:H/AT:P/PR:N/UI:N/VC:L/VI:N/VA:N/SC:N/SI:L/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-78505 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-78505</link>
+            <guid isPermaLink="false">CVE-2026-78505</guid>
+            <pubDate>Thu, 19 Nov 2026 23:23:41 GMT</pubDate>
+            <description><![CDATA[Heap-based buffer overflow in Microsoft Office allows an unauthorized attacker to execute code over a network.
+
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-69282 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-69282</link>
+            <guid isPermaLink="false">CVE-2026-69282</guid>
+            <pubDate>Thu, 19 Nov 2026 23:21:44 GMT</pubDate>
+            <description><![CDATA[Improper access control in Microsoft Office SharePoint allows an authorized attacker to execute code over a network.
+
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-69273 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-69273</link>
+            <guid isPermaLink="false">CVE-2026-69273</guid>
+            <pubDate>Thu, 19 Nov 2026 23:21:42 GMT</pubDate>
+            <description><![CDATA[Improper access control in Microsoft Office SharePoint allows an authorized attacker to execute code over a network.
+
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-68791 [CVSS:3.1 10 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-68791</link>
+            <guid isPermaLink="false">CVE-2026-68791</guid>
+            <pubDate>Thu, 19 Nov 2026 23:21:33 GMT</pubDate>
+            <description><![CDATA[Incorrect authorization in Azure Machine Learning allows an unauthorized attacker to disclose information over a network.
+
+Score: 10 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:L]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-50311 [CVSS:3.1 7.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-50311</link>
+            <guid isPermaLink="false">CVE-2026-50311</guid>
+            <pubDate>Thu, 19 Nov 2026 23:19:59 GMT</pubDate>
+            <description><![CDATA[Improper access control in Windows Server allows an authorized attacker to elevate privileges locally.
+
+Score: 7.8 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-133435 [CVSS:3.1 3.7 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133435</link>
+            <guid isPermaLink="false">CVE-2026-133435</guid>
+            <pubDate>Thu, 19 Nov 2026 23:19:29 GMT</pubDate>
+            <description><![CDATA[A flaw was found in Keycloak. When configured with a database that uses case-insensitive collation, Keycloak resolves realm URLs regardless of letter casing. A remote attacker can exploit this behavior by sending requests with alternate letter casing to bypass upstream reverse proxy access controls that rely on case-sensitive path matching. This issue can expose restricted authentication endpoints intended only for internal access, though Keycloak's internal authentication mechanisms remain intact.
+
+Score: 3.7 (LOW)
+Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-133327 [CVSS:4.0 2.1 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133327</link>
+            <guid isPermaLink="false">CVE-2026-133327</guid>
+            <pubDate>Thu, 19 Nov 2026 23:19:29 GMT</pubDate>
+            <description><![CDATA[A vulnerability was identified in Dolibarr ERP CRM up to 23.0.4. This affects the function dol_convert_file in the library htdocs/core/lib/files.lib.php of the component Document Upload. Such manipulation leads to code injection. The attack can be launched remotely. The exploit is publicly available and might be used. Upgrading to version 24.0.0 is able to mitigate this issue. The name of the patch is 9b6368b2a9eae3eec690b2ce22c4f291f0051540. Upgrading the affected component is advised.
+
+Score: 2.1 (LOW)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:L/VI:L/VA:L/SC:N/SI:N/SA:N/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-122676 [CVSS:3.1 8.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-122676</link>
+            <guid isPermaLink="false">CVE-2026-122676</guid>
+            <pubDate>Thu, 19 Nov 2026 23:19:25 GMT</pubDate>
+            <description><![CDATA[Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection') vulnerability in PublishPress PublishPress Authors publishpress-authors allows Blind SQL Injection.This issue affects PublishPress Authors: from n/a through 4.18.0.
+
+Score: 8.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:N/A:L]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-95517]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-95517</link>
+            <guid isPermaLink="false">CVE-2026-95517</guid>
+            <pubDate>Thu, 19 Nov 2026 22:19:56 GMT</pubDate>
+            <description><![CDATA[Reliance on obfuscation or encryption of Security-Relevant inputs without integrity checking, Improper validation of integrity check value, Cleartext transmission of sensitive information vulnerability in the EncryptInterceptor of Apache Tomcat.
+
+
+
+This issue affects Apache Tomcat: from 11.0.0-M1 through 11.0.27, from 10.1.0-M1 through 10.1.61, from 9.0.13 through 9.0.123.
+
+
+
+The following versions were EOL at the time the CVE was created but are known to be affected: from 8.5.38 through 8.5.100, from 7.0.100 through 7.0.109. Other unsupported versions may also be affected.
+
+
+
+Users are recommended to upgrade to version 11.0.29, 10.1.62 or 9.0.124 and switch to TLS-PSK to encrypt cluster communication, which fixes the issue.
+Note: Tomcat 11.0.28 was not released]]></description>
         </item>
         <item>
             <title><![CDATA[CVE-2026-87977 [CVSS:3.1 9.8 CRITICAL]]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-87977</link>
             <guid isPermaLink="false">CVE-2026-87977</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:06 GMT</pubDate>
+            <pubDate>Thu, 19 Nov 2026 22:19:43 GMT</pubDate>
             <description><![CDATA[IBM Guardium Data Protection 12.2 is vulnerable to SQL injection in the edge-controller component. An unauthenticated remote attacker could exploit this vulnerability to access or modify sensitive database information.
 
 Score: 9.8 (CRITICAL)
@@ -53,621 +477,298 @@ Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
             <title><![CDATA[CVE-2026-85018 [CVSS:3.1 8.1 HIGH]]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-85018</link>
             <guid isPermaLink="false">CVE-2026-85018</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:06 GMT</pubDate>
+            <pubDate>Thu, 19 Nov 2026 22:19:22 GMT</pubDate>
             <description><![CDATA[IBM Guardium Data Protection 12.2 is vulnerable to improper TLS certificate validation in the GDP Terraform provider, allowing a network attacker with a man-in-the-middle position to intercept sensitive credentials transmitted to the Guardium appliance.
 
 Score: 8.1 (HIGH)
 Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-84273 [CVSS:3.1 8.1 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-84273</link>
-            <guid isPermaLink="false">CVE-2026-84273</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:06 GMT</pubDate>
-            <description><![CDATA[IBM Guardium Data Protection 12.2 is vulnerable to path traversal in the datasource functionality. An authenticated attacker could exploit this vulnerability to delete arbitrary files on the appliance.
+            <title><![CDATA[CVE-2026-84786 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-84786</link>
+            <guid isPermaLink="false">CVE-2026-84786</guid>
+            <pubDate>Thu, 19 Nov 2026 22:19:22 GMT</pubDate>
+            <description><![CDATA[A DANE-enabled TLS client may crash by dereferencing a NULL pointer when processing an unusual combination of certificate and TLSA records.
 
-Score: 8.1 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:H/A:H]]></description>
+Score: 7.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-84236 [CVSS:3.1 9.8 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-84236</link>
-            <guid isPermaLink="false">CVE-2026-84236</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:06 GMT</pubDate>
-            <description><![CDATA[IBM Guardium Data Protection 12.2 is vulnerable to insecure deserialization in the SharePoint Tap MulticastTransceiver component. An unauthenticated remote attacker could exploit this vulnerability to execute arbitrary code on the affected system.
+            <title><![CDATA[CVE-2026-77316 [CVSS:3.1 7.1 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-77316</link>
+            <guid isPermaLink="false">CVE-2026-77316</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:44 GMT</pubDate>
+            <description><![CDATA[Flyto2 Core is an execution kernel for automation and AI-agent workflows. Prior to 2.26.8, validate_url_ssrf() in src/core/utils.py validates one DNS answer and then returns the hostname, while guarded_aiohttp_request(), enforce_outbound_url(), and validate_url_with_env_config() allow the outbound connection to perform an independent second lookup. A caller with control of the hostname's DNS can make validation see a public address and make the connection see an internal address, bypassing the guard across its outbound consumers and exposing readable internal or metadata-service responses. The attack requires low or zero DNS TTL behavior and a successful timing-dependent answer change; static multiple-address answers are checked and do not provide the same bypass. This issue is fixed in version 2.26.8.
 
-Score: 9.8 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+Score: 7.1 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:C/C:H/I:L/A:N]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-84211 [CVSS:3.1 5.9 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-84211</link>
-            <guid isPermaLink="false">CVE-2026-84211</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:06 GMT</pubDate>
-            <description><![CDATA[IBM Guardium Data Protection 12.2 could allow a remote attacker to inject forged audit records due to improper output neutralization for logs.
+            <title><![CDATA[CVE-2026-77315 [CVSS:3.1 8.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-77315</link>
+            <guid isPermaLink="false">CVE-2026-77315</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:44 GMT</pubDate>
+            <description><![CDATA[Flyto2 Core is an execution kernel for automation and AI-agent workflows. Prior to 2.26.8, http.paginate in src/core/modules/atomic/http/paginate.py validates only the initial base_url, and _paginate_link_header then follows a server-supplied Link: rel="next" URL without calling the SSRF guard again. A low-privileged caller can make an allowed first page point the next request at an internal or metadata service, causing a readable second-order SSRF whose response body is aggregated into all_items and returned. This issue is fixed in version 2.26.8.
 
-Score: 5.9 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:H/A:N]]></description>
+Score: 8.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:L/A:N]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-84087 [CVSS:3.1 7.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-84087</link>
-            <guid isPermaLink="false">CVE-2026-84087</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:05 GMT</pubDate>
-            <description><![CDATA[IBM Guardium Data Protection 12.2 is vulnerable to local privilege escalation via the SUID-root podman_wrapper binary on the Collector appliance. A local attacker with low-privileged access to the Collector can exploit insufficient argument validation in the SUID binary to execute arbitrary commands as root, resulting in full compromise of the Collector appliance.
+            <title><![CDATA[CVE-2026-77314 [CVSS:3.1 6.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-77314</link>
+            <guid isPermaLink="false">CVE-2026-77314</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:44 GMT</pubDate>
+            <description><![CDATA[Flyto2 Core is an execution kernel for automation and AI-agent workflows. Prior to 2.26.8, the MCP run_recipe tool in src/core/mcp_handler.py accepts a caller-controlled recipe_name that load_recipe() in src/cli/recipe.py appends to the src/recipes path without resolved-path containment. Parent-directory segments can therefore make Flyto load and execute a YAML workflow outside the bundled recipe directory, bypassing the boundary represented by list_recipes(). This does not necessarily provide unrestricted code execution because available workflow modules remain subject to Flyto's module policy, but it permits unintended execution of allowed browser, network, file, and data-processing modules. This issue is fixed in version 2.26.8.
 
-Score: 7.8 (HIGH)
-Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+Score: 6.3 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:L]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-84065 [CVSS:3.1 6.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-84065</link>
-            <guid isPermaLink="false">CVE-2026-84065</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:05 GMT</pubDate>
-            <description><![CDATA[IBM Guardium Data Protection 12.2 could allow a remote attacker to obtain sensitive information or cause a denial of service due to an out-of-bounds heap read.
+            <title><![CDATA[CVE-2026-77313 [CVSS:3.1 7.1 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-77313</link>
+            <guid isPermaLink="false">CVE-2026-77313</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:44 GMT</pubDate>
+            <description><![CDATA[Flyto2 Core is an execution kernel for automation and AI-agent workflows. Prior to 2.26.8, validate_url_ssrf in src/core/utils.py resolves and checks a hostname but returns the hostname URL rather than the validated address, and session.get in http.get performs an independent DNS lookup when connecting. A low-privileged caller with control of the hostname's DNS can make the first lookup return a public address and the connection-time lookup return an internal address, bypassing the SSRF guard for all modules that call it and exposing readable internal or metadata-service responses. Successful exploitation requires attacker-controlled DNS and a successful timing-dependent answer change between the two lookups. This issue is fixed in version 2.26.8.
 
-Score: 6.5 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:L]]></description>
+Score: 7.1 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:C/C:H/I:L/A:N]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-83631 [CVSS:3.1 6.8 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-83631</link>
-            <guid isPermaLink="false">CVE-2026-83631</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:05 GMT</pubDate>
-            <description><![CDATA[On Intel-based macOS systems, the Okta Device Access (ODA) component of Okta Verify for macOS configures a LaunchDaemon service whose program path resolves via a symbolic link in /usr/local/bin. In environments where non-standard directory permissions grant local non-root users write access to this path, the symbolic link target can be modified, causing the LaunchDaemon to execute the replacement binary upon service restart.
+            <title><![CDATA[CVE-2026-77312 [CVSS:3.1 10 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-77312</link>
+            <guid isPermaLink="false">CVE-2026-77312</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:44 GMT</pubDate>
+            <description><![CDATA[Flyto2 Core is an execution kernel for automation and AI-agent workflows. Prior to 2.26.8, the earlier CVE-2026-67429 remediation applied validate_path_with_env_config() to only a hand-picked set of file-writing modules, leaving data.csv.write in src/core/modules/atomic/data/csv_write.py, data.json_to_csv in src/core/modules/atomic/data/json_to_csv.py, file.copy in src/core/modules/atomic/file/copy.py, and file.move in src/core/modules/atomic/file/move.py outside the FLYTO_SANDBOX_DIR confinement boundary. The advisory also identifies unguarded modules across the broader data.*, file.*, and report-writer families. data.csv.write relies on a .. substring denylist that does not reject absolute paths, while the other named modules accept caller-controlled output or destination paths without the canonical guard. A caller able to execute modules or recipes can therefore write attacker-controlled content outside the configured sandbox, potentially overwriting application code, recipes, startup files, scheduled-task files, or authorization files and gaining code execution on the host. This issue is fixed in version 2.26.8.
 
-Score: 6.8 (MEDIUM)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:L/I:H/A:N]]></description>
+Score: 10 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:N/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-82342 [CVSS:3.1 8.1 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-82342</link>
-            <guid isPermaLink="false">CVE-2026-82342</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:05 GMT</pubDate>
-            <description><![CDATA[IBM Guardium Data Protection 12.2 is vulnerable to a stack-based buffer overflow when processing a specially crafted PROXY protocol v1 header. A remote attacker can exploit this vulnerability to cause a denial of service or potentially execute arbitrary code.
+            <title><![CDATA[CVE-2026-76543 [CVSS:3.1 5.4 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-76543</link>
+            <guid isPermaLink="false">CVE-2026-76543</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:43 GMT</pubDate>
+            <description><![CDATA[In Splunk Enterprise versions below 10.6.1, 10.4.5, 10.2.9, 10.0.12, and 9.4.17, a user who holds the "power" Splunk role could store attacker-controlled Search Processing Language (SPL) in a shared data model.
+The vulnerability is possible because the Data Model Editor does not properly neutralize data model field names when it builds a preview search.
+The vulnerability requires the attacker to phish the affected user by tricking them into initiating a request within their browser. The attacker should not be able to exploit the vulnerability at will.
+For more information see Add a regular expression field (https://help.splunk.com/en/splunk-enterprise/manage-knowledge-objects/knowledge-management-manual/10.4/define-data-model-dataset-fields/add-a-regular-expression-field), Define roles on the Splunk platform with capabilities (https://help.splunk.com/en/splunk-enterprise/administer/manage-users-and-security/10.4/manage-splunk-platform-users-and-roles/define-roles-on-the-splunk-platform-with-capabilities), and About the search language (https://help.splunk.com/en/splunk-enterprise/search/search-manual/10.4/search-overview/about-the-search-language) in the Splunk documentation.
+
+Score: 5.4 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:H/PR:L/UI:R/S:U/C:H/I:L/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-76538 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-76538</link>
+            <guid isPermaLink="false">CVE-2026-76538</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:43 GMT</pubDate>
+            <description><![CDATA[In Splunk Enterprise versions below 10.4.5, 10.2.9, 10.0.12, and 9.4.16, a user who does not hold the "admin" or "power" Splunk roles could cause Splunk Enterprise to run arbitrary Search Processing Language (SPL) searches with elevated privileges through data model acceleration.
+The vulnerability is possible because Splunk Enterprise does not correctly neutralize caller-supplied data model acceleration values before it places them into generated summarization searches.
+
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-76533 [CVSS:3.1 4.2 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-76533</link>
+            <guid isPermaLink="false">CVE-2026-76533</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:43 GMT</pubDate>
+            <description><![CDATA[In Splunk Enterprise versions below 10.4.5, 10.2.9, 10.0.12, and 9.4.17 on Ubuntu and AlmaLinux, an unauthenticated user who obtains a valid Splunk Web session cookie before the affected user logs out could continue using the cookie after logout to access data and perform actions available to that user.
+The vulnerability is possible because the logout flow does not invalidate the associated session token on affected deployments.
+The attacker must obtain the valid session cookie before the affected user logs out of Splunk Web. The issue was reproduced in Splunk Enterprise installations on Ubuntu and AlmaLinux.
+
+Score: 4.2 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:L/I:L/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-70217 [CVSS:3.1 4.9 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-70217</link>
+            <guid isPermaLink="false">CVE-2026-70217</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:35 GMT</pubDate>
+            <description><![CDATA[Improper access control in Microsoft Office SharePoint allows an authorized attacker to disclose information over a network.
+
+Score: 4.9 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:N/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-70175 [CVSS:3.1 8.1 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-70175</link>
+            <guid isPermaLink="false">CVE-2026-70175</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:32 GMT</pubDate>
+            <description><![CDATA[Improper authentication in ASP.NET Core allows an unauthorized attacker to elevate privileges over a network.
 
 Score: 8.1 (HIGH)
 Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-82339 [CVSS:3.1 9.1 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-82339</link>
-            <guid isPermaLink="false">CVE-2026-82339</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:05 GMT</pubDate>
-            <description><![CDATA[IBM Guardium Data Protection 12.2 is vulnerable to missing authentication in the SharePoint S-TAP RelayService, allowing an unauthenticated network attacker to inject forged audit events and access the active monitoring policy.
-
-Score: 9.1 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-81499 [CVSS:3.1 5.4 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-81499</link>
-            <guid isPermaLink="false">CVE-2026-81499</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:04 GMT</pubDate>
-            <description><![CDATA[Incus is a system container and virtual machine manager. Prior to 7.3.0, the six network address set handlers in cmd/incusd/network_address_sets.go resolved the effective project with project.NetworkProject(), which returns default when features.networks is unset. The expandProject authorization switch in cmd/incusd/daemon.go omitted auth.ObjectTypeNetworkAddressSet, so authorization used the requested project instead of the effective project. This issue is fixed in version 7.3.0.
-
-Score: 5.4 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:L]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-81434 [CVSS:4.0 4.8 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-81434</link>
-            <guid isPermaLink="false">CVE-2026-81434</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:04 GMT</pubDate>
-            <description><![CDATA[A reflected Cross-Site Scripting (XSS) vulnerability in WatchGuard Dimension's Device Configuration History page allows an authenticated attacker with view permission on a device to execute arbitrary JavaScript in another authenticated user's browser by enticing the victim to open a specially crafted link.
-
-Score: 4.8 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:A/VC:N/VI:N/VA:N/SC:L/SI:L/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-77378 [CVSS:3.1 6.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-77378</link>
-            <guid isPermaLink="false">CVE-2026-77378</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:04 GMT</pubDate>
-            <description><![CDATA[Bolt is a fully open source, adaptable platform for building and running modern websites. Prior to 6.1.4, SQL injection in ListFormatHelper allows authenticated users with upload permission to execute arbitrary SQL queries through /async/select-options and exfiltrate sensitive database contents when general/caching/list_format is enabled. This issue is fixed in version 6.1.4.
-
-Score: 6.5 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:H/PR:L/UI:R/S:C/C:N/I:H/A:L]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-77367 [CVSS:3.1 9.4 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-77367</link>
-            <guid isPermaLink="false">CVE-2026-77367</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:04 GMT</pubDate>
-            <description><![CDATA[Daptin is a GraphQL/JSON-API headless CMS. Prior to 0.12.30, the generic GET /api/{entity} list endpoint accepts attacker-controlled sort values in PaginatedFindAllWithoutFilters in server/resource/resource_findallpaginated.go without validating the requested column against the table schema. The code uses those values for SELECT and ORDER BY identifier construction, so an embedded identifier quote can terminate the quoted identifier and make the remainder parse as SQL, allowing an unauthenticated attacker to extract unauthorized table data through blind or error-based behavior or repeatedly trigger query failures. This issue is fixed in version 0.12.30.
-
-Score: 9.4 (CRITICAL)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:L/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-77338 [CVSS:4.0 9.3 CRITICAL]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-77338</link>
-            <guid isPermaLink="false">CVE-2026-77338</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:04 GMT</pubDate>
-            <description><![CDATA[Sprout Track is a self-hosted baby tracking application. Prior to 1.3.5, Sprout Track uses a publicly known hardcoded signing secret when JWT_SECRET is unset, and standard setup does not generate a unique secret. On a network-reachable affected deployment, an unauthenticated attacker can sign JWTs with arbitrary claims, including system-administrator claims, to access administrative functionality and read or modify family, child activity, account, and email data. Deployments with a strong unique JWT_SECRET are not affected. Managed and hosted instances were reported remediated. This issue is fixed in version 1.3.5.
-
-Score: 9.3 (CRITICAL)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-76542 [CVSS:3.1 5.9 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-76542</link>
-            <guid isPermaLink="false">CVE-2026-76542</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:04 GMT</pubDate>
-            <description><![CDATA[In Splunk Enterprise versions below 10.4.5, 10.2.9, 10.0.12, and 9.4.17, an unauthenticated user could trick a user who has an active Splunk Web session into selecting the Top values by time field report on the Search page. The selection could run arbitrary Search Processing Language (SPL) searches and potentially expose stored credentials and indexed data.
-The vulnerability is possible because Splunk Web does not correctly neutralize user-controlled data when it generates an SPL search for a field report.
-The vulnerability requires the attacker to phish the user by tricking them into opening a link that the attacker creates. The unauthenticated user should not be able to exploit the vulnerability at will.
-
-Score: 5.9 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-76537 [CVSS:3.1 4.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-76537</link>
-            <guid isPermaLink="false">CVE-2026-76537</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:04 GMT</pubDate>
-            <description><![CDATA[In Splunk Enterprise versions below 10.6.0, 10.4.5, 10.2.9, 10.0.12, and 9.4.17, a user who does not hold a role with either the list_indexer_cluster capability or the edit_indexer_cluster capability could download the cluster manager configuration bundle through the Representational State Transfer (REST) API and access configuration and app files that the cluster manager stages for indexer distribution.
-The vulnerability is possible because the REST API does not require the list_indexer_cluster or edit_indexer_cluster capability before it sends the configuration bundle.
-For more information see Define roles on the Splunk platform with capabilities (https://help.splunk.com/en/splunk-enterprise/administer/manage-users-and-security/10.4/manage-splunk-platform-users-and-roles/define-roles-on-the-splunk-platform-with-capabilities) in the Splunk documentation.
-For more information see Cluster endpoint descriptions (https://help.splunk.com/en/splunk-enterprise/leverage-rest-apis/rest-api-reference/10.6/cluster-endpoints/cluster-endpoint-descriptions) in the Splunk documentation.
-
-Score: 4.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-76532 [CVSS:3.1 4.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-76532</link>
-            <guid isPermaLink="false">CVE-2026-76532</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:03 GMT</pubDate>
-            <description><![CDATA[In Splunk Enterprise versions below 10.6.1, 10.4.5, 10.2.9, 10.0.12, and 9.4.17, a user who does not hold the "admin" or "power" Splunk roles could view credentials configured for email notifications in a saved search shared with that user.
-The vulnerability is possible when email notifications use authentication credentials because the Saved Searches Representational State Transfer (REST) API returns those credentials in clear text.
-For more information see Search endpoint descriptions (https://help.splunk.com/en/splunk-enterprise/leverage-rest-apis/rest-api-reference/10.6/search-endpoints/search-endpoint-descriptions), Manage knowledge object permissions (https://help.splunk.com/en/splunk-enterprise/manage-knowledge-objects/knowledge-management-manual/10.6/get-started-with-knowledge-objects/manage-knowledge-object-permissions), and Email notification action (https://help.splunk.com/en/splunk-enterprise/alert-and-respond/alerting-manual/10.6/configure-alert-actions/email-notification-action) in the Splunk documentation.
-
-Score: 4.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-75801 [CVSS:3.1 6.2 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-75801</link>
-            <guid isPermaLink="false">CVE-2026-75801</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:03 GMT</pubDate>
-            <description><![CDATA[IBM watsonx.data 2.4.0 through 2.4.0 patch 8 could allow a local attacker to obtain sensitive credentials due to the use of a hard-coded cryptographic key.
-
-Score: 6.2 (MEDIUM)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-63390 [CVSS:4.0 8.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-63390</link>
-            <guid isPermaLink="false">CVE-2026-63390</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:03 GMT</pubDate>
-            <description><![CDATA[HTSlib is a library for reading and writing bioinformatics file formats. Prior to 1.21.2, 1.22.3, 1.23.2, and 1.24, the BCF reader can experience an integer overflow in a record-length check that verifies whether a record contains enough bytes for the expected number and size of stored items. A crafted BCF record can bypass this check, causing reads beyond the stored data and, in some cases, writes beyond the heap buffer when the reader sets the least significant bit of accessed bytes. Opening such a file can crash the process, corrupt data or heap structures, and may permit arbitrary code execution. This issue is fixed in versions 1.21.2, 1.22.3, 1.23.2, and 1.24.
-
-Score: 8.8 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:H/VA:L/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-63012 [CVSS:3.1 6.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-63012</link>
-            <guid isPermaLink="false">CVE-2026-63012</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:03 GMT</pubDate>
-            <description><![CDATA[baserCMS is a website development framework. Prior to 5.3.0, getAuthenticationService permits an Api/Admin session authentication fallback based on the Referer header, although operator accounts have an Admin auth prefix and cannot obtain an Api/Admin JWT. An authenticated operator can therefore access /baser/api/admin/ endpoints whose permission.php entries have auth => true, including /baser/api/admin/baser-core/site_configs/view.json, even when the corresponding administrative functionality is restricted. This can disclose administrator-restricted configuration information. This issue is fixed in 5.3.0.
-
-Score: 6.5 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-62955 [CVSS:3.1 7.2 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62955</link>
-            <guid isPermaLink="false">CVE-2026-62955</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:03 GMT</pubDate>
-            <description><![CDATA[baserCMS is a website development framework. From 5.2.3 until 5.3.0, BcThemeFileService::getFullpath() in plugins/bc-theme-file/src/Service/BcThemeFileService.php skips its path containment check when realpath() fails for a nonexistent theme subdirectory selected by the type parameter. An authenticated administrator can supply a traversal path through the theme-file API to access locations outside the theme directory. The bypass of the CVE-2026-30940 fix can permit file writes, overwrites or deletion within the PHP process permissions and, where executable PHP can be written, remote code execution. This issue is fixed in 5.3.0.
-
-Score: 7.2 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-62258 [CVSS:4.0 8.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-62258</link>
-            <guid isPermaLink="false">CVE-2026-62258</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:03 GMT</pubDate>
-            <description><![CDATA[HTSlib is a library for reading and writing bioinformatics file formats. Prior to 1.21.2, 1.22.3, 1.23.2, and 1.24, the CRAM decoder validates the 254-character query-name limit only after decoding the name into a 1024-byte stack array. An attacker-controlled CRAM record can provide an overlong query name and overflow the local stack buffer before the later validation runs; all CRAM format versions are affected. Opening such a file can crash the process, corrupt stack data, and may permit arbitrary code execution. This issue is fixed in versions 1.21.2, 1.22.3, 1.23.2, and 1.24.
-
-Score: 8.8 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:H/VA:L/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-53526 [CVSS:3.1 5.7 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-53526</link>
-            <guid isPermaLink="false">CVE-2026-53526</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:02 GMT</pubDate>
-            <description><![CDATA[Reposilite is lightweight and easy-to-use repository management software dedicated to Maven-based artifacts in the JVM ecosystem. From 3.5.16 until 3.6.0, as stated by the advisory, the Maven directory-index page interpolates the request URI without HTML escaping in its title, heading, base URL, and parent-directory link. The advisory says the content-embedded ctx.uri() is percent-encoded, preventing tag injection, but that a single quote passes through and breaks the quoted Parent-Directory link; it also says Location.of strips single quotes, so the reachability of the described quote-based trigger remains unresolved. The listing shares the Admin UI origin and does not set the sandbox Content-Security-Policy used for artifact and Javadoc responses, so the reported script execution could access a user's local-storage token. A manager token could enable full instance compromise. The advisory reports version 3.6.0 as fixed.
-
-Score: 5.7 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:H/PR:H/UI:R/S:U/C:H/I:H/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-22310 [CVSS:4.0 7.6 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-22310</link>
-            <guid isPermaLink="false">CVE-2026-22310</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:02 GMT</pubDate>
-            <description><![CDATA[When the setting for saving requests to non-existent
-pages (404) is enabled, JTL-Shop stores the raw requested URL in its
-redirect table, and the administration backend renders it without output
-encoding in the form used to edit a redirect. An unauthenticated remote
-attacker can store script code with a single request, which is executed in the
-browser session of an administrator who opens the affected redirect,
-allowing actions to be performed with the administrator's privileges. The
-setting is disabled by default in new installations but may still be
-enabled in older ones.
-
-Score: 7.6 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:P/VC:H/VI:H/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-22309 [CVSS:4.0 8.6 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-22309</link>
-            <guid isPermaLink="false">CVE-2026-22309</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:02 GMT</pubDate>
-            <description><![CDATA[The visitor tracking of JTL-Shop automatically
-registers unknown crawler user agents without filtering the value, and the stored
-value is rendered without output encoding on several pages of the
-administration backend (search engine statistics, crawler dashboard widget, crawler
-edit form, sitemap export download list and campaign details). An
-unauthenticated remote attacker can store script code with a single request. The code is
-executed in the browser session of an administrator who opens one of these
-pages, allowing actions to be performed with the administrator's privileges.
-
-Score: 8.6 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:P/VC:H/VI:H/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-22308 [CVSS:4.0 8.6 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-22308</link>
-            <guid isPermaLink="false">CVE-2026-22308</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:02 GMT</pubDate>
-            <description><![CDATA[The preview mode of the OPC (OnPage Composer) page
-builder of JTL-Shop is activated by a request parameter alone and
-renders page data supplied in the request without checking for an authenticated
-backend session with the corresponding permission. Several portlet properties
-are output without output encoding. An unauthenticated remote attacker
-can thereby cause script code to be executed in the browser of a
-visitor or administrator who opens a crafted link; in the case of an
-administrator, actions can be performed with the administrator's privileges. Third-party
-plugins whose portlets evaluate property values as templates can
-additionally be made to execute template code through the same entry point. This is
-a separate flaw in such plugins and does not affect the portlets of JTL-Shop itself.
-
-Score: 8.6 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:P/VC:H/VI:H/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-18883 [CVSS:4.0 7.1 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-18883</link>
-            <guid isPermaLink="false">CVE-2026-18883</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:02 GMT</pubDate>
-            <description><![CDATA[ServiceNow has addressed an indirect prompt injection security issue that was identified in the Email Response AI Agent of Now Assist for CSM. We are not currently aware of malicious exploitation against ServiceNow instances.
-
-This remediation was deployed centrally to the Email Response AI Agent (Now Assist for CSM) and does not require a platform version upgrade or hot fix; no version-specific backports apply.
-
-Score: 7.1 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:P/VC:L/VI:H/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-16319 [CVSS:3.1 4.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-16319</link>
-            <guid isPermaLink="false">CVE-2026-16319</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:02 GMT</pubDate>
-            <description><![CDATA[IBM API Connect 10.0.8.0 through 10.0.8.13 could allow a remote authenticated attacker to delete API keys belonging to other users due to improper authorization checks.
-
-Score: 4.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-14885 [CVSS:3.1 4.8 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-14885</link>
-            <guid isPermaLink="false">CVE-2026-14885</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:02 GMT</pubDate>
-            <description><![CDATA[IBM watsonx.data 2.4.0 through 2.4.0 patch 8 could allow a remote attacker to obtain sensitive information due to improper access control.
-
-Score: 4.8 (MEDIUM)
-Vector: CVSS:3.1/AV:A/AC:H/PR:L/UI:N/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-14880 [CVSS:3.1 5.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-14880</link>
-            <guid isPermaLink="false">CVE-2026-14880</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:01 GMT</pubDate>
-            <description><![CDATA[IBM watsonx.data 2.4.0 through 2.4.0 patch 8 could allow unauthorized network access due to insufficient network segmentation controls.
+            <title><![CDATA[CVE-2026-69133 [CVSS:3.1 5.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-69133</link>
+            <guid isPermaLink="false">CVE-2026-69133</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:08 GMT</pubDate>
+            <description><![CDATA[netty-incubator-codec-ohttp implements Oblivious HTTP (OHTTP) gateway and client functionality using Netty. From 0.0.20.Final until 0.0.27.Final, OHttpClientCodec in codec-ohttp/src/main/java/io/netty/incubator/codec/ohttp/OHttpClientCodec.java and OHttpServerCodec in codec-ohttp/src/main/java/io/netty/incubator/codec/ohttp/OHttpServerCodec.java retain the consumed outer cumulationBuffer after a valid OHTTP exchange completes, even though OHttpRequestResponseContext.destroy in codec-ohttp/src/main/java/io/netty/incubator/codec/ohttp/OHttpRequestResponseContext.java releases the inner Binary HTTP cumulation and the channel remains active. A peer can complete a large request or response and leave the keep-alive connection idle, causing the client and server handlers to retain the current high-water pooled or direct buffer capacity until later inbound content replaces it or the handler is removed. Many long-lived idle connections can pin substantial memory and create availability pressure. The issue does not cause unbounded growth for repeated exchanges on a single channel. This issue is fixed in version 0.0.27.Final.
 
 Score: 5.3 (MEDIUM)
-Vector: CVSS:3.1/AV:A/AC:H/PR:N/UI:N/S:U/C:N/I:H/A:N]]></description>
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-14879 [CVSS:3.1 6.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-14879</link>
-            <guid isPermaLink="false">CVE-2026-14879</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:01 GMT</pubDate>
-            <description><![CDATA[IBM watsonx.data 2.4.0 through 2.4.0 patch 8 does not invalidate session after a logout which could allow an authenticated user to impersonate another user on the system.
+            <title><![CDATA[CVE-2026-64849 [CVSS:3.1 9.3 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-64849</link>
+            <guid isPermaLink="false">CVE-2026-64849</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:07 GMT</pubDate>
+            <description><![CDATA[MLflow is an open source AI engineering platform for agents, large language models, and machine learning models. Starting in 3.3.0 and prior to 3.15.0, the POST /api/2.0/mlflow/webhooks/{id}/test endpoint (accessible without credentials when server authentication is not enabled) calls _validate_webhook_url() in mlflow/utils/validation.py only for the original URL while mlflow/webhooks/delivery.py follows redirects and re-resolves the hostname without pinning the validated address, allowing attackers to reach internal or cloud metadata services and receive response_status and response_body. The unauthenticated attack scenario described here applies to deployments without authentication. With MLflow’s built-in basic authentication enabled, requests to this endpoint require valid credentials; this issue does not itself bypass authentication. This issue is fixed in version 3.15.0.
 
-Score: 6.5 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:H/A:N]]></description>
+Score: 9.3 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:L/A:N]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-133309 [CVSS:4.0 8.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133309</link>
-            <guid isPermaLink="false">CVE-2026-133309</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:01 GMT</pubDate>
-            <description><![CDATA[@scalar/typebox before 0.1.4 contains a code injection vulnerability in TypeCompiler that allows attackers to execute JavaScript by supplying crafted schema strings. Attackers can inject single-quote breakouts into string format, Kind names, property keys or Literal values to run arbitrary JavaScript in the host Node.js process during Compile() and Check().
-
-Score: 8.5 (HIGH)
-Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-133305 [CVSS:4.0 2.3 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133305</link>
-            <guid isPermaLink="false">CVE-2026-133305</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:01 GMT</pubDate>
-            <description><![CDATA[sqlmap before 1.10.11.89 contains a credential exposure vulnerability that allows attackers to capture user-supplied Cookie and Authorization headers by redirecting requests to another host. Attackers controlling the scanned target or abusing an open redirect can make RedirectHandler.http_error_302 forward session cookies or bearer tokens to an attacker-controlled host.
-
-Score: 2.3 (LOW)
-Vector: CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:P/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-133276 [CVSS:4.0 6.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133276</link>
-            <guid isPermaLink="false">CVE-2026-133276</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:01 GMT</pubDate>
-            <description><![CDATA[When extra data is allowed (extra=Extra.allow), providing a __pydantic_initialised__ key when validating a Pydantic V1 dataclass makes it considered as already validated, resulting in field values not being validated. The __init__() method of Pydantic V1 dataclasses stores all the provided keyword arguments in the instance __dict__ before validation, so a __pydantic_initialised__ keyword argument overrides the internal flag used to skip validation of already validated instances. As a result, data returned by validation doesn't match the declared type. Affected are applications validating untrusted data into Pydantic V1 dataclasses allowing extra data. The issue was fixed in Pydantic 1.10.27. Users relying on the pydantic.v1 namespace in Pydantic V2 should upgrade to 2.14.2 or later.
-
-Score: 6.3 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:L/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-133246 [CVSS:4.0 8.6 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133246</link>
-            <guid isPermaLink="false">CVE-2026-133246</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:01 GMT</pubDate>
-            <description><![CDATA[modified eCommerce Shopsoftware through 3.3.0 contains a local file inclusion vulnerability that allows administrators to include arbitrary server files by storing ../ sequences in the content manager file name. Unauthenticated requests to shop_content.php then pass the stored path to include(), executing embedded PHP in uploaded content files or images as the web server user.
-
-Score: 8.6 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:H/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-133242 [CVSS:4.0 5.1 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133242</link>
-            <guid isPermaLink="false">CVE-2026-133242</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:00 GMT</pubDate>
-            <description><![CDATA[diaspora* before 0.10.0 contains a stored cross-site scripting vulnerability that allows authenticated users to inject script by crafting og:video:secure_url values. Attackers can post links to pages whose allowlisted-prefix video URL contains a quote and onload handler, executing script in readers' sessions when they click the video preview.
-
-Score: 5.1 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:P/VC:L/VI:L/VA:N/SC:L/SI:L/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-133238 [CVSS:4.0 2.3 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133238</link>
-            <guid isPermaLink="false">CVE-2026-133238</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:00 GMT</pubDate>
-            <description><![CDATA[SABnzbd through 5.1.3 contains a path traversal vulnerability in the Sorter that allows attackers to write files outside the Complete folder via crafted propername, episodename or job name (%dn) values. Attackers can supply a malicious NZB with '...' sequences that collapse to '..' after single-pass replacement, moving downloaded files into arbitrary directories writable by SABnzbd.
-
-Score: 2.3 (LOW)
-Vector: CVSS:4.0/AV:N/AC:H/AT:P/PR:N/UI:P/VC:N/VI:L/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-133234 [CVSS:4.0 8.7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133234</link>
-            <guid isPermaLink="false">CVE-2026-133234</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:00 GMT</pubDate>
-            <description><![CDATA[Stoatchat before 0.16.5 contains an unbounded JXL image decoding vulnerability in revolt_files decode_image that allows unauthenticated attackers to exhaust memory via the january /proxy endpoint. Attackers can request a small hosted JXL file declaring 12000x12000 pixels through /proxy to trigger huge allocations, OOM-killing january and denying proxy and embed service.
-
-Score: 8.7 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-133201 [CVSS:4.0 8.7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133201</link>
-            <guid isPermaLink="false">CVE-2026-133201</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:00 GMT</pubDate>
-            <description><![CDATA[A vulnerability was determined in smartalock wireguard-lwip up to cfba91666590e86bd67842c71cedf9a423be823a. Impacted is the function mul of the file src/crypto/refc/x25519.c of the component X25519 Ladder. Executing a manipulation can lead to out-of-bounds write. The attack can be executed remotely. This product implements a rolling release for ongoing delivery, which means version information for affected or updated releases is unavailable. The project was informed of the problem early through an issue report but has not responded yet.
-
-Score: 8.7 (HIGH)
-Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-133111 [CVSS:3.1 5.9 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133111</link>
-            <guid isPermaLink="false">CVE-2026-133111</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:00 GMT</pubDate>
-            <description><![CDATA[@fastify/http-proxy is a Fastify plugin that proxies HTTP and WebSocket traffic to an upstream server. In versions from 7.1.0 up to but not including 11.6.10, when the plugin is registered with websocket support enabled, it opens the upstream WebSocket connection with a header set built by the default header rewriter, which forwards the client cookie but never sets the upstream origin option, so the browser origin header is dropped while the authenticating cookie is forwarded. Many WebSocket servers defend against cross-site hijacking by checking the origin and treat a missing origin as a trusted non-browser client, so behind the proxy that check never sees the foreign origin. A malicious page visited by a logged-in user can therefore open a WebSocket through the proxy to an upstream that authenticates the handshake with a cookie, and read or send messages on the user's behalf. The issue is fixed in @fastify/http-proxy 11.6.10, and users should upgrade to 11.6.10 or later. As a workaround, provide a header rewriter that sets a correct origin, or validate the origin before the proxy.
-
-Score: 5.9 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-133075 [CVSS:3.1 4.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133075</link>
-            <guid isPermaLink="false">CVE-2026-133075</guid>
-            <pubDate>Thu, 19 Nov 2026 21:18:00 GMT</pubDate>
-            <description><![CDATA[A flaw was found in Moodle. Due to insufficient authorization checks in the quiz random question filter web service, an authenticated user with teacher privileges can modify random question settings in quizzes they do not have permission to manage. This flaw allows unauthorized users to alter assessment configurations across courses they do not oversee.
-
-Score: 4.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-133074 [CVSS:3.1 4.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133074</link>
-            <guid isPermaLink="false">CVE-2026-133074</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:59 GMT</pubDate>
-            <description><![CDATA[A flaw was found in Moodle. Insufficient authorization checks in the quiz overrides web service allow an authenticated user with teacher privileges to modify user and group overrides for quizzes they do not have permission to manage. An attacker could exploit this vulnerability to improperly alter exam access, deadlines, or testing conditions across unauthorized courses.
-
-Score: 4.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-133073 [CVSS:3.1 4.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133073</link>
-            <guid isPermaLink="false">CVE-2026-133073</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:59 GMT</pubDate>
-            <description><![CDATA[A flaw was found in Moodle's single view grade report web service. A missing authorization check allows authenticated students to view the names of all grade items in a course, including those configured to be hidden. This vulnerability leads to unauthorized information disclosure.
-
-Score: 4.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-133072 [CVSS:3.1 5.4 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133072</link>
-            <guid isPermaLink="false">CVE-2026-133072</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:59 GMT</pubDate>
-            <description><![CDATA[A flaw was found in Moodle. Insufficient authorization checks in the quiz editing functionality allow an authenticated user with teacher privileges to view slot details and modify sections of quizzes they do not have permission to manage. An attacker could exploit this flaw to alter quiz configurations or disclose quiz structure information without proper authorization.
-
-Score: 5.4 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-133071 [CVSS:3.1 5.4 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133071</link>
-            <guid isPermaLink="false">CVE-2026-133071</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:59 GMT</pubDate>
-            <description><![CDATA[A flaw was found in Moodle. Due to a missing authorization check when editing Lesson activity pages, authenticated users with teacher privileges can view and move lesson pages from courses they are not permitted to access into their own lessons. This issue can lead to unauthorized access and modification of restricted course content.
-
-Score: 5.4 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-133070 [CVSS:3.1 4.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133070</link>
-            <guid isPermaLink="false">CVE-2026-133070</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:59 GMT</pubDate>
-            <description><![CDATA[A flaw was found in Moodle. Due to a missing authorization check when viewing and restoring wiki page versions, an authenticated user can access content from courses they are not permitted to view. This issue allows an attacker to inspect restricted course material and copy it into their own wiki pages, leading to unauthorized information disclosure.
-
-Score: 4.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-133069 [CVSS:3.1 5.4 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133069</link>
-            <guid isPermaLink="false">CVE-2026-133069</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:59 GMT</pubDate>
-            <description><![CDATA[A flaw was found in Moodle. Missing authorization checks in the forum discussion web services allow authenticated users to view discussion information in courses they do not have permission to access. In addition, users with teacher privileges may lock forum discussions in courses where they lack proper authorization. This issue can lead to unauthorized information disclosure and unauthorized discussion state modification.
-
-Score: 5.4 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-133068 [CVSS:3.1 4.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133068</link>
-            <guid isPermaLink="false">CVE-2026-133068</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:59 GMT</pubDate>
-            <description><![CDATA[A flaw was found in Moodle. An improper authorization check when displaying individual glossary entries allows an authenticated user to view approved glossary items from courses they do not have permission to access. This vulnerability leads to unauthorized information disclosure of restricted educational materials.
-
-Score: 4.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-133067 [CVSS:3.1 5.4 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133067</link>
-            <guid isPermaLink="false">CVE-2026-133067</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:59 GMT</pubDate>
-            <description><![CDATA[A flaw was found in Moodle. Due to missing ownership checks in badge alignments, an authenticated user with badge management privileges can view and modify alignments associated with badges they do not own. This vulnerability can lead to unauthorized data disclosure and tampering with badge configurations.
-
-Score: 5.4 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-133066 [CVSS:3.1 5.4 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133066</link>
-            <guid isPermaLink="false">CVE-2026-133066</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:58 GMT</pubDate>
-            <description><![CDATA[A flaw was found in Moodle. Missing ownership verification in Feedback activity templates allows an authenticated teacher to view, use, or delete templates associated with courses other than their own. This can result in unauthorized access, modification, or deletion of course materials.
-
-Score: 5.4 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-133065 [CVSS:3.1 4.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133065</link>
-            <guid isPermaLink="false">CVE-2026-133065</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:58 GMT</pubDate>
-            <description><![CDATA[A flaw was found in Moodle. Due to insufficient permission checks and input validation in the quiz question bank callback, an authenticated user can access and view questions from question banks they do not have permission to access. Furthermore, this issue allows users to trigger arbitrary class instantiation (creating unintended application objects), potentially leading to further unauthorized actions.
-
-Score: 4.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-133064 [CVSS:3.1 4.6 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133064</link>
-            <guid isPermaLink="false">CVE-2026-133064</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:58 GMT</pubDate>
-            <description><![CDATA[A flaw was found in Moodle. Insufficient sanitization of objective identifiers in the SCORM (Sharable Content Object Reference Model) objectives report allows an authenticated user with content upload permissions to inject malicious scripts. When another user views the report, the injected script executes in their browser session, potentially allowing the attacker to access sensitive information or perform unauthorized actions on their behalf.
-
-Score: 4.6 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:R/S:U/C:L/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-133063 [CVSS:3.1 4.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133063</link>
-            <guid isPermaLink="false">CVE-2026-133063</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:58 GMT</pubDate>
-            <description><![CDATA[A flaw was found in Moodle. Due to insufficient validation when saving activity settings, an authenticated user with teacher privileges can modify activities in courses they are not authorized to access. This flaw allows unauthorized changes to course materials, compromising the integrity of course content.
-
-Score: 4.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-133062 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133062</link>
-            <guid isPermaLink="false">CVE-2026-133062</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:58 GMT</pubDate>
-            <description><![CDATA[A flaw was found in Moodle's external database enrolment plugin. Insufficient sanitization of data passed to queries against the external database allows an authenticated user with course editing permissions to perform a Structured Query Language (SQL) injection attack. When this non-default plugin is enabled, an attacker can exploit this issue to view, modify, or delete sensitive records within the connected external database.
+            <title><![CDATA[CVE-2026-63202 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-63202</link>
+            <guid isPermaLink="false">CVE-2026-63202</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:07 GMT</pubDate>
+            <description><![CDATA[netty-incubator-codec-ohttp implements Oblivious HTTP (OHTTP) gateway and client functionality using Netty. Prior to 0.0.23.Final, BinaryHttpParser.readFieldSection in codec-bhttp/src/main/java/io/netty/incubator/codec/bhttp/BinaryHttpParser.java loops while fieldSectionLength is nonzero and relies on disabled-by-default assertions to require BinaryHttpParser.readFieldLine to return a value and consume bytes. A corrupt field line can consume more bytes than its understated declared section length and drive the counter negative, or a truncated field line can return without consuming data and leave the parser in the same state. An unauthenticated OHTTP peer can encrypt such Binary HTTP content under the gateway public configuration, reach OHttpRequestResponseContext.ContentDecoder.decodeChunk, and permanently pin a Netty event-loop thread at full CPU before application business logic. Multiple requests can exhaust the event-loop group and deny service until restart. This issue is fixed in version 0.0.23.Final.
 
 Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-133061 [CVSS:3.1 4.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133061</link>
-            <guid isPermaLink="false">CVE-2026-133061</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:58 GMT</pubDate>
-            <description><![CDATA[A flaw was found in Moodle. Due to a missing capability check in the grade items web service, an authenticated user with a student role can view the names of all grade items in a course, including those intended to be hidden. This flaw leads to unauthorized information disclosure of hidden course assessment details.
+            <title><![CDATA[CVE-2026-63124 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-63124</link>
+            <guid isPermaLink="false">CVE-2026-63124</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:07 GMT</pubDate>
+            <description><![CDATA[netty-incubator-codec-ohttp implements Oblivious HTTP (OHTTP) gateway and client functionality using Netty. Prior to 0.0.23.Final, BinaryHttpParser.readFieldLine in codec-bhttp/src/main/java/io/netty/incubator/codec/bhttp/BinaryHttpParser.java treats a complete field line that ends exactly at a known field-section boundary as incomplete and returns without consuming bytes. BinaryHttpParser.readFieldSection then leaves fieldSectionLength unchanged and repeats the loop because its forward-progress checks are Java assertions, which are normally disabled in production. A remote peer that sends a known-length Binary HTTP header or trailer section ending at that boundary can make the parser spin indefinitely and pin the Netty event-loop or worker thread responsible for the channel. This issue is fixed in version 0.0.23.Final.
+
+Score: 7.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-61827 [CVSS:4.0 8.7 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61827</link>
+            <guid isPermaLink="false">CVE-2026-61827</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:06 GMT</pubDate>
+            <description><![CDATA[netty-incubator-codec-ohttp implements Oblivious HTTP (OHTTP) gateway and client functionality using Netty. Prior to 0.0.23.Final, BinaryHttpParser does not enforce limits on encoded variable-length fields controlled by a remote peer. A remote peer can cause the decoder to buffer data indefinitely until memory is exhausted, causing denial of service. This issue is fixed in version 0.0.23.Final.
+
+Score: 8.7 (HIGH)
+Vector: CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-61799 [CVSS:3.1 5.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61799</link>
+            <guid isPermaLink="false">CVE-2026-61799</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:06 GMT</pubDate>
+            <description><![CDATA[netty-incubator-codec-ohttp implements Oblivious HTTP (OHTTP) gateway and client functionality using Netty. Prior to 0.0.23.Final, BinaryHttpParser in codec-bhttp/src/main/java/io/netty/incubator/codec/bhttp/BinaryHttpParser.java accumulates attacker-controlled Binary HTTP variable-length integers into the int offset sumBytes. BinaryHttpParser.readRequestHead, BinaryHttpParser.readFieldLine, and BinaryHttpParser.getIndeterminateLength can narrow long lengths into that offset, causing integer wraparound before buffer indices are calculated. A remote peer that supplies a valid large encoded length to BinaryHttpParser or BinaryHttpDecoder can trigger an unchecked bounds exception from a small malformed message, fail or close the channel, and repeatedly cause denial of service. Java and Netty bounds checks prevent memory corruption, and no information disclosure was observed. This issue is fixed in version 0.0.23.Final.
+
+Score: 5.3 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-61798 [CVSS:3.1 8.1 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-61798</link>
+            <guid isPermaLink="false">CVE-2026-61798</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:06 GMT</pubDate>
+            <description><![CDATA[netty-incubator-codec-ohttp implements Oblivious HTTP (OHTTP) gateway and client functionality using Netty. Prior to 0.0.23.Final, BoringSSLAsymmetricCipherKeyPair.toString in codec-ohttp-hpke-classes-boringssl/src/main/java/io/netty/incubator/codec/hpke/boringssl/BoringSSLAsymmetricCipherKeyPair.java includes its private parameter, BoringSSLAsymmetricKeyParameter.toString in codec-ohttp-hpke-classes-boringssl/src/main/java/io/netty/incubator/codec/hpke/boringssl/BoringSSLAsymmetricKeyParameter.java renders the complete private-key byte array when isPrivate is true, and BoringSSL.EVP_HPKE_KEY_init_or_throw in codec-ohttp-hpke-classes-boringssl/src/main/java/io/netty/incubator/codec/hpke/boringssl/BoringSSL.java includes rejected privateKeyBytes in an exception message. Applications that log affected key-pair objects or initialization exceptions can persist complete HPKE private key material in logs or telemetry. Anyone who can read those records can recover the key and may compromise OHTTP message confidentiality or authenticity expectations while the key remains usable. This issue is fixed in version 0.0.23.Final.
+
+Score: 8.1 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-34002 [CVSS:3.1 9.1 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-34002</link>
+            <guid isPermaLink="false">CVE-2026-34002</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:05 GMT</pubDate>
+            <description><![CDATA[A flaw was found in the X.Org X server. This vulnerability, an out-of-bounds read, affects the XKB (X Keyboard Extension) modifier map handling. An attacker with access to the X11 server can exploit this by sending a malformed request, which causes the server to read beyond its intended memory boundaries. This can lead to the exposure of sensitive information or cause the server to crash, resulting in a denial of service.
+
+Score: 9.1 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-34000 [CVSS:3.1 9.1 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-34000</link>
+            <guid isPermaLink="false">CVE-2026-34000</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:04 GMT</pubDate>
+            <description><![CDATA[A flaw was found in the X.Org X server. This out-of-bounds read vulnerability in the XKB geometry processing, specifically within the `CheckSetGeom()` and `XkbAddGeomKeyAlias` functions, allows an attacker to read uninitialized or out-of-bounds memory. An attacker with a connection to the X11 server, either locally or remotely, can exploit this without user interaction. This could lead to the disclosure of memory contents or cause a denial of service by crashing the server.
+
+Score: 9.1 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-133494 [CVSS:3.1 4.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133494</link>
+            <guid isPermaLink="false">CVE-2026-133494</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:04 GMT</pubDate>
+            <description><![CDATA[Greenbone gvmd before 26.43.0 does not restrict certificate creation. Even the Observer role, documented to be read-only, can execute create_tls_certificate.
+
+Score: 4.3 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:L]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-133481 [CVSS:3.1 4.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133481</link>
+            <guid isPermaLink="false">CVE-2026-133481</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:04 GMT</pubDate>
+            <description><![CDATA[In Dolibarr before 24.0.3, /api/index.php/eventattendees discloses attendee and project data regardless of the caller's permissions. Only 22.0.0 and later (where api_eventattendees.class.php exists) are affected. A remote authenticated user can obtain column values one character at a time.
 
 Score: 4.3 (MEDIUM)
 Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:N]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-133060 [CVSS:3.1 6.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133060</link>
-            <guid isPermaLink="false">CVE-2026-133060</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:58 GMT</pubDate>
-            <description><![CDATA[A flaw was found in Moodle's Blackboard question import format. Insufficient validation of file paths during the question import process allows an authenticated user with permissions to import questions into a question bank to read arbitrary files accessible to the web server process. An attacker could leverage this vulnerability to view sensitive files, resulting in unauthorized information disclosure.
+            <title><![CDATA[CVE-2026-133476 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133476</link>
+            <guid isPermaLink="false">CVE-2026-133476</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:04 GMT</pubDate>
+            <description><![CDATA[In Dolibarr before 24.0.3, dolForgeSQLCriteriaCallback() in htdocs/core/lib/functions.lib.php allows account takeover because it strips only a single table-name prefix from a Universal Search Filter (sqlfilters) operand before checking it against the forbidden-field denylist (pass, pass_crypted, api_key). MariaDB and MySQL accept a two-level qualification such as schema.alias.column, so an operand of the form dolibarr.u.pass_crypted survives the check and is emitted into the WHERE clause. A remote authenticated user holding only the holiday read and readall permissions, which confer no user-management or administrative access, can use the resulting boolean oracle at GET /api/index.php/holidays to recover any user's bcrypt password hash and api_key one character at a time, including an administrator's. Because api_key is accepted directly by the REST API as a bearer credential, this yields full administrative control of the application. This bypasses the fix for CVE-2026-89012, which added only a strtolower() call and did not address prefix depth. The same denylist also omits pass_temp, which stores a password in cleartext, as well as national_registration_number, salary, birth, address, personal_mobile and note_private.
 
-Score: 6.5 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N]]></description>
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-133059 [CVSS:3.1 4.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133059</link>
-            <guid isPermaLink="false">CVE-2026-133059</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:58 GMT</pubDate>
-            <description><![CDATA[A flaw was found in Moodle. The grade feedback web service does not properly verify group and course enrolment permissions. An authenticated user with non-editing teacher privileges can exploit this vulnerability to access grade feedback and user profile details across groups or courses they are not authorized to view, leading to unauthorized information disclosure.
+            <title><![CDATA[CVE-2026-133430 [CVSS:3.1 5.4 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133430</link>
+            <guid isPermaLink="false">CVE-2026-133430</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:04 GMT</pubDate>
+            <description><![CDATA[A flaw was found in Keycloak. This vulnerability allows an authenticated remote attacker to cause a denial of service by terminating active sessions of arbitrary users. When processing Security Assertion Markup Language (SAML) documents that lack a root signature, Keycloak accepts the request as long as any assertion within the document is signed, without verifying its context or placement. An attacker holding a validly signed assertion can embed it into an unsigned logout request for another user, causing Keycloak to accept the forged request and terminate the victim's session.
 
-Score: 4.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:N]]></description>
+Score: 5.4 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:L]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-133007 [CVSS:3.1 5.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133007</link>
-            <guid isPermaLink="false">CVE-2026-133007</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:57 GMT</pubDate>
-            <description><![CDATA[A flaw was found in GIMP. Opening a crafted XCF with a truncated uncompressed tile can expose uninitialized main-process stack memory through the imported layer's pixel data, which may include process addresses that weaken ASLR.
+            <title><![CDATA[CVE-2026-133325]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133325</link>
+            <guid isPermaLink="false">CVE-2026-133325</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:04 GMT</pubDate>
+            <description><![CDATA[Key exchange without entity authentication vulnerability in Apache Tomcat allowed an unauthenticated node to join a cluster when the cluster was secured with TLS 1.3 and TLS-PSK.
 
-Score: 5.5 (MEDIUM)
-Vector: CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N]]></description>
+
+
+This issue affects Apache Tomcat: 11.0.29, 10.1.62, 9.0.124.
+
+
+
+Users are recommended to switch to TLS 1.2 and PLDS-PSK or upgrade to version 11.0.30, 10.1.63 or 9.0.123 (when released), which fix the issue.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-133306 [CVSS:4.0 7.3 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133306</link>
+            <guid isPermaLink="false">CVE-2026-133306</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:03 GMT</pubDate>
+            <description><![CDATA[VideoLAN libaacs 0.7.0 through 0.12.0 on non-macOS, non-Windows builds contains stack-based buffer overflows in aacs_resolve_path() in src/file/path.c from length checks against the wrong buffer. Local attackers can place a symlink with a long target on a disc path a user opens to overflow resolved_path[] and link[], crashing the process or potentially executing code if mitigations are bypassed.
+
+Score: 7.3 (HIGH)
+Vector: CVSS:4.0/AV:L/AC:H/AT:N/PR:N/UI:P/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-133217 [CVSS:4.0 4.8 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-133217</link>
+            <guid isPermaLink="false">CVE-2026-133217</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:03 GMT</pubDate>
+            <description><![CDATA[A weakness has been identified in OSGeo shapelib up to 1.6.3. This vulnerability affects the function DBFCloneEmpty of the file dbfopen.c. This manipulation causes null pointer dereference. It is possible to launch the attack on the local host. Patch name: f79050a900d2a05529501b2b714b8f89067db071. It is recommended to apply a patch to fix this issue.
+
+Score: 4.8 (MEDIUM)
+Vector: CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
         </item>
         <item>
             <title><![CDATA[CVE-2026-132607 [CVSS:4.0 6 MEDIUM]]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-132607</link>
             <guid isPermaLink="false">CVE-2026-132607</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:57 GMT</pubDate>
+            <pubDate>Thu, 19 Nov 2026 22:18:03 GMT</pubDate>
             <description><![CDATA[Insufficient verification of data authenticity in the decryption component of Amazon S3 Encryption Client for PHP in AWS SDK for PHP before 3.383.1 might allow an authenticated remote user to forge ciphertext that decrypts to arbitrary plaintext via manipulation of the GCM authentication tag length metadata.
 
 
@@ -678,420 +779,397 @@ Score: 6 (MEDIUM)
 Vector: CVSS:4.0/AV:N/AC:L/AT:P/PR:L/UI:N/VC:N/VI:H/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-131304 [CVSS:3.1 8.1 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131304</link>
-            <guid isPermaLink="false">CVE-2026-131304</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:57 GMT</pubDate>
-            <description><![CDATA[In Splunk AI Assistant versions below 2.0.0 a user who does not hold the "admin" or "power" Splunk roles could access data associated with another tenant and cause actions to be attributed to that tenant through the Representational State Transfer (REST) API.
-The vulnerability is possible because Splunk AI Assistant accepted a client-controlled tenant identifier when selecting the authorization context for a request.
+            <title><![CDATA[CVE-2026-132079 [CVSS:3.1 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-132079</link>
+            <guid isPermaLink="false">CVE-2026-132079</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:03 GMT</pubDate>
+            <description><![CDATA[Insufficient Session Expiration vulnerability in the Apache Iggy Go SDK. The TCP client method CreatePersonalAccessToken wrote the 32-bit expiry into the upper half of the 64-bit expiry field that the server reads. The server read a nonzero expiry as 2^32 times the requested value. A token created through the Go TCP client therefore stayed valid about four billion times longer than the caller asked for.
+
+This issue affects Apache Iggy Go SDK: from 0.5.0 before 0.10.0.
+
+Users are recommended to upgrade to version 0.10.0, which fixes the issue. Tokens that an earlier version created keep their long expiry on the server. Delete those tokens and create new ones.
+
+Score: 9.8 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-131305 [CVSS:3.1 8.1 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131305</link>
+            <guid isPermaLink="false">CVE-2026-131305</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:03 GMT</pubDate>
+            <description><![CDATA[In Splunk AI Assistant versions below 2.0.0, a user who does not hold the "admin" or "power" Splunk roles could submit client-controlled feature settings through the Representational State Transfer (REST) API. This could modify limited response metadata outside the expected server-side configuration.
+The vulnerability is possible because the REST API processes client-supplied feature settings without enforcing the expected server-side configuration boundary.
 
 Score: 8.1 (HIGH)
 Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:N]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-131299 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131299</link>
-            <guid isPermaLink="false">CVE-2026-131299</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:57 GMT</pubDate>
-            <description><![CDATA[In Splunk App for Stream versions below 8.1.7, an unauthenticated user who can reach the Splunk App for Stream Representational State Transfer (REST) API on the management port (8089) could upload an Extensible Markup Language (XML) vocabulary file, which lets the vocabulary upload endpoint read local files accessible to the Splunk process or send outbound requests.
-The vulnerability is possible because the vocabulary upload endpoint parses uploaded XML without an application-level policy that blocks external entity resolution.
-For more information see About Splunk Stream (https://help.splunk.com/en/splunk-enterprise/collect-stream-data/install-and-configure-splunk-stream/8.1/introduction/about-splunk-stream) and restmap.conf (https://help.splunk.com/en/splunk-enterprise/administer/admin-manual/9.4/configuration-file-reference/9.4.3-configuration-file-reference/restmap.conf) in the Splunk documentation.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-131294 [CVSS:3.1 6.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131294</link>
-            <guid isPermaLink="false">CVE-2026-131294</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:57 GMT</pubDate>
-            <description><![CDATA[In Splunk SOAR versions below 8.8.0, an authenticated user who can edit and run playbooks on a container label could associate a custom-function callback with another playbook run. The callback could modify the state of a container outside the authorized scope for that user.
-The vulnerability is possible because Splunk SOAR does not bind playbook API requests to the trusted playbook run and container context.
-
-Score: 6.5 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:H/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-131289 [CVSS:3.1 3.1 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131289</link>
-            <guid isPermaLink="false">CVE-2026-131289</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:57 GMT</pubDate>
-            <description><![CDATA[In Splunk SOAR versions below 8.8.0, a user who holds a role that can edit and run playbooks in Splunk SOAR could cause Splunk SOAR to run non-read-only actions from a Safe Mode playbook, resulting in unauthorized state changes.
-The vulnerability is possible because Splunk SOAR does not verify that the playbook run context in an action request matches the context that the server provided.
-
-Score: 3.1 (LOW)
-Vector: CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:N/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-131284 [CVSS:3.1 4.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131284</link>
-            <guid isPermaLink="false">CVE-2026-131284</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:57 GMT</pubDate>
-            <description><![CDATA[In Splunk SOAR versions below 8.8.0, an authenticated user with permission to view and edit containers could import a container archive that makes artifacts appear to be part of a case or have notes when no corresponding case associations or notes exist. This could cause Representational State Transfer (REST) API clients and filters to use incorrect artifact state.
-The vulnerability is possible because container archive import accepts artifact workflow state from the archive instead of deriving that state from associated cases and notes.
-For more information see Splunk SOAR REST API reference (https://help.splunk.com/en/splunk-soar/soar-on-premises/rest-api-reference) in the Splunk documentation.
-
-Score: 4.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-131279 [CVSS:3.1 4.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131279</link>
-            <guid isPermaLink="false">CVE-2026-131279</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:57 GMT</pubDate>
-            <description><![CDATA[In Splunk SOAR versions below 8.8.0, an authenticated user with permission to edit artifacts could cause indicator correlation data to retain stale field associations, which can produce incorrect correlation results and event counts.
-The vulnerability is possible because Splunk SOAR does not remove stale indicator associations when an artifact changes.
-
-Score: 4.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-131274 [CVSS:3.1 2.7 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131274</link>
-            <guid isPermaLink="false">CVE-2026-131274</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:56 GMT</pubDate>
-            <description><![CDATA[In Splunk SOAR versions below 8.8.0, a user with the system_settings permission could change event custom field definitions without the changes appearing in the audit trail, reducing forensic visibility and change accountability.
-The issue occurs because Splunk SOAR does not audit custom field definition changes.
-
-Score: 2.7 (LOW)
-Vector: CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:N/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-131269 [CVSS:3.1 8.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131269</link>
-            <guid isPermaLink="false">CVE-2026-131269</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:56 GMT</pubDate>
-            <description><![CDATA[In Splunk SOAR versions below 8.8.0, a user that holds a role with the Apps edit permission could cause Splunk SOAR to execute arbitrary code on the host when the user validates an installed app.
-The vulnerability is possible because the app validation workflow does not isolate untrusted code from the trusted environment.
+            <title><![CDATA[CVE-2026-131295 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131295</link>
+            <guid isPermaLink="false">CVE-2026-131295</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:03 GMT</pubDate>
+            <description><![CDATA[In Splunk SOAR versions below 8.8.0, an authenticated user with permission to create and run playbooks could start child playbooks on containers outside the authorized label, or repository scope for that user. This could expose container data and affect automation outside that scope.
+The vulnerability is possible because Splunk SOAR does not bind the identity used to authorize the child playbook run to the parent playbook execution context.
 
 Score: 8.8 (HIGH)
 Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-131264 [CVSS:3.1 6.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131264</link>
-            <guid isPermaLink="false">CVE-2026-131264</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:56 GMT</pubDate>
-            <description><![CDATA[In Splunk SOAR versions below 8.8.0, a user that holds a role with the System Settings edit permission could cause Splunk SOAR to send the stored root credential for an external credential store to a host that the user controls. Depending on the configuration, the exposed credential could include an access token, application secret, account password, or client certificate.
-The vulnerability is possible because Splunk SOAR reuses the stored credential when the user changes the external credential store endpoint without supplying replacement credentials.
-
-Score: 6.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:C/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-131259 [CVSS:3.1 5.4 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131259</link>
-            <guid isPermaLink="false">CVE-2026-131259</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:56 GMT</pubDate>
-            <description><![CDATA[In Splunk SOAR versions below 8.8.0, a user with permission to create and view containers for a label could use the Representational State Transfer (REST) API to create a container that references a workbook phase in a case the user cannot view, disclosing the phase name and creating an inconsistent phase association.
-The vulnerability exists because the Container REST API does not enforce the same case-scoped authorization when it accepts a workbook-phase reference during container creation.
-
-Score: 5.4 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-131254 [CVSS:3.1 5.4 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131254</link>
-            <guid isPermaLink="false">CVE-2026-131254</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:56 GMT</pubDate>
-            <description><![CDATA[In Splunk SOAR versions below 8.8.0, a user with permission to create containers on one label could use the Representational State Transfer (REST) API to create a container with a parent relationship to a container that the user cannot access. This could let the user alter incident lineage across authorization boundaries and identify existing restricted containers.
-The vulnerability is possible because the REST API accepts a customer-supplied parent relationship when creating a container without authorizing access to the referenced container.
-For more information see REST Containers (https://help.splunk.com/en/splunk-soar/soar-on-premises/rest-api-reference/8.6.0/container-endpoints/rest-containers) and Manage roles and permissions in Splunk SOAR (On-premises) (https://help.splunk.com/en/splunk-soar/soar-on-premises/administer-soar-on-premises/8.8.0/manage-your-splunk-soar-on-premises-users-and-accounts/manage-roles-and-permissions-in-splunk-soar-on-premises) in the Splunk documentation.
-
-Score: 5.4 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-131249 [CVSS:3.1 4.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131249</link>
-            <guid isPermaLink="false">CVE-2026-131249</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:56 GMT</pubDate>
-            <description><![CDATA[In Splunk SOAR versions below 8.8.0, an authenticated user with permission to view, edit, and run playbooks and access to at least one container label could retrieve a callback handle from a playbook run outside the container-label scope granted to that account.
-The vulnerability is possible because Splunk SOAR does not verify that the requested callback handle belongs to the parent playbook run that launched the child playbook.
-For more information see Manage roles and permissions in Splunk SOAR (On-premises) (https://help.splunk.com/en/splunk-soar/soar-on-premises/administer-soar-on-premises/8.8.0/manage-your-splunk-soar-on-premises-users-and-accounts/manage-roles-and-permissions-in-splunk-soar-on-premises) and Data access automation API (https://help.splunk.com/en/splunk-soar/soar-on-premises/python-playbook-api-reference/8.8.0/automation-api/data-access-automation-api) in the Splunk documentation.
-
-Score: 4.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-131244 [CVSS:3.1 4.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131244</link>
-            <guid isPermaLink="false">CVE-2026-131244</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:56 GMT</pubDate>
-            <description><![CDATA[In Splunk SOAR versions below 8.8.0, an authenticated user with permission to edit and run playbooks could modify a child playbook callback handle associated with another playbook run, which could alter the callback behavior of that run.
-The vulnerability exists because the Playbook API does not verify that callback-handle updates belong to the related parent and child playbook runs.
-
-Score: 4.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-131239 [CVSS:3.1 7.3 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131239</link>
-            <guid isPermaLink="false">CVE-2026-131239</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:56 GMT</pubDate>
-            <description><![CDATA[In Splunk Enterprise Security versions below 8.7.0, a user that holds a role with the run_collect capability could store attacker-controlled values in Updates data. If another user who can access the System Update Status report selects an affected row, Splunk Enterprise Security could run attacker-controlled Search Processing Language (SPL) commands using the permissions of the user who selects the row. The user who stores the values could then access sensitive data and modify data available to the user who selects the row.
-The vulnerability is possible because the System Update Status report does not validate destination, signature, and vendor-product values before inserting them into drilldown searches.
-For more information see Define roles on the Splunk platform with capabilities (https://help.splunk.com/en/splunk-enterprise/administer/manage-users-and-security/10.4/manage-splunk-platform-users-and-roles/define-roles-on-the-splunk-platform-with-capabilities) and System Update Status (https://help.splunk.com/en/splunk-enterprise-security-8/splunk-app-for-pci-compliance/installation-and-configuration-manual/8.7/configure-reports/system-update-status) in the Splunk documentation.
-
-Score: 7.3 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:R/S:U/C:H/I:H/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-131234 [CVSS:3.1 4.2 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131234</link>
-            <guid isPermaLink="false">CVE-2026-131234</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:55 GMT</pubDate>
-            <description><![CDATA[In Splunk Enterprise Security versions below 8.7.0, an unauthenticated user could create and deliver an Entity Analysis dashboard link to a Splunk Enterprise Security user. If the Splunk Enterprise Security user opens the link, Splunk Enterprise Security could run attacker-controlled Search Processing Language (SPL) commands using the permissions of the Splunk Enterprise Security user. The commands could expose or modify some data available to the Splunk Enterprise Security user.
-The vulnerability is possible because the Entity Analysis dashboard inserts entity values from a link that an unauthenticated user creates into SPL searches without safely escaping the values.
-The vulnerability requires the attacker to phish the affected user by tricking them into initiating a request within their browser. The unauthenticated user should not be able to exploit the vulnerability at will.
-For more information see Entity analysis dashboard (https://help.splunk.com/en/splunk-enterprise-security-8/user-guide/8.7/exposure-analytics-and-ueba/entity-analysis-dashboard) in the Splunk documentation.
-
-Score: 4.2 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:L/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-131229 [CVSS:3.1 5.4 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131229</link>
-            <guid isPermaLink="false">CVE-2026-131229</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:55 GMT</pubDate>
-            <description><![CDATA[In Splunk Enterprise Security versions below 8.7.0, a user that holds a role with the run_collect capability could store attacker-controlled values in vulnerability data. If another user who can access the Vulnerability Search dashboard selects an affected row, Splunk Enterprise Security could run attacker-controlled Search Processing Language (SPL) commands using the permissions of the user who selects the row. The user who stores the values could then access sensitive data and modify some data available to the user who selects the row.
-The vulnerability is possible because the Vulnerability Search dashboard encodes data-model field values for the drilldown link but does not escape the values as SPL search literals before inserting the values into drilldown searches.
-For more information see Define roles on the Splunk platform with capabilities (https://help.splunk.com/en/splunk-enterprise/administer/manage-users-and-security/10.4/manage-splunk-platform-users-and-roles/define-roles-on-the-splunk-platform-with-capabilities) and Network dashboards (https://help.splunk.com/en/splunk-enterprise-security-8/user-guide/8.7/analytics/network-dashboards) in the Splunk documentation.
-
-Score: 5.4 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:H/PR:L/UI:R/S:U/C:H/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-131224 [CVSS:3.1 3.7 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131224</link>
-            <guid isPermaLink="false">CVE-2026-131224</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:55 GMT</pubDate>
-            <description><![CDATA[In Splunk Enterprise Security versions below 8.7.0, a user that holds a role with the run_collect capability could store attacker-controlled values in data that populates the Endpoint Changes report. Another user who holds the "pci_analyst" role could later click a corresponding table row. Splunk Enterprise Security could then run attacker-controlled Search Processing Language (SPL) commands using the permissions of the user who clicked the row. The commands could access or modify data available to that user.
-The vulnerability is possible because the Endpoint Changes report does not treat dynamic report values as literal search values when it builds table-row drilldown searches.
-For more information see Reports (https://help.splunk.com/en/splunk-enterprise-security-8/splunk-app-for-pci-compliance/user-manual/8.7/using-the-splunk-app-for-pci-compliance/reports) and Configure users and roles (https://help.splunk.com/en/splunk-enterprise-security-8/splunk-app-for-pci-compliance/installation-and-configuration-manual/8.7/configure-the-app/configure-users-and-roles) in the Splunk documentation.
-
-Score: 3.7 (LOW)
-Vector: CVSS:3.1/AV:N/AC:H/PR:L/UI:R/S:U/C:L/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-131219 [CVSS:3.1 3.7 LOW]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131219</link>
-            <guid isPermaLink="false">CVE-2026-131219</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:55 GMT</pubDate>
-            <description><![CDATA[In Splunk Enterprise Security versions below 8.7.0, a user that holds a role with the run_collect capability could store attacker-controlled values in network traffic data. Another user who holds the "pci_user" role could later click the corresponding row in the Traffic Detail panel of the Network Traffic Activity report. Splunk Enterprise Security could then run attacker-controlled Search Processing Language (SPL) commands using the permissions of the user who clicked the row. The commands could access data and perform actions available to that user.
-The vulnerability is possible because the Network Traffic Activity report does not treat network traffic values as literal search values when it builds the Traffic Detail drilldown search.
-For more information see Network Traffic Activity (https://help.splunk.com/en/splunk-enterprise-security-8/splunk-app-for-pci-compliance/installation-and-configuration-manual/8.7/configure-reports/network-traffic-activity) and Configure users and roles (https://help.splunk.com/en/splunk-enterprise-security-8/splunk-app-for-pci-compliance/installation-and-configuration-manual/8.7/configure-the-app/configure-users-and-roles) in the Splunk documentation.
-
-Score: 3.7 (LOW)
-Vector: CVSS:3.1/AV:N/AC:H/PR:L/UI:R/S:U/C:L/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-131214 [CVSS:3.1 4.8 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131214</link>
-            <guid isPermaLink="false">CVE-2026-131214</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:55 GMT</pubDate>
-            <description><![CDATA[In Splunk Enterprise Security versions below 8.7.0, a user that holds a role with the edit_timeline capability could store attacker-controlled Search Processing Language (SPL) in a legacy investigation timeline entry. Another user that holds a role with the manage_all_investigations capability could later open the investigation and select Run Search from the timeline. Splunk Enterprise Security could then run the SPL stored by the first user using the permissions of the user who selected Run Search. The SPL stored by the first user could access data or perform actions available to the user who selected Run Search.
-The vulnerability is possible because Splunk Enterprise Security does not treat stored investigation search content as a literal search before building the Search page link.
-For more information see Capability reference for Splunk Enterprise Security (https://help.splunk.com/en/splunk-enterprise-security-8/install/8.3/installation/capability-reference-for-splunk-enterprise-security) and Add details to an investigation in Splunk Enterprise Security (https://help.splunk.com/en/splunk-enterprise-security-7/user-guide/7.3/investigations/add-details-to-an-investigation-in-splunk-enterprise-security) in the Splunk documentation.
-
-Score: 4.8 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:H/PR:L/UI:R/S:U/C:H/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-131209 [CVSS:3.1 8.3 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131209</link>
-            <guid isPermaLink="false">CVE-2026-131209</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:55 GMT</pubDate>
-            <description><![CDATA[In Splunk Enterprise Security versions below 8.7.0, a user that holds a role with the ueba_ers_execution_post capability could cause the User and Entity Behavior Analytics (UEBA) Content App to run arbitrary Search Processing Language (SPL) commands with elevated permissions through an Entity Risk Score calculation. With this access, the user could expose stored credentials and other data outside the permissions assigned to that role.
-The vulnerability is possible because the UEBA Content App does not validate Entity Risk Score calculation values before including them in SPL searches.
-For more information see Installing the UEBA Content App for Splunk Enterprise Security (https://help.splunk.com/en/splunk-enterprise-security-8/administer/8.5/user-and-entity-behavior-analytics/installing-the-ueba-content-app-for-splunk-enterprise-security), Entity risk scoring in Splunk Enterprise Security (https://help.splunk.com/en/splunk-enterprise-security-8/administer/8.4/risk-based-alerting/entity-risk-scoring-in-splunk-enterprise-security), and Roles and knowledge objects in UEBA for Splunk Enterprise Security (https://help.splunk.com/en/splunk-enterprise-security-8/administer/8.8/user-and-entity-behavior-analytics/ueba-content-app-for-on-premises/roles-and-knowledge-objects-in-ueba-for-splunk-enterprise-security) in the Splunk documentation.
+            <title><![CDATA[CVE-2026-131293 [CVSS:3.1 8.3 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131293</link>
+            <guid isPermaLink="false">CVE-2026-131293</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:03 GMT</pubDate>
+            <description><![CDATA[In Splunk SOAR versions below 8.8.0, an authenticated user with permission to edit and run playbooks could read or overwrite persisted data for playbook runs outside the authorized label, or ownership scope for that user. The affected data can include playbook inputs, prompt and block results, outputs, and secrets that playbooks save in run data. Overwriting the data could corrupt results that paused, scheduled, or parent playbook runs later use.
+The vulnerability is possible because the playbook automation APIs do not bind data operations to the active playbook run.
 
 Score: 8.3 (HIGH)
 Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:L]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-131204 [CVSS:3.1 4.2 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131204</link>
-            <guid isPermaLink="false">CVE-2026-131204</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:55 GMT</pubDate>
-            <description><![CDATA[In Splunk Enterprise Security versions below 8.7.0, a user that holds a role with the mc_investigation_read capability could overwrite Mission Control preference records for other users and remove saved filters and analyst queue settings from those records.
-The vulnerability is possible because the Mission Control user preferences Representational State Transfer (REST) API does not bind an update to the preference record that passes the authorization check.
-The attack requires the user to obtain a preference record identifier that the product does not normally expose to that user. The user should not be able to exploit the vulnerability at will.
-For more information see Overview of Mission Control in Splunk Enterprise Security (https://help.splunk.com/en/splunk-enterprise-security-8/user-guide/8.7/mission-control/overview-of-mission-control-in-splunk-enterprise-security) in the Splunk documentation.
+            <title><![CDATA[CVE-2026-131291 [CVSS:3.1 6.5 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131291</link>
+            <guid isPermaLink="false">CVE-2026-131291</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:03 GMT</pubDate>
+            <description><![CDATA[In Splunk SOAR versions below 8.8.0, a Splunk SOAR user who can edit and run playbooks for a permitted container label could associate action and callback state with a running playbook outside that container label. This could affect playbook automation for containers that the user cannot view.
+The vulnerability is possible because the Playbook Automation API accepts a supplied playbook run identifier without verifying that it is bound to the server-provided playbook execution context.
+The vulnerability requires a running playbook on a container label that the user cannot view.
 
-Score: 4.2 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:N/I:L/A:L]]></description>
+Score: 6.5 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:H/A:N]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-131199 [CVSS:3.1 8.8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131199</link>
-            <guid isPermaLink="false">CVE-2026-131199</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:55 GMT</pubDate>
-            <description><![CDATA[In Splunk Enterprise Security versions below 8.7.0, a user that holds a role with the mc_investigation_read capability could cause the Risk Event Timeline Representational State Transfer (REST) API to run arbitrary Search Processing Language (SPL) commands with elevated permissions. With this access, the user could expose stored credentials and modify indexes and lookup data available to those permissions.
-The vulnerability is possible because the affected REST API does not validate request values before including them in search macro arguments.
-For more information see Capability reference for Splunk Enterprise Security (https://help.splunk.com/en/splunk-enterprise-security-8/install/8.7/installation/capability-reference-for-splunk-enterprise-security) and Risk analysis (https://help.splunk.com/en/splunk-enterprise-security-8/user-guide/8.7/analytics/risk-analysis) in the Splunk documentation.
+            <title><![CDATA[CVE-2026-131288 [CVSS:3.1 7.3 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131288</link>
+            <guid isPermaLink="false">CVE-2026-131288</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:02 GMT</pubDate>
+            <description><![CDATA[In Splunk SOAR versions below 8.8.0, a user with access to the configured load balancer account could replace a load balancer helper that Splunk SOAR later runs with root privileges during cluster lifecycle operations. If a Splunk SOAR administrator performs a cluster lifecycle operation, Splunk SOAR could execute arbitrary code with root privileges on the load balancer.
+The vulnerability is possible because Splunk SOAR does not verify the integrity or ownership of the load balancer helper before running it with root privileges.
+
+Score: 7.3 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:R/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-131287 [CVSS:3.1 9.6 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131287</link>
+            <guid isPermaLink="false">CVE-2026-131287</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:02 GMT</pubDate>
+            <description><![CDATA[In Splunk SOAR versions below 8.8.0, a user that holds a role with the Playbooks view, edit, execute, and delete permissions could cause existing cross-repository playbook references to run attacker-controlled playbook code.
+The vulnerability is possible because Splunk SOAR can bind existing cross-repository playbook references to a different source control repository when a deleted repository name is reused.
+
+Score: 9.6 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:N/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-131286 [CVSS:3.1 7.1 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131286</link>
+            <guid isPermaLink="false">CVE-2026-131286</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:02 GMT</pubDate>
+            <description><![CDATA[In Splunk SOAR versions below 8.8.0, an authenticated user with permission to author and run playbooks could view action data outside the authorized scope for that user and change the status and message of another playbook run.
+The vulnerability is possible because the playbook API does not verify that the requested playbook run is within the authorized scope of the authenticated user.
+
+Score: 7.1 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:L/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-131282 [CVSS:3.1 8.1 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131282</link>
+            <guid isPermaLink="false">CVE-2026-131282</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:02 GMT</pubDate>
+            <description><![CDATA[In Splunk SOAR versions below 8.8.0, a user who holds the "Observer" Splunk SOAR role could access a password-reset credential in a diagnostic log bundle and reset the password for an active local account.
+The vulnerability is possible because Splunk SOAR does not redact password-reset email bodies before it logs communications between product processes.
+
+Score: 8.1 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-131278 [CVSS:3.1 7.3 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131278</link>
+            <guid isPermaLink="false">CVE-2026-131278</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:02 GMT</pubDate>
+            <description><![CDATA[In Splunk SOAR versions below 8.8.0, a user with local access to the affected host could obtain a live Splunk SOAR session token or decrypted asset configuration when another user starts an App Editor debug action.
+The vulnerability is possible because App Editor debug actions expose sensitive runtime information to other local users on the affected host.
+
+Score: 7.3 (HIGH)
+Vector: CVSS:3.1/AV:L/AC:L/PR:L/UI:R/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-131272 [CVSS:3.1 7.2 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131272</link>
+            <guid isPermaLink="false">CVE-2026-131272</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:02 GMT</pubDate>
+            <description><![CDATA[In Splunk SOAR versions below 8.8.0, a user that holds a role with the System Settings edit permission could use the Automation Dependency Wheel Representational State Transfer (REST) API to write arbitrary files outside the intended directory, which could lead to arbitrary code execution.
+The vulnerability is possible because Splunk SOAR does not restrict uploaded automation dependency wheel filenames to the intended storage directory.
+
+Score: 7.2 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-131268 [CVSS:3.1 7.2 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131268</link>
+            <guid isPermaLink="false">CVE-2026-131268</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:02 GMT</pubDate>
+            <description><![CDATA[In Splunk SOAR versions below 8.8.0, a user that holds a role with the System Settings edit permission could use a customer automation dependency to execute arbitrary code as the user account that runs Splunk SOAR.
+The vulnerability is possible because Splunk SOAR does not properly separate customer automation dependencies from trusted product code.
+
+Score: 7.2 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-131263 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131263</link>
+            <guid isPermaLink="false">CVE-2026-131263</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:02 GMT</pubDate>
+            <description><![CDATA[In Splunk SOAR versions below 8.8.0, a user that holds a role with only the apps:edit permission could install a connector app that causes Splunk SOAR to write attacker-controlled files outside the app directory. This could let the user modify files used by Splunk SOAR and execute arbitrary code as the user account that runs Splunk SOAR.
+The vulnerability is possible because Splunk SOAR constructs the dependency installation command from app-supplied metadata without preventing that metadata from changing its arguments.
+For more information see Manage roles and permissions in Splunk SOAR (On-premises) (https://help.splunk.com/en/splunk-soar/soar-on-premises/administer-soar-on-premises/8.8.0/manage-your-splunk-soar-on-premises-users-and-accounts/manage-roles-and-permissions-in-splunk-soar-on-premises) and Add and configure apps and assets to provide actions in Splunk SOAR (On-premises) (https://help.splunk.com/en/splunk-soar/soar-on-premises/administer-soar-on-premises/8.6.0/manage-your-splunk-soar-on-premises-apps-and-assets/add-and-configure-apps-and-assets-to-provide-actions-in-splunk-soar-on-premises) in the Splunk documentation.
 
 Score: 8.8 (HIGH)
 Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-131193 [CVSS:3.1 4.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131193</link>
-            <guid isPermaLink="false">CVE-2026-131193</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:54 GMT</pubDate>
-            <description><![CDATA[In Splunk Enterprise versions below 10.4.5, 10.2.9, 10.0.12, and 9.4.17, a user holding a role with the edit_token_http capability could create a persistent HTTP Event Collector (HEC) token that cannot be disabled or deleted via the Representational State Transfer (REST) API or Splunk Web. As a result, the token remains active and can continue ingesting events even after administrative attempts to revoke it.
-The vulnerability is possible because HTTP Event Collector token creation accepts names that later management operations cannot process.
-For more information see authorize.conf (https://help.splunk.com/en/splunk-enterprise/administer/admin-manual/10.4/configuration-file-reference/10.4.5-configuration-file-reference/authorize.conf) and Set up and use HTTP Event Collector in Splunk Web (https://help.splunk.com/en/splunk-enterprise/get-data-in/get-started-with-getting-data-in/10.6/get-data-with-http-event-collector/set-up-and-use-http-event-collector-in-splunk-web) in the Splunk documentation.
+            <title><![CDATA[CVE-2026-131261 [CVSS:3.1 8.8 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131261</link>
+            <guid isPermaLink="false">CVE-2026-131261</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:02 GMT</pubDate>
+            <description><![CDATA[In Splunk SOAR versions below 8.8.0, a user that holds a role with the Apps edit permission could execute arbitrary code as the user account that runs Splunk SOAR by installing a malicious app.
+The vulnerability is possible because Splunk SOAR does not restrict app dependencies to validated binary packages before installing them.
 
-Score: 4.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:N]]></description>
+Score: 8.8 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-131188 [CVSS:3.1 7.1 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131188</link>
-            <guid isPermaLink="false">CVE-2026-131188</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:54 GMT</pubDate>
-            <description><![CDATA[In Splunk Enterprise versions below 10.4.4, 10.2.8, 10.0.11, and 9.4.16, an unauthenticated user could craft a malicious link that, if opened by an authenticated user, executes arbitrary Search Processing Language (SPL) searches with the victim's permissions. 
-Successful exploitation could allow the unauthenticated user to access or modify data, alter Splunk platform configurations, and disrupt operations available to the affected user.
-The vulnerability is possible because the Portable Document Format (PDF) generation component processes request data before it rejects deprecated GET requests and does not apply SPL safeguards for risky commands to subsearches.
-For more information see Generate PDFs of your reports and dashboards (https://help.splunk.com/en/splunk-enterprise/create-dashboards-and-reports/reporting-manual/10.4/report-management/generate-pdfs-of-your-reports-and-dashboards) and SPL safeguards for risky commands (https://help.splunk.com/en/splunk-enterprise/administer/manage-users-and-security/10.4/best-practices-for-splunk-platform-security/spl-safeguards-for-risky-commands) in the Splunk documentation.
+            <title><![CDATA[CVE-2026-131256 [CVSS:3.1 7.2 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131256</link>
+            <guid isPermaLink="false">CVE-2026-131256</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:01 GMT</pubDate>
+            <description><![CDATA[In Splunk SOAR versions below 8.8.0, an authenticated user that holds a role with the System Settings edit permission could execute arbitrary code on the host that runs Splunk SOAR.
+The vulnerability is possible because the Representational State Transfer (REST) API accepts package references from untrusted sources and passes them to the dependency installer.
 
-Score: 7.1 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:L]]></description>
+Score: 7.2 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-131183 [CVSS:3.1 5.4 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131183</link>
-            <guid isPermaLink="false">CVE-2026-131183</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:54 GMT</pubDate>
-            <description><![CDATA[In Splunk Enterprise versions below 10.4.5, 10.2.9, 10.0.12, and 9.4.17, a low-privileged user who holds the "power" Splunk role could inject arbitrary Search Processing Language (SPL) commands into a Classic Dashboard search. When another user opens the affected dashboard in Splunk Web, those injected commands execute with the viewing user's permissions, potentially allowing the low-privileged user to access stored credentials and write data to indexes.
-The vulnerability is possible because Splunk Enterprise does not correctly escape user-supplied content when it rewrites a search, which lets the rewritten search include additional SPL commands.
-The vulnerability requires another user to open the dashboard in Splunk Web. Consequently, a user who holds the "power" Splunk role should not be able to exploit the vulnerability at will.
-For more information see SPL safeguards for risky commands (https://help.splunk.com/en/splunk-enterprise/administer/manage-users-and-security/10.6/best-practices-for-splunk-platform-security/spl-safeguards-for-risky-commands) and Define roles on the Splunk platform with capabilities (https://help.splunk.com/en/splunk-enterprise/administer/manage-users-and-security/10.6/manage-splunk-platform-users-and-roles/define-roles-on-the-splunk-platform-with-capabilities) in the Splunk documentation.
+            <title><![CDATA[CVE-2026-131255 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131255</link>
+            <guid isPermaLink="false">CVE-2026-131255</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:01 GMT</pubDate>
+            <description><![CDATA[In Splunk SOAR versions below 8.8.0, an unauthenticated user could gain administrator privileges through a user account that receives an unintended role. A user that holds a role with permission to create or modify users and assign roles must assign the target account a role with a numeric name through the user-management Representational State Transfer (REST) API.
+The vulnerability is possible because the API resolves a numeric role name as a role identifier instead of preserving the requested role name.
 
-Score: 5.4 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:H/PR:L/UI:R/S:U/C:H/I:L/A:N]]></description>
+Score: 7.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-131178 [CVSS:3.1 7.6 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131178</link>
-            <guid isPermaLink="false">CVE-2026-131178</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:54 GMT</pubDate>
-            <description><![CDATA[In Splunk Enterprise versions below 10.4.5, 10.2.9, 10.0.12, and 9.4.17, a user who holds the "power" Splunk role could craft a shared Classic Dashboard that runs arbitrary Search Processing Language (SPL) commands for another authenticated user. Exploitation requires the dashboard viewer to open the shared dashboard. The injected commands could access data available to the dashboard viewer, modify data available to the dashboard viewer, and partially disrupt Splunk Enterprise.
-For more information see Add sparklines to search results (https://help.splunk.com/en/splunk-enterprise/search/search-manual/10.6/calculate-statistics/add-sparklines-to-search-results), Configure dashboard permissions (https://help.splunk.com/en/splunk-enterprise/create-dashboards-and-reports/simple-xml-dashboards/10.6/manage-and-share-dashboards/configure-dashboard-permissions), and SPL safeguards for risky commands (https://help.splunk.com/en/splunk-enterprise/administer/manage-users-and-security/10.6/best-practices-for-splunk-platform-security/spl-safeguards-for-risky-commands) in the Splunk documentation.
+            <title><![CDATA[CVE-2026-131253 [CVSS:3.1 9.9 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131253</link>
+            <guid isPermaLink="false">CVE-2026-131253</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:01 GMT</pubDate>
+            <description><![CDATA[In Splunk SOAR versions below 8.8.0, an authenticated user that holds a role with the Apps edit, Containers edit, and Playbooks execute permissions could use the App Wizard to execute arbitrary code as the user account that runs Splunk SOAR. This could compromise the confidentiality, integrity, and availability of the Splunk SOAR instance.
+The vulnerability exists because the App Wizard does not validate user-supplied identifiers before incorporating them into generated connector code.
+
+Score: 9.9 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-131202 [CVSS:3.1 9.1 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131202</link>
+            <guid isPermaLink="false">CVE-2026-131202</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:01 GMT</pubDate>
+            <description><![CDATA[In Splunk Enterprise Security versions below 8.7.0, a user who holds the "ess_admin" Splunk Enterprise Security role could execute arbitrary code on the search head as the user account running Splunk Enterprise by combining lookup file upload and Configuration Checker functionality.
+The vulnerability is possible because Splunk Enterprise Security does not restrict lookup upload file types or keep Configuration Checker module paths within the intended directory.
+For more information see Users and roles for Splunk Enterprise Security (https://help.splunk.com/en/splunk-enterprise-security-8/install/8.7/installation/users-and-roles-for-splunk-enterprise-security) and Create and manage lookups in Splunk Enterprise Security (https://help.splunk.com/en/splunk-enterprise-security-8/administer/8.7/managing-security-content/create-and-manage-lookups-in-splunk-enterprise-security) in the Splunk documentation.
+
+Score: 9.1 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:C/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-131194 [CVSS:3.1 4.6 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131194</link>
+            <guid isPermaLink="false">CVE-2026-131194</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:01 GMT</pubDate>
+            <description><![CDATA[In Splunk Enterprise versions below 10.4.4, 10.2.8, 10.0.11, and 9.4.16, a low-privileged user who holds the "power" Splunk role could inject malicious content into a Splunk Web view. When another authenticated user opens the affected view in Splunk Web, the injected content executes unauthorized JavaScript code within the viewing user's browser session.
+The vulnerability is possible because Splunk Web does not properly validate content in a view definition before rendering the view.
+For more information see Define roles on the Splunk platform with capabilities (https://help.splunk.com/en/splunk-enterprise/administer/manage-users-and-security/10.2/manage-splunk-platform-users-and-roles/define-roles-on-the-splunk-platform-with-capabilities) in the Splunk documentation.
+
+Score: 4.6 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:R/S:U/C:L/I:L/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-131184 [CVSS:3.1 6.4 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131184</link>
+            <guid isPermaLink="false">CVE-2026-131184</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:01 GMT</pubDate>
+            <description><![CDATA[In Splunk Enterprise versions below 10.6.1, 10.4.5, 10.2.9, 10.0.12, and 9.4.17, a low-privileged user who does not hold the "admin" or "power" Splunk roles could inject a malicious script into the name of a private saved search. If another user subsequently enables, disables, or edits the corresponding platform alert in the Monitoring Console, the injected script executes within that user's browser session, potentially allowing the low-privileged user to view sensitive information or modify data in Splunk Enterprise.
+The vulnerability is possible because the Monitoring Console does not safely handle saved-search names in the platform alert workflow.
+For more information see Enable and configure platform alerts (https://help.splunk.com/en/splunk-enterprise/administer/monitor/10.4/configure-the-monitoring-console/enable-and-configure-platform-alerts) and About configuring role-based user access (https://help.splunk.com/en/splunk-enterprise/administer/manage-users-and-security/10.4/manage-splunk-platform-users-and-roles/about-configuring-role-based-user-access) in the Splunk documentation.
+
+Score: 6.4 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:H/PR:L/UI:R/S:U/C:H/I:H/A:N]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-131179 [CVSS:3.1 7.6 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131179</link>
+            <guid isPermaLink="false">CVE-2026-131179</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:01 GMT</pubDate>
+            <description><![CDATA[In Splunk Enterprise versions below 10.4.5, 10.2.9, 10.0.12, and 9.4.17, a user who holds the "power" Splunk role could add attacker-controlled Search Processing Language (SPL) to a shared dashboard. When another user opens the dashboard in Splunk Web, Splunk Enterprise could run the attacker-controlled SPL using the permissions of that dashboard viewer. The attacker-controlled SPL could expose stored credentials, modify indexed data, and reduce availability.
+The vulnerability is possible because Splunk Enterprise does not neutralize special elements in search filter values before it builds optimized search jobs.
+The vulnerability requires the attacker to phish the affected user by tricking them into initiating a request within their browser. The attacker should not be able to exploit the vulnerability at will.
 
 Score: 7.6 (HIGH)
 Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:R/S:U/C:H/I:H/A:L]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-130886 [CVSS:3.1 8.2 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-130886</link>
-            <guid isPermaLink="false">CVE-2026-130886</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:54 GMT</pubDate>
-            <description><![CDATA[@fastify/reply-from is a Fastify plugin that forwards requests to an upstream HTTP server. In versions 12.8.1 through 12.8.3, its buildURL function checked the attacker-supplied source string for parent-directory segments, but when the source begins with the same special scheme as the base, such as http or https, the WHATWG URL parser drops the scheme and resolves the remainder as a relative path. A payload that glues the scheme to a percent-encoded parent-directory sequence therefore passes the check, because the inspected segment reads as the scheme plus the dots rather than a bare parent-directory token, while the proxy forwards the encoded traversal unchanged. An upstream that percent-decodes the request path before resolving dot-segments then serves a path outside the configured prefix, so an unauthenticated client scoped to an upstream prefix, or relying on Fastify route guards in front of the proxy, can escape that prefix and reach sibling or parent upstream endpoints. The per-segment check added in 12.8.1 is what the scheme prefix bypasses, and releases up to 12.8.0 already rejected the decoded form. The issue is fixed in @fastify/reply-from 12.8.4, and users should upgrade to 12.8.4 or later.
+            <title><![CDATA[CVE-2026-131174 [CVSS:3.1 5.4 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-131174</link>
+            <guid isPermaLink="false">CVE-2026-131174</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:01 GMT</pubDate>
+            <description><![CDATA[In Splunk Enterprise versions below 10.4.5, 10.2.9, 10.0.12, and 9.4.16, a user who does not hold the "admin" or "power" Splunk roles could make unauthorized changes when restoring archived indexed data or cause a Denial of Service (DoS) on the Splunk Enterprise instance.
+The vulnerability is possible because the Representational State Transfer (REST) API does not require the indexes_edit capability for archived-data restoration actions.
+For more information see Define roles on the Splunk platform with capabilities (https://help.splunk.com/en/splunk-enterprise/administer/manage-users-and-security/10.6/manage-splunk-platform-users-and-roles/define-roles-on-the-splunk-platform-with-capabilities) in the Splunk documentation.
+For more information see Restore archived indexed data (https://help.splunk.com/en/splunk-enterprise/administer/manage-indexers-and-indexer-clusters/10.6/back-up-and-archive-your-indexes/restore-archived-indexed-data) in the Splunk documentation.
 
-Score: 8.2 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:L/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-130811 [CVSS:3.1 5.3 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-130811</link>
-            <guid isPermaLink="false">CVE-2026-130811</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:54 GMT</pubDate>
-            <description><![CDATA[@fastify/static is the Fastify plugin for serving static files. In versions up to and including 10.1.11, when it is configured to deny or ignore dotfiles together with directory listing enabled, a request for a denied dot-directory returns its directory listing instead of being refused. The underlying send step answers with a forbidden response, but the listing fallback misreads that response on a path ending in a slash as a directory without an index file and serves the listing anyway. An unauthenticated client can enumerate the names of files and subdirectories, recursively, inside dot-directories the operator explicitly denied, such as version control, backup, and key file names. File contents remain protected and only names are disclosed. The issue is fixed in @fastify/static 10.1.12, and users should upgrade to 10.1.12 or later. As a workaround, disable directory listing or do not serve a root that contains dot-directories.
-
-Score: 5.3 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N]]></description>
-        </item>
-        <item>
-            <title><![CDATA[CVE-2026-130647 [CVSS:3.1 7.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-130647</link>
-            <guid isPermaLink="false">CVE-2026-130647</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:54 GMT</pubDate>
-            <description><![CDATA[@fastify/http-proxy is a Fastify plugin that proxies HTTP and WebSocket traffic to an upstream server. In versions from 9.0.0 up to but not including 11.6.10, when the plugin is registered with websocket support enabled, a WebSocket upgrade that is pipelined behind another HTTP request on the same cleartext connection arrives while that request's response is still attached to the socket. The shared upgrade listener sees the socket is already claimed and returns early without taking the upgrade, but it does not attach an error listener to the raw socket, and Node.js has already removed its own error listener before emitting the upgrade event. A later socket error on that connection, such as a client connection reset, is therefore unhandled and terminates the Node.js process. A single unauthenticated connection that pipelines an upgrade behind a normal request and then resets is enough to crash the server, and it can be repeated to keep the process down. Upgrades over TLS are not affected. The issue is fixed in @fastify/http-proxy 11.6.10, and users should upgrade to 11.6.10 or later.
-
-Score: 7.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
+Score: 5.4 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:L]]></description>
         </item>
         <item>
             <title><![CDATA[CVE-2026-130236 [CVSS:3.1 8.5 HIGH]]]></title>
             <link>https://nvd.nist.gov/vuln/detail/CVE-2026-130236</link>
             <guid isPermaLink="false">CVE-2026-130236</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:54 GMT</pubDate>
+            <pubDate>Thu, 19 Nov 2026 22:18:01 GMT</pubDate>
             <description><![CDATA[In the Auth0 Authorization Extension, request authentication handling can process claims from query parameters independently of header validation. Under specific preconditions, this may allow an authenticated tenant user to issue requests to the extension's administrative endpoints. Also, input handling during rule generation may permit modification of the tenant login rule published by the extension.
 
 Score: 8.5 (HIGH)
 Vector: CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:C/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-130235 [CVSS:3.1 8.7 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-130235</link>
-            <guid isPermaLink="false">CVE-2026-130235</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:53 GMT</pubDate>
-            <description><![CDATA[In the Okta .NET SDK Abstractions library, outbound HTTP requests are not restricted to the configured Okta organization domain when processing certain URL formats. If a URL parameter is modified to specify an external host, the library may transmit the configured SSWS API token to that unintended destination.
+            <title><![CDATA[CVE-2026-130161 [CVSS:3.1 5.3 MEDIUM]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-130161</link>
+            <guid isPermaLink="false">CVE-2026-130161</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:00 GMT</pubDate>
+            <description><![CDATA[Tamari is a fully-featured recipe manager web application built using Python and the Flask Framework. Prior to 1.7.2, an authenticated user can bypass the recipe-autofill SSRF check by submitting a hostname under the user's control through the Autofill from URL feature; the hostname can resolve to a public address during validation and a private or internal address during the later connection. In app/myrecipes/routes.py, is_safe_autofill_url validates the first DNS response, but recipe autofill passes the original URL to requests.get, which independently resolves the hostname and can connect to the internal address. The fetched response is parsed into recipe fields, enabling internal-service reconnaissance and potential data exposure; no redirect is required, and disabling redirects does not stop this DNS-rebinding bypass. This issue is fixed in 1.7.2.
 
-Score: 8.7 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:N]]></description>
+Score: 5.3 (MEDIUM)
+Vector: CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:H/I:N/A:N]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-130234 [CVSS:3.1 8 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-130234</link>
-            <guid isPermaLink="false">CVE-2026-130234</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:53 GMT</pubDate>
-            <description><![CDATA[The Okta Swift Management SDK does not percent-encode forward slash (/) characters during path parameter interpolation. If an application supplies input containing relative path sequences (e.g., ../) to an SDK method, standard URL normalization may direct the outbound request to an alternative Okta Management API endpoint.
+            <title><![CDATA[CVE-2026-129705 [CVSS:3.1 9.1 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-129705</link>
+            <guid isPermaLink="false">CVE-2026-129705</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:00 GMT</pubDate>
+            <description><![CDATA[In Eclipse Mosquitto versions 2.1.0 to 2.1.2, a broker with a listener that is configured to use the PROXY protocol v2 is vulnerable to an untrusted proxy providing details that cause the broker to accept fake SSL information.
 
-Score: 8 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:C/C:H/I:H/A:N]]></description>
+
+
+This can be mitigated by following the documented requirements for PROXY listeners: It is very important that only trusted proxies are allowed to connect to any listener using the PROXY protocol, and that clients are not allowed to connect to the listener at all.
+
+Score: 9.1 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-130233 [CVSS:3.1 6.8 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-130233</link>
-            <guid isPermaLink="false">CVE-2026-130233</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:53 GMT</pubDate>
-            <description><![CDATA[The Okta .NET SDK Abstractions library improperly synchronizes authentication credentials set on a shared HTTP client during request execution. When concurrent requests are dispatched for different principals, one principal's credential may be transmitted on an outbound request intended for another principal, which can result in credential exposure and lead to unauthorized actions performed as the affected principal at the Okta Management API.
+            <title><![CDATA[CVE-2026-129149 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-129149</link>
+            <guid isPermaLink="false">CVE-2026-129149</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:00 GMT</pubDate>
+            <description><![CDATA[In Eclipse Mosquitto versions 2.1.0 to 2.1.2, using the mosquitto_ctrl utility in interactive shell mode to interact with a malicious server could result in a crash of the utility if the server sent a hostile response.
 
-Score: 6.8 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:N]]></description>
+Score: 7.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-130179 [CVSS:3.1 8.5 HIGH]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-130179</link>
-            <guid isPermaLink="false">CVE-2026-130179</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:53 GMT</pubDate>
-            <description><![CDATA[The Okta .NET SDK Abstractions library systematically writes per-request authentication credentials to a shared HTTP client instance, rather than being isolated to individual outbound request objects. When using scoped child clients, a subsequent scoped request can overwrite the shared client configuration. Because the original parent client credential has not been restored, subsequent outbound requests may be transmitted using the newly written credential, which can result in subsequent actions being executed under the context of an incorrect security principal in the Okta Management API and improper attribution in audit logs.
+            <title><![CDATA[CVE-2026-126765 [CVSS:3.1 3.7 LOW]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-126765</link>
+            <guid isPermaLink="false">CVE-2026-126765</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:00 GMT</pubDate>
+            <description><![CDATA[The glob functions in the GNU C Library versions 2.44 and earlier may free the same heap block twice when a memory allocation fails while glob prepends the directory name to the names it matched.  The names already rewritten are freed, but their pointers stay in the result vector, and the error path frees them again with globfree.
 
-Score: 8.5 (HIGH)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:L/A:N]]></description>
+The allocation must fail after at least one name has been rewritten, so the issue can only be reached when the process is already close to its memory limit, for example under an address space limit (RLIMIT_AS) or on a 32-bit system.  The attacker needs control to make the result large enough to make the program or service run out of memory, either by controlling the glob pattern and having knowledge of the filesystem layout or through other means.  This issue affects all architectures and ABIs supported by the GNU C Library.
+
+Score: 3.7 (LOW)
+Vector: CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:L]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-130163 [CVSS:4.0 5.9 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-130163</link>
-            <guid isPermaLink="false">CVE-2026-130163</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:53 GMT</pubDate>
-            <description><![CDATA[Collabora Online is a collaborative online office suite based on LibreOffice technology. Prior to 24.04.19.3, 25.04.13.3, and 26.04.3.3, the RouteToken query parameter is reflected into the unauthenticated admin-console page without HTML encoding. The admin-console page is served without authentication. A victim must load a crafted URL, and token exposure requires the victim to be an administrator already signed in to the console; the reflected value can run script in the Collabora Online origin and expose the console authentication token. This issue is fixed in versions 24.04.19.3, 25.04.13.3, and 26.04.3.3.
+            <title><![CDATA[CVE-2026-126763 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-126763</link>
+            <guid isPermaLink="false">CVE-2026-126763</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:00 GMT</pubDate>
+            <description><![CDATA[In Eclipse Mosquitto versions 1.6 to 2.0.22 and 2.1.0 to 2.1.2, an MQTT v5.0 client connecting with a will-delay-interval that subsequently disconnects with a shorter interval causes all delayed wills to be suppressed.
 
-Score: 5.9 (MEDIUM)
-Vector: CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:A/VC:H/VI:L/VA:L/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X]]></description>
+Score: 7.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-130159 [CVSS:3.1 6.5 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-130159</link>
-            <guid isPermaLink="false">CVE-2026-130159</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:53 GMT</pubDate>
-            <description><![CDATA[RepoManager is a self-hosted deb/rpm package repository. Prior to 5.13.3, the authenticated get-unit-log action accepts a caller-controlled logfile value. Validate::string() escapes HTML but leaves path traversal components unchanged. The action joins the caller-controlled logfile to SERVICE_LOGS_DIR without enforcing containment, so traversal can resolve the file read outside that directory. www/controllers/ajax/status/service.php reads and returns the resolved file, and any authenticated user can invoke the action to retrieve files readable by the www-data service account, including application configuration, source code, and the GPG signing-key passphrase. Fixed in 5.13.3.
+            <title><![CDATA[CVE-2026-126708 [CVSS:3.1 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-126708</link>
+            <guid isPermaLink="false">CVE-2026-126708</guid>
+            <pubDate>Thu, 19 Nov 2026 22:18:00 GMT</pubDate>
+            <description><![CDATA[In Eclipse Mosquitto versions 2.0.0 to 2.0.22 and 2.1.0 to 2.1.2, the return value of password hash functions for sha512-pbkdf2 and legacy sha512 were not checked. Starting with OpenSSL 4.0, sha512-pbkdf2 hashing will fail when using the FIPS provider for passwords shorter than 8 characters. This has the effect that newly created passwords would match against any other password with fewer than 8 characters.
 
-Score: 6.5 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N]]></description>
+Score: 9.8 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
         </item>
         <item>
-            <title><![CDATA[CVE-2026-130153 [CVSS:3.1 4.7 MEDIUM]]]></title>
-            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-130153</link>
-            <guid isPermaLink="false">CVE-2026-130153</guid>
-            <pubDate>Thu, 19 Nov 2026 21:17:53 GMT</pubDate>
-            <description><![CDATA[The Okta Client SDK for Python (okta-client-python) includes client authentication values (client_secret or JWT assertions) as query parameters in the front-channel authorization URL when executing the authorization code flow without Pushed Authorization Requests (PAR). When PAR is disabled, unsupported by the authorization server, or fails, the SDK falls back to standard authorization URL construction, transmitting these parameters via user-agent requests.
+            <title><![CDATA[CVE-2026-126706 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-126706</link>
+            <guid isPermaLink="false">CVE-2026-126706</guid>
+            <pubDate>Thu, 19 Nov 2026 22:17:59 GMT</pubDate>
+            <description><![CDATA[In Eclipse Mosquitto versions 2.1.0 to 2.1.2, the mosquitto_ctrl utility would crash if attempting to interact with a hostile broker and the broker sent a non-string "error" value.
 
-Score: 4.7 (MEDIUM)
-Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:N/A:N]]></description>
+Score: 7.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-121649]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-121649</link>
+            <guid isPermaLink="false">CVE-2026-121649</guid>
+            <pubDate>Thu, 19 Nov 2026 22:17:59 GMT</pubDate>
+            <description><![CDATA[Use of cache containing sensitive information vulnerability in Apache Tomcat's ExpiresFilter caused by the filter removing cache-control header fields set by the authentication layer.
+
+
+
+This issue affects Apache Tomcat: from 11.0.0-M1 through 11.0.27, from 10.1.0-M1 through 10.1.61, from 9.0.0.M1 through 9.0.123.
+
+
+
+The following versions were EOL at the time the CVE was created but are known to be affected: from 8.5.0 through 8.5.100, from 7.0.1 through 7.0.109. Older unsupported versions may also be affected.
+
+
+
+Users are recommended to upgrade to version 11.0.29, 10.1.62 or 9.0.124, which fix the issue.
+Note: Tomcat 11.0.28 was not released]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-121482 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-121482</link>
+            <guid isPermaLink="false">CVE-2026-121482</guid>
+            <pubDate>Thu, 19 Nov 2026 22:17:59 GMT</pubDate>
+            <description><![CDATA[Verifying a maliciously crafted CMS or PKCS#7 SignedData message with CRL checking enabled may consume excessive CPU time, growing with the square of the message size.
+
+Score: 7.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-121481 [CVSS:3.1 9.8 CRITICAL]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-121481</link>
+            <guid isPermaLink="false">CVE-2026-121481</guid>
+            <pubDate>Thu, 19 Nov 2026 22:17:59 GMT</pubDate>
+            <description><![CDATA[Calling EVP_EncodeBlock() with an input length close to INT_MAX may overflow the calculation of the encoded output size and write past the end of the caller-supplied output buffer.
+
+Score: 9.8 (CRITICAL)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H]]></description>
+        </item>
+        <item>
+            <title><![CDATA[CVE-2026-118493 [CVSS:3.1 7.5 HIGH]]]></title>
+            <link>https://nvd.nist.gov/vuln/detail/CVE-2026-118493</link>
+            <guid isPermaLink="false">CVE-2026-118493</guid>
+            <pubDate>Thu, 19 Nov 2026 22:17:59 GMT</pubDate>
+            <description><![CDATA[Insertion of Sensitive Information into Log File vulnerability in the Apache Iggy server. If Apache Iggy 0.9.0 started without IGGY_ROOT_USERNAME and IGGY_ROOT_PASSWORD, it generated a root password and wrote it to the server log file, which is enabled by default. The system snapshot command (GetSnapshot on the binary transports and POST /snapshot on HTTP) let a user with only the read_servers permission download the server log files. That user could read the generated root password and log in as root.
+
+This issue affects Apache Iggy: 0.9.0.
+
+Users are recommended to upgrade to version 0.10.0, which fixes the issue. Version 0.10.0 never generates a root password, and the snapshot requires the manage_servers permission. If a 0.9.0 server generated its root password, change that password.
+
+Score: 7.5 (HIGH)
+Vector: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N]]></description>
         </item>
     </channel>
 </rss>
